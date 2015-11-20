@@ -12,9 +12,9 @@ my $version="1.0";
 my $abs_path=abs_path($0);
 # remove /bin/sanjuan.pl to obtain root directory of SANJUAN installation
 $abs_path =~ s/\/bin\/sanjuan\.pl//;
-my $sanjuan_dir=$abs_path."/lib";
-my $sanjuan_perllib=$abs_path."/perllib";
-my $sanjuan_genomic_data_dir=$abs_path."/db";
+my $sanjuan_dir=$abs_path."/lib";   			# should contain all scripts used by SANJUAN
+my $sanjuan_perllib=$abs_path."/perllib";		# should contain Perl modules Text and Statistics XXX check if we need both!
+my $sanjuan_genomic_data_dir=$abs_path."/db";	# should contain folders genomes and annotation_files
 
 my $user="unpecified"; # switch between Andre and Pan to overwrite path variables
 if($user eq "Andre"){	
@@ -24,12 +24,11 @@ if($user eq "Andre"){
 }
 if($user eq "Pan"){
 	$sanjuan_dir="";
-	$sanjuan_perllib=""; # should contain Perl modules Text and Statistics XXX check if we need both!
-	$sanjuan_genomic_data_dir="";  # should contain folders genomes and annotation_files
+	$sanjuan_perllib=""; 
+	$sanjuan_genomic_data_dir="";  
 }
 
 # Are all important parts of SANJUAN in place?
-
 # check if all sanjuan files can be accessed
 sub check_file_access{open(my $fh,"<".$_[0]) or die "Cannot open file $_[0] which is essential for SANJUAN. You might go through the installation process again to solve this problem.\n";close($fh);}
 my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions.pl","calc_INTRON_retention.pl","calc_JUNCT_efficiency.pl","get_juncts.pl","job1.pl","job2.pl","ln_s_wrapper.sh","merge_junctions.pl","preProcess_and_Map.pl","SANJUAN_wrapper.pl","sort_wrapper.sh","tophat_junctions2IntronSegments.pl");
