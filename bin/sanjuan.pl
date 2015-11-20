@@ -1,13 +1,22 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use Cwd;
+use Cwd qw(abs_path);
 
+### Verion
 my $version="1.0";
 
 #### main paths parameters
-my ($sanjuan_dir,$sanjuan_perllib,$sanjuan_genomic_data_dir);
-my $user="Andre"; # switch to Pan
+# is the full path to the script sanjuan.pl including sanjuan.pl
+# even, if sanjuan was called through a link 
+my $abs_path=abs_path($0);
+# remove /bin/sanjuan.pl to obtain root directory of SANJUAN installation
+$abs_path =~ s/\/bin\/sanjuan\.pl//;
+my $sanjuan_dir=$abs_path."/lib";
+my $sanjuan_perllib=$abs_path."/perllib";
+my $sanjuan_genomic_data_dir=$abs_path."/db";
+
+my $user="unpecified"; # switch between Andre and Pan to overwrite path variables
 if($user eq "Andre"){	
 	$sanjuan_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/lib";
 	$sanjuan_perllib="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/perllib";
@@ -69,9 +78,10 @@ sub print_help{
 	print "\t-t:    If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
 	print "\t-db: Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
-	print "\nTo write an example SANJUAN command line call to the terminal: sanjuan -exampleC\n\n";
+	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
+	print "Contact: Panagiotis Papasaikas\n\n"
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
@@ -80,7 +90,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -g hg -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l fr-firststrand -a AGATCGGAAGAGC -b T -c HC -i -s -lsr -t\n\n";
+	print "\nsanjuan -g hg -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l fr-firststrand -a AGATCGGAAGAGC -b T -c HC -i -s -lsr -t -db\n\n";
 	exit 0;
 }
 
