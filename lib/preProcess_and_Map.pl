@@ -19,6 +19,9 @@ my $start_with = $ARGV[5];  # T: trimming, M: mapping
 
 my $test_run=$ARGV[6]; # 1 test run (statements are printed but not sent to cluster), 0 no test run
 
+my $tophat_tr_index=$ARGV[7];
+my $tophat_gtf=$ARGV[8];
+my $tophat_bowtie_index=$ARGV[9];
 
 ##########################################################################################################
 ##########################################################################################################
@@ -43,7 +46,7 @@ my @g1_files=();
 my @g2_files=();
 my @skipping_ok=();
 
-for(my $i=7; $i<@ARGV; $i++){
+for(my $i=10; $i<@ARGV; $i++){
 	if(substr($ARGV[$i],0,3) eq "-g1"){
 		$i++;
 		$cond1_name=$ARGV[$i];
@@ -159,41 +162,13 @@ for my $cf (0..$#READ1){
 
 	$skipping_ok{$cond}=0;
 	$jobs_started=1;
-	
-	#Default Human:
-	if($genome eq "hg"){
-		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp 12 -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/iGENOMES_UCSC_hg19_clean/ -G /users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/iGENOMES_UCSC_hg19_clean/cuffcmp.combined.gtf -p 12 -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 /users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/hg19/hg19 $fq1 $fq2";
-		print "$call\n";
-		if(!$test_run){
-			$ret= `$call`;
-			print "$ret\n\n";
-    		($job_id)=$ret=~/job (\d+?) \(/;
-			push(@all_job_ids,$job_id);
-		}
-	}
-
-	#Default Mouse:
-	if($genome eq "mm"){
-		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp 12 -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/ENSEMBL_mm10_GRVm30/ -G /users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/ENSEMBL_mm10_GRVm30/cuffcmp.combined.gtf -p 12 -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 /users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/mm10/mm10 $fq1 $fq2";
-		print "$call\n";
-		if(!$test_run){
-			$ret=`$call`;
-			print "$ret\n\n";
-    		($job_id)=$ret=~/job (\d+?) \(/;
-			push(@all_job_ids,$job_id);
-		}
-	}
-
-	#Default Zebrafish:
-	if($genome eq "dr"){
-		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp 12 -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/ -G /users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/cuffcmp.combined.gtf -p 12 -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 /users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/dr10/dr10 $fq1 $fq2"; 
-		print "$call\n";
-		if(!$test_run){
-			$ret=`$call`;
-			print "$ret\n\n";
-    		($job_id)=$ret=~/job (\d+?) \(/;
-			push(@all_job_ids,$job_id);
-		}
+	$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp 12 -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p 12 -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
+	print "$call\n";
+	if(!$test_run){
+		$ret= `$call`;
+		print "$ret\n\n";
+   		($job_id)=$ret=~/job (\d+?) \(/;
+		push(@all_job_ids,$job_id);
 	}
 
 	#Only for CNAG sequencing

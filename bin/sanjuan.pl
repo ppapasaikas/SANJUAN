@@ -3,57 +3,73 @@ use strict;
 use warnings;
 use Cwd;
 
+my $version="1.0";
+
 #### main paths parameters
 my ($sanjuan_dir,$sanjuan_perllib,$sanjuan_genomic_data_dir);
 my $user="Andre"; # switch to Pan
 if($user eq "Andre"){	
 	$sanjuan_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/lib";
 	$sanjuan_perllib="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/perllib";
-	$sanjuan_genomic_data_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/data";
+	$sanjuan_genomic_data_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/db";
 }
 if($user eq "Pan"){
 	$sanjuan_dir="";
 	$sanjuan_perllib=""; # should contain Perl modules Text and Statistics XXX check if we need both!
 	$sanjuan_genomic_data_dir="";  # should contain folders genomes and annotation_files
 }
-#############################################################
-#############################################################
 
+# Are all important parts of SANJUAN in place?
+
+# check if all sanjuan files can be accessed
+sub check_file_access{open(my $fh,"<".$_[0]) or die "Cannot open file $_[0] which is essential for SANJUAN. You might go through the installation process again to solve this problem.\n";close($fh);}
+my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions.pl","calc_INTRON_retention.pl","calc_JUNCT_efficiency.pl","get_juncts.pl","job1.pl","job2.pl","ln_s_wrapper.sh","merge_junctions.pl","preProcess_and_Map.pl","SANJUAN_wrapper.pl","sort_wrapper.sh","tophat_junctions2IntronSegments.pl");
+foreach (@SANJUAN_files){check_file_access($sanjuan_dir."/".$_);}
+
+# check if sub-directories genomes and annotation_files exist in db sub-directory
+if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/annotation_files"){die "Sud-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
+
+# check if sub-directories perllib is in place
+if(!-d $sanjuan_perllib."/Text" || !-d $sanjuan_perllib."/Statistics"){die "Sud-directories / perl modules Text and/or Statistics cannot be found in $sanjuan_perllib. You might go through the installation process again to solve this problem.\n";}
+#############################################################
+#############################################################
 
 
 sub print_help{
-	print "\nSANJUAN -- *S*plicing *AN*alysis & *JU*nction *AN*notation\nVersion 1.0\n===========\n\n";
+	print "\nSANJUAN $version -- *S*plicing *AN*alysis & *JU*nction *AN*notation\n===========\n\n";
 	print "Parameter definition by a dedicated parameter file or by arguments of the program call.\n\n";
 	print "Call with parameter file: sanjuan <parameter-file>\n";
 	print "To create a standard parameter file SANJUAN_parameters.txt with explanations run: sanjuan -exampleF\n";
 	print "\n";
 	print "Call with arguments (<standard value already set>):\n";
-	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -p <phred33> -l <fr-firststrand> -a <AGATCGGAAGAGC> -b <T> -c <HC> -i -s -lsr -t\n\n";
-	print "\t-g:   genome / species; values: hg -> human, mm-> mouse, dr-> zebrafish\n";
-	print "\t-g1:  short name for group 1\n";
-	print "\t-f1:  input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
+	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -p <phred33> -l <fr-firststrand> -a <AGATCGGAAGAGC> -b <T> -c <HC> -i -s -lsr -t -db <db sub-directory of SANJUAN directory>\n\n";
+	print "\t-g:    genome / species; values: hg -> human, mm-> mouse, dr-> zebrafish\n";
+	print "\t-g1:   short name for group 1\n";
+	print "\t-f1:   input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
 	print "\t\t if -b is T or M: pairs of FASTQ/FASTQ.GZ files describing paired-end RNAseq data,\n";
 	print "\t\t\t comma separated list without white spaces following this order (file names don't matter): run1_read1.fastq,run1_read2.fastq,run2_read1.fastq,run2_read2.fastq,..\n";
 	print "\t\t if -b set to B: exactly one BAM file containing all mapped reads for group 1\n";
-	print "\t-g2:  like argument -g1 but for group 2\n";
-	print "\t-f2:  like argument -f1 but for group 2\n";
-	print "\t-o:   output directory; If omitted current working directory is taken.\n";
-	print "\t-p:   encoding of fastq qualities; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
+	print "\t-g2:   like argument -g1 but for group 2\n";
+	print "\t-f2:   like argument -f1 but for group 2\n";
+	print "\t-o:    output directory; If omitted current working directory is taken.\n";
+	print "\t-p:    encoding of fastq qualities; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
 	print "\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
-	print "\t-l:   library type of RNAseq samples; values fr-unstranded, fr-firststrand, fr-secondstrand (fr-firststrand is standard for CRG samples).  Can be omitted if -b B\n";
+	print "\t-l:    library type of RNAseq samples; values fr-unstranded, fr-firststrand, fr-secondstrand (fr-firststrand is standard for CRG samples).  Can be omitted if -b B\n";
 	print "\t\t Set to fr-unstranded if you are in doubt about the library type; though this parameter is critical and it is recommended\n";
 	print "\t\t setting it correctly according to the RNAseq data you are working with.\n";
 	print "\t\t For details have a look at section on library type of TopHat online manual https://ccb.jhu.edu/software/tophat/manual.shtml.\n";
-	print "\t-a:   adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b B.\n"; 
+	print "\t-a:    adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b B.\n"; 
 	print "\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz)\n";
-	print "\t-b:   Starting point; values T -> start with trimming, M -> start with mapping SKIPPING trimming, B- > start with splicing analysis SKIPPING trimming and mapping\n";	
-	print "\t-c:   threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
+	print "\t-b:    Starting point; values T -> start with trimming, M -> start with mapping SKIPPING trimming, B- > start with splicing analysis SKIPPING trimming and mapping\n";	
+	print "\t-c:    threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
 	print "\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
-	print "\t-i:   If -i is given, high sensitivity intron retention anlaysis (IRM mode) will be done.\n";
-	print "\t-s:   If -s is given, supporting junction evidence for IR identification (for IRM mode -i) will be required; not required if -s omitted\n";
-	print "\t-lsr: If -lsr (low sequence requirements) is given, reads will be filter-out less strictly.\n";
-	print "\t-t:   If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
-	print "\nTo write a SANJUAN command line call to the terminal: sanjuan -exampleC\n\n";
+	print "\t-i:    If -i is given, high sensitivity intron retention anlaysis (IRM mode) will be done.\n";
+	print "\t-s:    If -s is given, supporting junction evidence for IR identification (for IRM mode -i) will be required; not required if -s omitted\n";
+	print "\t-lsr:  If -lsr (low sequence requirements) is given, reads will be filter-out less strictly.\n";
+	print "\t-t:    If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
+	print "\t-db: Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
+	print "\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
+	print "\nTo write an example SANJUAN command line call to the terminal: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
 }
@@ -94,6 +110,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "COND1=CNT		### Label for Condition 1 (eg 'CNT' or 'WT')";
 	print $fh "COND2=KD			### Label for Condition 2 (eg 'KD' or 'OvEx')";
 	print $fh "TESTRUN=N		### values Y, N; if Y, qsub statements are printed but not sent to cluster";
+	print $fh "DBLOCATION=		### the location of the sub-directory db containing predefined exon-exon junctions. Needs to be specified only if db sun-directory is not in main SANJUAN directory.\n";
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Data  #######################";
@@ -179,6 +196,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-b"){$start_with=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-lsr"){$low_seq_req="Y";}
 		if($ARGV[$i] eq "-t"){$test_run=1;}
+		if($ARGV[$i] eq "-db"){$sanjuan_genomic_data_dir=$ARGV[($i++)+1];}
 	}
 }
 
@@ -203,6 +221,7 @@ else{
 		$IRM=$1 if $_=~/^\s*IRM\s*=(Y|N)/;
 		$low_seq_req=$1 if $_=~/^\s*LOWSEQRQMNTS\s*=(Y|N)/;
 		$test_run=1 if $_=~/^\s*TESTRUN\s*=Y/;
+		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=([\w\/\.\_\-]+)/;
 	}
 	close($fh);
 }
@@ -303,6 +322,22 @@ if($start_with eq "B"){
 
 
 
+# tophat files:
+# transcriptome index, gene annotation, bowtie index
+my ($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index);
+if($genome eq "hg"){
+	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/iGENOMES_UCSC_hg19_clean/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/iGENOMES_UCSC_hg19_clean/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/hg19/hg19");
+}
+if($genome eq "mm"){
+	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/ENSEMBL_mm10_GRVm30/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/ENSEMBL_mm10_GRVm30/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/mm10/mm10");
+}
+if($genome eq "dr"){
+	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/dr10/dr10");
+}
+
+
+
+
 #########
 #########
 my $call;
@@ -323,7 +358,7 @@ if($start_with ne "B"){
 	# 1. triming and mapping
 	# trim_galore needs python
 	print "\n\n*************\nTrimming & Mapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $tophat_tr_index $tophat_gtf $tophat_bowtie_index -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
 	$ret=`$call`;
 	print $ret."\n";
 }else{
