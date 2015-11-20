@@ -65,10 +65,14 @@ have to install any further programs.
 INSTALLATION
 ============
 Checkout SANJUAN from its repository on GitHub.com
-or download and un-compress the tar.gz-archive 
+
+> git clone https://github.com/ppapasaikas/SANJUAN.git 
+
+or download and un-compress the zip archive 
 into any directory on your computer.
 
-The directory should contain the following sub-directories:
+The SANJUAN (SANJUAN-master) directory should contain 
+the following sub-directories:
 * bin
 * lib 
 * perllib
@@ -78,10 +82,10 @@ Directory lib contains helper scripts used by sanjuan.pl.
 Directory perllib contains the two Perl modules Text and
 Statistics which are used by SANJUAN.
 
-Make the main script sanjuan.pl in the bin directory 
+If necessary make the sanjuan.pl in the bin directory 
 executable with
 
-> chmod 770 sanjuan.pl
+> chmod 700 sanjuan.pl
 
 Now you can call sanjuan through its full
 path.
@@ -89,8 +93,7 @@ path.
 > /full/path/to/SANJUAN/bin/sanjuan.pl
 
 You might define a link to sanjuan.pl in any of
-your PATH directories to allow execution of 
-sanjuan anywhere.
+your PATH directories to allow easier execution.
 
 > ln -s /one/of/my/directories/inPATH/sanjuan /full/path/to/SANJUAN/bin/sanjuan.pl 
    
