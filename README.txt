@@ -32,9 +32,9 @@ with already trimmed RNAseq data, or already
 mapped data in form of BAM files.
 
 XXX if mapping is done by user, does the user 
-has to guaranty that the mapping was done against
+has to guarantee that the mapping was done against
 a certain version of a genome or do the chromosomes
-have to fulfil any name conventions?
+have to fulfill any name conventions?
 
 
 GENERAL NOTE

@@ -16,7 +16,7 @@ my $sanjuan_dir=$abs_path."/lib";   			# should contain all scripts used by SANJ
 my $sanjuan_perllib=$abs_path."/perllib";		# should contain Perl modules Text and Statistics XXX check if we need both!
 my $sanjuan_genomic_data_dir=$abs_path."/db";	# should contain folders genomes and annotation_files
 
-my $user="unpecified"; # switch between Andre and Pan to overwrite path variables
+my $user="unspecified"; # switch between Andre and Pan to overwrite path variables
 if($user eq "Andre"){	
 	$sanjuan_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/lib";
 	$sanjuan_perllib="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/perllib";
@@ -35,7 +35,7 @@ my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions
 foreach (@SANJUAN_files){check_file_access($sanjuan_dir."/".$_);}
 
 # check if sub-directories genomes and annotation_files exist in db sub-directory
-if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/annotation_files"){die "Sud-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
+if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/annotation_files"){die "Sub-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
 
 # check if sub-directories perllib is in place
 if(!-d $sanjuan_perllib."/Text" || !-d $sanjuan_perllib."/Statistics"){die "Sud-directories / perl modules Text and/or Statistics cannot be found in $sanjuan_perllib. You might go through the installation process again to solve this problem.\n";}
@@ -60,7 +60,7 @@ sub print_help{
 	print "\t-g2:   like argument -g1 but for group 2\n";
 	print "\t-f2:   like argument -f1 but for group 2\n";
 	print "\t-o:    output directory; If omitted current working directory is taken.\n";
-	print "\t-p:    encoding of fastq qualities; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
+	print "\t-p:    encoding of base qualities in FASTQ files; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
 	print "\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
 	print "\t-l:    library type of RNAseq samples; values fr-unstranded, fr-firststrand, fr-secondstrand (fr-firststrand is standard for CRG samples).  Can be omitted if -b B\n";
 	print "\t\t Set to fr-unstranded if you are in doubt about the library type; though this parameter is critical and it is recommended\n";
@@ -71,7 +71,7 @@ sub print_help{
 	print "\t-b:    Starting point; values T -> start with trimming, M -> start with mapping SKIPPING trimming, B- > start with splicing analysis SKIPPING trimming and mapping\n";	
 	print "\t-c:    threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
 	print "\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
-	print "\t-i:    If -i is given, high sensitivity intron retention anlaysis (IRM mode) will be done.\n";
+	print "\t-i:    If -i is given, high sensitivity intron retention analysis (IRM mode) will be done.\n";
 	print "\t-s:    If -s is given, supporting junction evidence for IR identification (for IRM mode -i) will be required; not required if -s omitted\n";
 	print "\t-lsr:  If -lsr (low sequence requirements) is given, reads will be filter-out less strictly.\n";
 	print "\t-t:    If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
@@ -105,7 +105,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "# 1.a raw FASTQ files: specify the parameter RAWFASTQS in section Data to run trimming, mapping, and splicing analysis.";
 	print $fh "# 1.b trimmed FASTQ files: specify the parameter TRIMMEDFASTQS in section Data to SKIP trimming, AND ONLY RUN mapping and splicing analysis.";
 	print $fh "# 1.c BAM files: specify the parameters BAM1 and BAM2 in section Data to SKIP trimming and mapping, AND ONLY RUN splicing analysis.";
-	print $fh "# 2. SANJUAN will always start at the lates possible starting point. E.g., if you specify BAM1 and BAM2, SANJUAN will start directly with the splicing analysis regardless of whether you have specified TRIMMEDFASTQS or RAWFASTQS or none of both.";
+	print $fh "# 2. SANJUAN will always start at the latest possible starting point. E.g., if you specify BAM1 and BAM2, SANJUAN will start directly with the splicing analysis regardless of whether you have specified TRIMMEDFASTQS or RAWFASTQS or none of both.";
 	print $fh "#";
 	print $fh "# 3. To avoid un-necessary computations, SANJUAN applies the following rules to decide which computations are skipped further.";
 	print $fh "# 4. If intermediate output files / results of preprocessing or splicing analysis are present, they will be used and not re-computed.";
@@ -123,7 +123,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Data  #######################";
-	print $fh "### To specify parameters, uncomment them.";
+	print $fh "### To specify parameters, un-comment them.";
 	print $fh "### You start with raw FASTQ files: specify this parameter RAWFASTQS to run trimming, mapping, and splicing analysis.";
 	print $fh "### Directory containing the FASTQ files";
 	print $fh "### Naming convention:\n";
@@ -144,12 +144,12 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "#######################  Preprocessing and Mapping parameters  #######################";
 	print $fh "ADAPTER=AGATCGGAAGAGC	### Specify adapter sequence if other than CRG facility default (AGATCGGAAGAGC...).  Leave empty if unknown.";
-	print $fh "LIBTYPE=fr-firststrand	### Specify sequencing library type (fr-firststrand, fr-secondstrand, fr-unstranded). See tophat online manual for details. fr-firstrsand default for CRG facility. Leave empty if unknown.";
-	print $fh "PHRED=phred33		### encoding of fastq qualities ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see details on wikipedia for fastq file format)";
+	print $fh "LIBTYPE=fr-firststrand	### Specify sequencing library type (fr-firststrand, fr-secondstrand, fr-unstranded). See tophat online manual for details. fr-firststrand default for CRG facility. Leave empty if unknown.";
+	print $fh "PHRED=phred33		### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Splicing Analysis parameters  #######################";
-	print $fh "CONF=HC			### Analysis Stingency Level: 'VHC'-> VeryHighConfidence (DPSI>20%, p-val<0.0001),  'HC'-> HighConfidence (DPSI>15%, p-val<0.001),   'MC'-> MediumConfidence (DPSI>10%, p-val<0.01)"; 
+	print $fh "CONF=HC			### Analysis Stringency Level: 'VHC'-> VeryHighConfidence (DPSI>20%, p-val<0.0001),  'HC'-> HighConfidence (DPSI>15%, p-val<0.001),   'MC'-> MediumConfidence (DPSI>10%, p-val<0.01)"; 
 	print $fh "IRM=Y			### IRM mode: Perform  High Sensitivity Intron Retention Analysis? 'Y'->YES  'N'->NO ";
 	print $fh "SUPPJUN=Y		### Require Supporting Junction Evidence for IntrRet. identification (IRM mode). 'Y'->YES  'N'->NO";
 	print $fh "LOWSEQRQMNTS=N		### Low sequence requirements: set to Y is you are working with RNASeq data not coming from CRG. If set to Y, some stringent tests on RNASeq will be omitted leading to more usable reads.";
