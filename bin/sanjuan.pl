@@ -81,7 +81,7 @@ sub print_help{
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
-	print "Contact: Panagiotis Papasaikas\n\n"
+	print "Contact: Panagiotis Papasaikas\n\n";
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
