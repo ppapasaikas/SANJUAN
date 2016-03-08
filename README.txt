@@ -14,7 +14,7 @@ condition.
 SANJUAN is applicable to data from the 
 following species.
 * human (hg19)
-* mouse (mm10) XXX we also have mm8 and mm9 ?
+* mouse (mm10)
 * zebrafish (dr10)
 
 As input SANJUAN takes either
