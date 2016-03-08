@@ -74,6 +74,7 @@ sub print_help{
 	print "\t-i:     If -i is given, high sensitivity intron retention analysis (IRM mode) will be done.\n";
 	print "\t-s:     If -s is given, supporting junction evidence for IR identification (for IRM mode -i) will be required; not required if -s omitted\n";
 	print "\t-lsr:   If -lsr (low sequence requirements) is given, reads will be filter-out less strictly.\n";
+	print "\t-rmdup  Remove PCR duplicates\n";
 	print "\t-t:     If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
 	print "\t-db:    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
@@ -150,14 +151,15 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "#######################  Preprocessing and Mapping parameters  #######################";
 	print $fh "ADAPTER=AGATCGGAAGAGC	### Specify adapter sequence if other than CRG facility default (AGATCGGAAGAGC...).  Leave empty if unknown.";
 	print $fh "LIBTYPE=fr-firststrand	### Specify sequencing library type (fr-firststrand, fr-secondstrand, fr-unstranded). See tophat online manual for details. fr-firststrand default for CRG facility. Leave empty if unknown.";
-	print $fh "PHRED=phred33		### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
+	print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Splicing Analysis parameters  #######################";
 	print $fh "CONF=HC			### Analysis Stringency Level: 'VHC'-> VeryHighConfidence (DPSI>20%, p-val<0.0001),  'HC'-> HighConfidence (DPSI>15%, p-val<0.001),   'MC'-> MediumConfidence (DPSI>10%, p-val<0.01)"; 
 	print $fh "IRM=Y			### IRM mode: Perform  High Sensitivity Intron Retention Analysis? 'Y'->YES  'N'->NO ";
 	print $fh "SUPPJUN=Y		### Require Supporting Junction Evidence for IntrRet. identification (IRM mode). 'Y'->YES  'N'->NO";
-	print $fh "LOWSEQRQMNTS=N		### Low sequence requirements: set to Y is you are working with RNASeq data not coming from CRG. If set to Y, some stringent tests on RNASeq will be omitted leading to more usable reads.";
+	print $fh "LOWSEQRQMNTS=N	### Low sequence requirements: set to Y is you are working with RNASeq data not coming from CRG. If set to Y, some stringent tests on RNASeq will be omitted leading to more usable reads.";
+	print $fh "RMDUP=N			### If set to Y: PCR duplicates will be removed\n";
 	$\="";
 	
 	close($fh);
@@ -193,6 +195,7 @@ my ($rawinput_dir,$trimmedinput_dir)=("","");# input_dir contains all input fast
 # this SANJUAN run should not use qsub but run locally
 my $run_without_qsub=0;
 my $N_processes=12;
+my $rmdup=0; #set to 0 to keep PCR duplicates / 1 to discard them
 
 # parameters through arguments
 if(@ARGV>1){
@@ -216,6 +219,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-db"){$sanjuan_genomic_data_dir=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-nqsub"){$run_without_qsub=1;}
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
 	}
 }
 
@@ -243,6 +247,7 @@ else{
 		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=([\w\/\.\_\-]+)/;
 		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=Y/;
 		$N_processes=$1      if $_=~/^\s*NPROCS\s*=(\d+)/;
+		$rmdup=1			 if $_=~/^\s*RMDUP\s*=Y/;
 	}
 	close($fh);
 }
@@ -415,7 +420,7 @@ my $merged_bam_file_2 = ($start_with eq "B")? $bam2 : $output_dir . '/TOPHAT_' .
 print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_2\n\n";
 
 print "\n\n*************\nSplicing Analysis\n*************\n\n";
-$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
+$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $rmdup $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
 system($call);
 
 exit(0);

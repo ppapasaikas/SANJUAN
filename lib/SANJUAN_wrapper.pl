@@ -102,11 +102,12 @@ my $low_seq_req=$ARGV[11];
 my $test_run=$ARGV[12]; # 1 test run (statements are printed but not sent to cluster), 0 no test run
 my $run_without_qsub=$ARGV[13]; # 0=> use qsub, 1=> don't use qsub
 my $N_processes=$ARGV[14];
+my $rmdup_as_argument=$ARGV[15];
 
 # main paths variables
-my $sanjuan_dir=$ARGV[15];
-my $sanjuan_perllib=$ARGV[16]; 
-my $sanjuan_genomic_data_dir=$ARGV[17];
+my $sanjuan_dir=$ARGV[16];
+my $sanjuan_perllib=$ARGV[17]; 
+my $sanjuan_genomic_data_dir=$ARGV[18];
 
 my $prefix="SANJUAN";
 
@@ -169,7 +170,7 @@ my $Rmd_PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads_rmdup.bam';
 my $NSort_PPoutbam1=$output_dir."/".$COND1 . '_ProperPReads_Nsorted';
 my $NSort_PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads_Nsorted';
 my $paired = ($low_seq_req eq "N")? "-bf 0x2" : "-b";	#set to '-b' to keep non properly aligned mates / '-bf 0x2' to discard them
-my $rmdup=0;	#set to 0 to keep PCR duplicates / 1 to discard them
+my $rmdup=$rmdup_as_argument;	#set to 0 to keep PCR duplicates / 1 to discard them
 
 unless ($skip{1}){
 	print "\n\n\nRemoval of unmapped reads and secondary alignments\n#####################\n\n";
