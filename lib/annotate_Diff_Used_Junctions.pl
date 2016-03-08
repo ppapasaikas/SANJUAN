@@ -7,6 +7,8 @@ $ENS_Tx_Junc=$ARGV[5];
 $conf=$ARGV[6];
 $COND1=$ARGV[7];
 $COND2=$ARGV[8];
+$fn_out=$ARGV[9];
+open(OUT,">".$fn_out) || die $!;
 
 ($minDPSI,$minPvRET,$minLFC)=(0.15,0.05,0.4) if $conf eq 'HC';
 ($minDPSI,$minPvRET,$minLFC)=(0.20,0.01,0.2) if $conf eq 'VHC';
@@ -252,7 +254,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 			next if ($EL_START{$ssj} eq $EL_END{$shortj}) || ($EL_END{$ssj} eq $EL_START{$shortj});
 			next if $ssj eq $shortj || $ssj eq $longj;
 			$CE="yes" if ($EL_END{$ssj} < $EL_START{$shortj}-2 && $L_LR{$ssj} && $L_LR{$ssj}*$L_LR{$shortj}>0);
-			#print "LOOK1: $hcj\t$lcj\t$longj\t$shortj\t$ssj\t$CE\n";# if $CE eq "yes";
+			#print OUT "LOOK1: $hcj\t$lcj\t$longj\t$shortj\t$ssj\t$CE\n";# if $CE eq "yes";
 			}
 			foreach $sej (@{$Same_End{$longj}}) {
 			next if abs($EL_END{$longj}-$EL_END{$shortj})<2;	#Added 05-10-14
@@ -260,7 +262,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 			next if ($EL_START{$sej} eq $EL_END{$shortj}) || ($EL_END{$sej} eq $EL_START{$shortj});
 			next if $sej eq $shortj || $sej eq $longj;
 			$CE="yes" if ($EL_START{$sej} > $EL_END{$shortj}+2 && $L_LR{$sej}  && $L_LR{$sej}*$L_LR{$shortj}>0)
-			#print "LOOK2: $hcj\t$lcj\t$longj\t$shortj\t$sej\t$CE\n"  if $CE eq "yes";
+			#print OUT "LOOK2: $hcj\t$lcj\t$longj\t$shortj\t$sej\t$CE\n"  if $CE eq "yes";
 			}
 		}
 
@@ -280,14 +282,14 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 
 
 if ($conf ne 'IRM'){
-print "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCompeting_Junction\tminJDist\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
-print "CompJ_5'ss\tCompJ_3'ss\tCompJ_Junc\tHCJ_LR($COND2/$COND1)\tCompJ_LogRatio($COND2/$COND1)\tHCJ_Delta($COND2-$COND1)\tCompJ_Delta($COND2-$COND1)\tHCJ_Pval\t";
-print "CompJ_Pval\tHCJ_Eff_$COND1\tHCJ_Eff_$COND2\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\tCompJ_Eff_$COND1\tCompJ_Eff_$COND2\tCompJ_N_$COND1\tCompJ_N_$COND2\tCompJ_PSI_$COND1\tCompJ_PSI_$COND2\n";
+print OUT "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCompeting_Junction\tminJDist\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
+print OUT "CompJ_5'ss\tCompJ_3'ss\tCompJ_Junc\tHCJ_LR($COND2/$COND1)\tCompJ_LogRatio($COND2/$COND1)\tHCJ_Delta($COND2-$COND1)\tCompJ_Delta($COND2-$COND1)\tHCJ_Pval\t";
+print OUT "CompJ_Pval\tHCJ_Eff_$COND1\tHCJ_Eff_$COND2\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\tCompJ_Eff_$COND1\tCompJ_Eff_$COND2\tCompJ_N_$COND1\tCompJ_N_$COND2\tCompJ_PSI_$COND1\tCompJ_PSI_$COND2\n";
 }
 
 else {
-print "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
-print "IRLR\tPvalIR\tHCJ_Delta\tHCJ_Pval\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\n";
+print OUT "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
+print OUT "IRLR\tPvalIR\tHCJ_Delta\tHCJ_Pval\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\n";
 }
 
 
@@ -351,42 +353,33 @@ $NOVJ1="novel" if $JUNCTION{$PROXIMAL{$hcj}}<1;
 
 $INCL_COORDS="$chr:$min-$max";
 next unless $conf ne 'IRM' || $TYPE{$hcj}=~/RET/;
-print "$INCL_COORDS\t";
+print OUT "$INCL_COORDS\t";
 $,=",";
 undef %saw;
 @{$Gnames{$hcj}} = grep(!$saw{$_}++, @{$Gnames{$hcj}});
-print @{$Gnames{$hcj}};
+print OUT @{$Gnames{$hcj}};
 $,="\t";
 if ($conf ne 'IRM'){
-print "\t$hcj\t$PROXIMAL{$hcj}\t$PROX_DIS{$hcj}\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ\t$NOVD1\t$NOVA1\t$NOVJ1";
-print "\t$LR{$hcj}\t$L_VALS[0]\t$DELTA{$hcj}\t$L_VALS[1]\t$ATTRIBS{$hcj}[7]\t$L_VALS[2]\t";
-print @{$ATTRIBS{$hcj}}[1..6];
-print "\t";
-print @L_VALS[3..8];
-print "\n";
+print OUT "\t$hcj\t$PROXIMAL{$hcj}\t$PROX_DIS{$hcj}\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ\t$NOVD1\t$NOVA1\t$NOVJ1";
+print OUT "\t$LR{$hcj}\t$L_VALS[0]\t$DELTA{$hcj}\t$L_VALS[1]\t$ATTRIBS{$hcj}[7]\t$L_VALS[2]\t";
+print OUT @{$ATTRIBS{$hcj}}[1..6];
+print OUT "\t";
+print OUT @L_VALS[3..8];
+print OUT "\n";
 }
 
 else {
-print "\t$hcj\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ";
-print "\t${$RI{$hcj}}[6]\t${$RI{$hcj}}[7]\t$DELTA{$hcj}\t$ATTRIBS{$hcj}[7]\t";
-print @{$ATTRIBS{$hcj}}[3..6];
-print "\n";
+print OUT "\t$hcj\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ";
+print OUT "\t${$RI{$hcj}}[6]\t${$RI{$hcj}}[7]\t$DELTA{$hcj}\t$ATTRIBS{$hcj}[7]\t";
+print OUT @{$ATTRIBS{$hcj}}[3..6];
+print OUT "\n";
 }
 
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
+close(OUT);
 
 
 

@@ -10,6 +10,9 @@ $olapSel_Junc2Tx=$ARGV[3];
 $conf=$ARGV[4];
 $ENS_Tx_Junc=$ARGV[5];
 
+$fn_out=$ARGV[7];
+open(OUT,">".$fn_out) || die $!;
+
 open (IN,$Proc_Junctions1)||die;
 while (<IN>){
 @mat=split /\t/,$_;
@@ -118,7 +121,7 @@ foreach $JID (keys %AJn2STxs){
 	next if ($DProx eq "NA" && $UProx eq "NA");
     unless ($DProx eq "NA") {$DnProx{$JID}{$DProx}=1;$Prox{$JID}{$DProx}=1}
     unless ($UProx eq "NA") {$UpProx{$JID}{$UProx}=1;$Prox{$JID}{$UProx}=1} 
-	#print "$JID\t$UProx\t$DProx\n";	
+	#print OUT "$JID\t$UProx\t$DProx\n";	
 	}
 }
 
@@ -236,8 +239,8 @@ $NEIGH_TC=int($tmC+1);
 $NEIGH_TR=int($tmR+1);
 
 $PSI_S_C=$Ccount/($Ccount+$PSI_SNEIGH_C);
-#print "\n$Ccount\t$PSI_SNEIGH_C\t$PSI_ENEIGH_C\n" if $JID=~/13563599/; 
-#print "\n$Rcount\t$PSI_SNEIGH_R\t$PSI_ENEIGH_R\n" if $JID=~/13563599/; 
+#print OUT "\n$Ccount\t$PSI_SNEIGH_C\t$PSI_ENEIGH_C\n" if $JID=~/13563599/; 
+#print OUT "\n$Rcount\t$PSI_SNEIGH_R\t$PSI_ENEIGH_R\n" if $JID=~/13563599/; 
 $PSI_E_C=$Ccount/($Ccount+$PSI_ENEIGH_C);
 $PSI_S_R=$Rcount/($Rcount+$PSI_SNEIGH_R);
 $PSI_E_R=$Rcount/($Rcount+$PSI_ENEIGH_R);
@@ -269,20 +272,20 @@ $PSI_R=$Rcount/$NEIGH_TR;
 $cj++;
 
 $pval=calculateStatistic(n11=>$Ccount, n1p=>$Ccount+$Rcount, np1=>$NEIGH_C+$Ccount, npp=>$NEIGH_C+$NEIGH_R+$Ccount+$Rcount);
-#print "$JID\t$Ccount{$JID}\t$Rcount{$JID}\t$NEIGH_C{$JID}\t$NEIGH_R{$JID}\tTMC: $tmC\tTMR: $tmR\t$pval\t$JLENG{$JID}\t$TH[6]\n"; 
+#print OUT "$JID\t$Ccount{$JID}\t$Rcount{$JID}\t$NEIGH_C{$JID}\t$NEIGH_R{$JID}\tTMC: $tmC\tTMR: $tmR\t$pval\t$JLENG{$JID}\t$TH[6]\n"; 
 
-#print "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$NEIGH_C{$JID}\t$NEIGH_R{$JID}\t$pval\n" if $pval<$TH[6];
-print "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$PSI_C\t$PSI_R\t$pval\n" if $pval<$TH[6];
+#print OUT "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$NEIGH_C{$JID}\t$NEIGH_R{$JID}\t$pval\n" if $pval<$TH[6];
+print OUT "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$PSI_C\t$PSI_R\t$pval\n" if $pval<$TH[6];
 }
-print ">$cj\n";
+print OUT ">$cj\n";
 
-
+close(OUT);
 
 
 
 
 # wait 5 min so that output on cluster is written completely for sure 
-sleep 300;
+sleep 60;
 
 
 

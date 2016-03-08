@@ -1,6 +1,8 @@
 #Use this script to generate k bed files with each one coveringh 1/k length of Intronic Segment:
 
 $JUNCTIONS=$ARGV[0];	#ALL2_junctions.bed
+$fn_out=$ARGV[1];
+open(OUT,">".$fn_out) || die $1;
 
 open (IN, $JUNCTIONS) ||die;
 while (<IN>){
@@ -37,7 +39,7 @@ $en=$end-1 if $_==$k;
 next if ($en-$st)<5;
 $sid=$id . "_" . $_;
 $BED="$mat[0]\t$st\t$en\t$sid\t0\t$STRAND{$id}";
-print $BED . "\n";
+print OUT $BED . "\n";
 }
 }
 
@@ -45,4 +47,4 @@ print $BED . "\n";
 
 
 
-
+close(OUT);

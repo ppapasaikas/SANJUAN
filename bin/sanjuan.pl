@@ -51,32 +51,34 @@ sub print_help{
 	print "\n";
 	print "Call with arguments (<standard value already set>):\n";
 	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -p <phred33> -l <fr-firststrand> -a <AGATCGGAAGAGC> -b <T> -c <HC> -i -s -lsr -t -db <db sub-directory of SANJUAN directory>\n\n";
-	print "\t-g:    genome / species; values: hg -> human, mm-> mouse, dr-> zebrafish\n";
-	print "\t-g1:   short name for group 1\n";
-	print "\t-f1:   input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
+	print "\t-g:     genome / species; values: hg -> human, mm-> mouse, dr-> zebrafish\n";
+	print "\t-g1:    short name for group 1\n";
+	print "\t-f1:    input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
 	print "\t\t if -b is T or M: pairs of FASTQ/FASTQ.GZ files describing paired-end RNAseq data,\n";
 	print "\t\t\t comma separated list without white spaces following this order (file names don't matter): run1_read1.fastq,run1_read2.fastq,run2_read1.fastq,run2_read2.fastq,..\n";
 	print "\t\t if -b set to B: exactly one BAM file containing all mapped reads for group 1\n";
-	print "\t-g2:   like argument -g1 but for group 2\n";
-	print "\t-f2:   like argument -f1 but for group 2\n";
-	print "\t-o:    output directory; If omitted current working directory is taken.\n";
-	print "\t-p:    encoding of base qualities in FASTQ files; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
+	print "\t-g2:    like argument -g1 but for group 2\n";
+	print "\t-f2:    like argument -f1 but for group 2\n";
+	print "\t-o:     output directory; If omitted current working directory is taken.\n";
+	print "\t-p:     encoding of base qualities in FASTQ files; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
 	print "\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
-	print "\t-l:    library type of RNAseq samples; values fr-unstranded, fr-firststrand, fr-secondstrand (fr-firststrand is standard for CRG samples).  Can be omitted if -b B\n";
+	print "\t-l:     library type of RNAseq samples; values fr-unstranded, fr-firststrand, fr-secondstrand (fr-firststrand is standard for CRG samples).  Can be omitted if -b B\n";
 	print "\t\t Set to fr-unstranded if you are in doubt about the library type; though this parameter is critical and it is recommended\n";
 	print "\t\t setting it correctly according to the RNAseq data you are working with.\n";
 	print "\t\t For details have a look at section on library type of TopHat online manual https://ccb.jhu.edu/software/tophat/manual.shtml.\n";
-	print "\t-a:    adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b B.\n"; 
+	print "\t-a:     adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b B.\n"; 
 	print "\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz)\n";
-	print "\t-b:    Starting point; values T -> start with trimming, M -> start with mapping SKIPPING trimming, B- > start with splicing analysis SKIPPING trimming and mapping\n";	
-	print "\t-c:    threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
+	print "\t-b:     Starting point; values T -> start with trimming, M -> start with mapping SKIPPING trimming, B- > start with splicing analysis SKIPPING trimming and mapping\n";	
+	print "\t-c:     threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
 	print "\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
-	print "\t-i:    If -i is given, high sensitivity intron retention analysis (IRM mode) will be done.\n";
-	print "\t-s:    If -s is given, supporting junction evidence for IR identification (for IRM mode -i) will be required; not required if -s omitted\n";
-	print "\t-lsr:  If -lsr (low sequence requirements) is given, reads will be filter-out less strictly.\n";
-	print "\t-t:    If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
-	print "\t-db: Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
+	print "\t-i:     If -i is given, high sensitivity intron retention analysis (IRM mode) will be done.\n";
+	print "\t-s:     If -s is given, supporting junction evidence for IR identification (for IRM mode -i) will be required; not required if -s omitted\n";
+	print "\t-lsr:   If -lsr (low sequence requirements) is given, reads will be filter-out less strictly.\n";
+	print "\t-t:     If -t (test run) is given, qsub statements will be printed but not sent to cluster.\n";
+	print "\t-db:    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
+	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n";
+	print "\t-nprocs number of parallel processes\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
@@ -119,7 +121,9 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "COND1=CNT		### Label for Condition 1 (eg 'CNT' or 'WT')";
 	print $fh "COND2=KD			### Label for Condition 2 (eg 'KD' or 'OvEx')";
 	print $fh "TESTRUN=N		### values Y, N; if Y, qsub statements are printed but not sent to cluster";
-	print $fh "DBLOCATION=		### the location of the sub-directory db containing predefined exon-exon junctions. Needs to be specified only if db sun-directory is not in main SANJUAN directory.\n";
+	print $fh "DBLOCATION=		### the location of the sub-directory db containing predefined exon-exon junctions. Needs to be specified only if db sun-directory is not in main SANJUAN directory.";
+	print $fh "NOQSUB=N			### run SANJUAN without sending jobs to CRG cluster";
+	print $fh "NPROCS=12		### run SANJUAN with this maximal number of parallel processes";	
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Data  #######################";
@@ -127,11 +131,12 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "### You start with raw FASTQ files: specify this parameter RAWFASTQS to run trimming, mapping, and splicing analysis.";
 	print $fh "### Directory containing the FASTQ files";
 	print $fh "### Naming convention:\n";
-	print $fh "### 1. file names have to contain at some point the label COND1 or COND2 according to which they get assigned to conditions\n";
-	print $fh "### 2. endings should be (r|read|R)(1|2).(fq|fastq|fq.gz|fastq.gz)\n";
-	print $fh "### 3. the only difference between the read-pair files should be read1 vs read2 or r1 vs r2 or R1 vs R2\n";
-	print $fh "### examples for COND1=cntr: test_cntr_somethingmore_r1.fq or siRNA_cntr_something_R2.fq.gz or  dec_cntr_read2.fastq.gz\n";
+	print $fh "### 1. file names have to contain at some point the label COND1 or COND2 according to which they get assigned to conditions";
+	print $fh "### 2. endings should be (r|read|R)(1|2).(fq|fastq|fq.gz|fastq.gz)";
+	print $fh "### 3. the only difference between the read-pair files should be read1 vs read2 or r1 vs r2 or R1 vs R2";
+	print $fh "### examples for COND1=cntr: test_cntr_somethingmore_r1.fq or siRNA_cntr_something_R2.fq.gz or  dec_cntr_read2.fastq.gz";
 	print $fh "RAWFASTQS_DIR=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/";
+	print $fh "";
 	print $fh "";
 	print $fh "### You start with trimmed FASTQ files: specify this parameter TRIMMEDFASTQS to SKIP trimming, AND ONLY RUN mapping and splicing analysis.";
 	print $fh "### TRIMMEDFASTQS_DIR=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/";
@@ -185,6 +190,9 @@ my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to 
 #  if $map_no_trim=Y -> Go to mapping directly (i.e map using untrimmed fastq files)
 #
 my ($rawinput_dir,$trimmedinput_dir)=("","");# input_dir contains all input fastq files 
+# this SANJUAN run should not use qsub but run locally
+my $run_without_qsub=0;
+my $N_processes=12;
 
 # parameters through arguments
 if(@ARGV>1){
@@ -206,6 +214,8 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-lsr"){$low_seq_req="Y";}
 		if($ARGV[$i] eq "-t"){$test_run=1;}
 		if($ARGV[$i] eq "-db"){$sanjuan_genomic_data_dir=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-nqsub"){$run_without_qsub=1;}
+		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
 	}
 }
 
@@ -214,23 +224,25 @@ else{
 	# Read and parse parameter file:
 	open (my $fh,"<".$ARGV[0]) || die "Cannot open parameter file $ARGV[0] for reading: $!\n";
 	while (<$fh>){
-		$genome=$1 if $_=~/^\s*GENOME\s*=(hg|mm|dr)/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
-		$rawinput_dir=$1 if $_=~/^\s*RAWFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory
+		$genome=$1           if $_=~/^\s*GENOME\s*=(hg|mm|dr)/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
+		$rawinput_dir=$1     if $_=~/^\s*RAWFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory
 		$trimmedinput_dir=$1 if $_=~/^\s*TRIMMEDFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory of trimmed fastq files (if given, trimming is skipped)
-		$output_dir=$1 if $_=~/^\s*OUTDIR\s*=([\w\/\.\_\-]+)/;	#Base directory for Output
-		$adapter=$1 if $_=~/^\s*ADAPTER\s*=([ACGTNUacgtnu]+)/;	#Adapter sequence
-		$library_type=$1 if $_=~/^\s*LIBTYPE\s*=(fr\-firststrand|fr\-secondstrand|fr\-unstranded)/;
-		$phred_code=$1 if  $_=~/^\s*PHRED\s*=(phred33|phred64)/;
-		$g1_shortname=$1 if  $_=~/^\s*COND1\s*=(\w+)/;
-		$g2_shortname=$1 if  $_=~/^\s*COND2\s*=(\w+)/;
-		$bam1=$1 if $_=~/^\s*INFDIR\s*=([\w\/\.\_\-]+)/;	# bam files; if given trimming and mapping are skipped
-		$bam2=$1 if $_=~/^\s*INFDIR\s*=([\w\/\.\_\-]+)/;
-		$conf=$1 if $_=~/^\s*CONF\s*=(VHC|HC|MC)/;
-		$SuppJun=$1 if $_=~/^\s*SUPPJUN\s*=(Y|N)/;
-		$IRM=$1 if $_=~/^\s*IRM\s*=(Y|N)/;
-		$low_seq_req=$1 if $_=~/^\s*LOWSEQRQMNTS\s*=(Y|N)/;
-		$test_run=1 if $_=~/^\s*TESTRUN\s*=Y/;
+		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=([\w\/\.\_\-]+)/;	#Base directory for Output
+		$adapter=$1          if $_=~/^\s*ADAPTER\s*=([ACGTNUacgtnu]+)/;	#Adapter sequence
+		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=(fr\-firststrand|fr\-secondstrand|fr\-unstranded)/;
+		$phred_code=$1       if $_=~/^\s*PHRED\s*=(phred33|phred64)/;
+		$g1_shortname=$1     if $_=~/^\s*COND1\s*=(\w+)/;
+		$g2_shortname=$1     if $_=~/^\s*COND2\s*=(\w+)/;
+		$bam1=$1             if $_=~/^\s*INFDIR\s*=([\w\/\.\_\-]+)/;	# bam files; if given trimming and mapping are skipped
+		$bam2=$1             if $_=~/^\s*INFDIR\s*=([\w\/\.\_\-]+)/;
+		$conf=$1             if $_=~/^\s*CONF\s*=(VHC|HC|MC)/;
+		$SuppJun=$1          if $_=~/^\s*SUPPJUN\s*=(Y|N)/;
+		$IRM=$1              if $_=~/^\s*IRM\s*=(Y|N)/;
+		$low_seq_req=$1      if $_=~/^\s*LOWSEQRQMNTS\s*=(Y|N)/;
+		$test_run=1          if $_=~/^\s*TESTRUN\s*=Y/;
 		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=([\w\/\.\_\-]+)/;
+		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=Y/;
+		$N_processes=$1      if $_=~/^\s*NPROCS\s*=(\d+)/;
 	}
 	close($fh);
 }
@@ -344,6 +356,19 @@ if($genome eq "dr"){
 	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/dr10/dr10");
 }
 
+# set paths for local execution
+if($run_without_qsub==1){
+	if($genome eq "hg"){
+	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_hg19",$abs_path."/indexes/tophat_hg19/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_hg19/hg19");
+	}
+	if($genome eq "mm"){
+		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_mm10",$abs_path."/indexes/tophat_mm10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_mm10/mm10");
+	}
+	if($genome eq "dr"){
+		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_dr10",$abs_path."/indexes/tophat_dr10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_dr10/dr10");
+	}
+}
+
 
 
 
@@ -351,12 +376,12 @@ if($genome eq "dr"){
 #########
 my $call;
 print "*************\nSANJUAN\n*************\n\n";
-unless($test_run){
-	print "Call:\nsanjuan -g $genome -c $conf -i $IRM -s $SuppJun -p $phred_code -l $library_type -a $adapter -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req\n";
-}else{
-	print "Call:\nsanjuan -g $genome -c $conf -i $IRM -s $SuppJun -p $phred_code -l $library_type -a $adapter -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req -t\n";
-}
-print "\n\n";
+
+my $suffix="";
+if($test_run){$suffix.="-t ";}
+if($run_without_qsub){$suffix.="-nqsub ";}
+
+print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -p $phred_code -l $library_type -a $adapter -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
@@ -367,7 +392,7 @@ if($start_with ne "B"){
 	# 1. triming and mapping
 	# trim_galore needs python
 	print "\n\n*************\nTrimming & Mapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $tophat_tr_index $tophat_gtf $tophat_bowtie_index -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_gtf $tophat_bowtie_index $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
 	$ret=`$call`;
 	print $ret."\n";
 }else{
@@ -390,7 +415,7 @@ my $merged_bam_file_2 = ($start_with eq "B")? $bam2 : $output_dir . '/TOPHAT_' .
 print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_2\n\n";
 
 print "\n\n*************\nSplicing Analysis\n*************\n\n";
-$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
+$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
 system($call);
 
 exit(0);

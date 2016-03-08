@@ -36,5 +36,5 @@ close($fh);
 
 
 # wait 5 min so that output on cluster is written completely for sure 
-sleep 300;
+#sleep 300;
 	

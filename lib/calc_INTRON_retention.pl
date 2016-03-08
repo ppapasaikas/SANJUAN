@@ -11,6 +11,8 @@ $ENS_Tx_Junc=$ARGV[5];
 $Proc_Junctions1=$ARGV[6];
 $Proc_Junctions2=$ARGV[7];
 $IRM=$ARGV[8];
+$fn_out=$ARGV[10];
+open(OUT,">".$fn_out) || die $!;
 
 open (IN, $Diff_Junct_Eff) ||die;
 while (<IN>){
@@ -185,7 +187,7 @@ foreach $JID (keys %AJn2STxs){
 	next if ($DProx eq "NA" && $UProx eq "NA");
 	unless ($DProx eq "NA") {$DnProx{$JID}{$DProx}=1;$Prox{$JID}{$DProx}=1}
 	unless ($UProx eq "NA") {$UpProx{$JID}{$UProx}=1;$Prox{$JID}{$UProx}=1}
-	#print "$JID\t$UProx\t$DProx\n";	
+	#print OUT "$JID\t$UProx\t$DProx\n";	
 	}
 }
 
@@ -273,7 +275,7 @@ $SR_transgn=$S_Rcount/($NEIGH_R+$S_Rcount);
 $IRLR=log($SR_transgn/$SR_control);
 $pval=calculateStatistic(n11=>$S_Ccount, n1p=>$S_Ccount+$S_Rcount, np1=>$NEIGH_C+$S_Ccount, npp=>$NEIGH_C+$NEIGH_R+$S_Ccount+$S_Rcount);
 
-#print "$IID\t$S_Ccount\t$S_Rcount\t$NEIGH_C\t$NEIGH_R\t$IRLR\t$pval\n" if $IID=~/18168624/;
+#print OUT "$IID\t$S_Ccount\t$S_Rcount\t$NEIGH_C\t$NEIGH_R\t$IRLR\t$pval\n" if $IID=~/18168624/;
 
 push @{$IRLRS{$IID}},$IRLR;
 push @{$PVALS{$IID}},$pval;
@@ -284,14 +286,13 @@ $,="\t";
 foreach $IID (keys %IRLRS){
 $medIRLR=median(\@{$IRLRS{$IID}});
 $medPval=geomPval(\@{$PVALS{$IID}},\@{$IRLRS{$IID}});	#Changed on 03-2015
-print "$IID\t$I_Ccount{$IID}\t$I_Rcount{$IID}\t$NEIGH_C{$IID}\t$NEIGH_R{$IID}\t$LR{$IID}\t$medIRLR\t$medPval\n";# if $medPval<$pvalTH;
+print OUT "$IID\t$I_Ccount{$IID}\t$I_Rcount{$IID}\t$NEIGH_C{$IID}\t$NEIGH_R{$IID}\t$LR{$IID}\t$medIRLR\t$medPval\n";# if $medPval<$pvalTH;
 }
 
-
-
+close(OUT);
 
 # wait 5 min so that output on cluster is written completely for sure 
-sleep 300;
+sleep 60;
 
 
 
@@ -342,12 +343,3 @@ $medVal=median (\@vals);
 $gmP=exp($LP/($#pvals+1));
 return $gmP;
 }
-
-
-
-
-
-
-
-
-

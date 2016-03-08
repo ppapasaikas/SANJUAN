@@ -8,6 +8,9 @@ $SuppJun=$ARGV[6]; #Require Supporting Junction switch? N->no
 $conf=$ARGV[7];
 $COND1=$ARGV[8];
 $COND2=$ARGV[9];
+$fn_out=$ARGV[10];
+
+open(OUT,">".$fn_out) || die $!;
 
 ($minLFC,$minPvRET)=(0.92,0.0001) if $conf eq 'VHC';	#x3   fold
 ($minLFC,$minPvRET)=(0.69,0.0010) if $conf eq 'HC';	#x2   fold
@@ -131,8 +134,8 @@ next unless $RET_INTR{$mat[3]};
 close IN;
 
 
-print "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
-print "IRLR\tPvalIR\tHCJ_Delta\tHCJ_Pval\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\n";
+print OUT "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
+print OUT "IRLR\tPvalIR\tHCJ_Delta\tHCJ_Pval\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\n";
 
 
 $,="\t";
@@ -163,32 +166,23 @@ $TYPE{$hcj}.="/RET_INTRON";
 
 
 $INCL_COORDS="$chr:$min-$max";
-print "$INCL_COORDS\t";
+print OUT "$INCL_COORDS\t";
 $,=",";
 undef %saw;
 @{$Gnames{$hcj}} = grep(!$saw{$_}++, @{$Gnames{$hcj}});
-print @{$Gnames{$hcj}};
+print OUT @{$Gnames{$hcj}};
 $,="\t";
-print "\t$hcj\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ";
-print "\t${$RI{$hcj}}[6]\t${$RI{$hcj}}[7]\t$DELTA{$hcj}\t$ATTRIBS{$hcj}[7]\t";
-print @{$ATTRIBS{$hcj}}[3..6];
-print "\n";
+print OUT "\t$hcj\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ";
+print OUT "\t${$RI{$hcj}}[6]\t${$RI{$hcj}}[7]\t$DELTA{$hcj}\t$ATTRIBS{$hcj}[7]\t";
+print OUT @{$ATTRIBS{$hcj}}[3..6];
+print OUT "\n";
 
 
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
+close(OUT);
 
 
 

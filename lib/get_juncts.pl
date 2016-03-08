@@ -2,6 +2,9 @@ $SuppThreshold=3;	#Minimum Total Number of Junction Reads
 $FractThreshold=0.6;	#Minimum Fraction of Replicates with Junction
 $SAMFILE=$ARGV[0];
 $low_seq_req=$ARGV[1]; # Y or N
+$fn_out=$ARGV[2];
+
+open (OUT,">".$fn_out) || die $!;
 
 open (IN, "$SAMFILE") ||die;	#Open Merged Junctions File
 
@@ -18,7 +21,7 @@ $nj=int($#CIG/2);		#For each two additional fields (#N#M) add one junction.
 
 $strand="NA";
 #83,99,147 and 163.
-if ($mat[1]==99 || $mat[1]==147 | $mat[1]==97 | $mat[1]==145 ){$strand="-"}		#only correct for firstrand
+if ($mat[1]==99 || $mat[1]==147 || $mat[1]==97 || $mat[1]==145 ){$strand="-"}		#only correct for firstrand
 elsif ($mat[1]==83 || $mat[1]==163 || $mat[1]==81 || $mat[1]==161){$strand="+"}		#Only correct for firstrand
 if($low_seq_req eq "N" && $strand eq "NA"){next;}
 $strand="-" if $line=~/XS:A:\-/;		#Added on 03-2015
@@ -49,13 +52,15 @@ $oppid=$INF[0] . '_' . $INF[1]  . '_' . $INF[2]  . '_' . $opps;
 next if $count{$oppid}>$count{$id};	#Spurious junction on opposite strand
 if($low_seq_req eq "N" && $fcount{$id}< $FractThreshold * $flowcells){next;} #Absent in significant fraction of flowcells
 next if $count{$id}< $SuppThreshold;	#Low count
-print "$INF[0]\t$INF[1]\t$INF[2]\t$id\t$count{$id}\t$INF[3]\n";#$fcount{$id}\t$flowcells\n";
+print OUT "$INF[0]\t$INF[1]\t$INF[2]\t$id\t$count{$id}\t$INF[3]\n";#$fcount{$id}\t$flowcells\n";
 }
 
 
+close(IN);
+close(OUT);
 
 # wait 5 min so that output on cluster is written completely for sure 
-sleep 300;
+#sleep 60;
 
 
 

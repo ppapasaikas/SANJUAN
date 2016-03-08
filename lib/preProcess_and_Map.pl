@@ -19,10 +19,14 @@ my $start_with = $ARGV[5];  # T: trimming, M: mapping
 
 my $test_run=$ARGV[6]; # 1 test run (statements are printed but not sent to cluster), 0 no test run
 
-my $tophat_tr_index=$ARGV[7];
-my $tophat_gtf=$ARGV[8];
-my $tophat_bowtie_index=$ARGV[9];
+my $run_without_qsub=$ARGV[7]; # 1 = local run without qsub, 0 = with qsub
 
+my $sanjuan_dir=$ARGV[8]; # location of SANJUAN program files
+
+my $tophat_tr_index=$ARGV[9];
+my $tophat_gtf=$ARGV[10];
+my $tophat_bowtie_index=$ARGV[11];
+my $N_processes=$ARGV[12];
 ##########################################################################################################
 ##########################################################################################################
 ##########################################################################################################
@@ -46,7 +50,7 @@ my @g1_files=();
 my @g2_files=();
 my @skipping_ok=();
 
-for(my $i=10; $i<@ARGV; $i++){
+for(my $i=13; $i<@ARGV; $i++){
 	if(substr($ARGV[$i],0,3) eq "-g1"){
 		$i++;
 		$cond1_name=$ARGV[$i];
@@ -84,7 +88,7 @@ $skipping_ok{$cond1_name}=1;
 $skipping_ok{$cond2_name}=1;
 
 print "Call of sub routine:\n";
-print "preProcess_and_Map.pl $basedir $genome $adapter_seq $phred_code $library_type $start_with $test_run -g1 $cond1_name ".join(",",@g1_files)." -g2 $cond2_name ".join(",",@g2_files)."\n";
+print "preProcess_and_Map.pl $basedir $genome $adapter_seq $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_gtf $tophat_bowtie_index $N_processes -g1 $cond1_name ".join(",",@g1_files)." -g2 $cond2_name ".join(",",@g2_files)."\n";
 
 ########################################	T R I M M I N G		##########################################
 if($start_with eq "T"){
@@ -110,14 +114,22 @@ if($start_with eq "T"){
 		}
 		$skipping_ok[$cf]=0;
 		$jname="TRIM_$cond"."_$cf";
-		$call= "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/01_out_trim_${cf}.txt -e $basedir/log_files/01_err_trim_${cf}.txt -l virtual_free=40G -l h_rt=48:00:00 ~/crg/projects/2015_sanjuan/dev/trim_galore_wrapper.sh --$phred_code --gzip --stringency 3 -q 0 -a $ad_bc -a2 $ad_bc --length 19 --paired $READ1[$cf] $READ2[$cf] -o $odir";
+		if($run_without_qsub==0){
+			$call= "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/01_out_trim_${cf}.txt -e $basedir/log_files/01_err_trim_${cf}.txt -l virtual_free=40G -l h_rt=48:00:00 $sanjuan_dir/trim_galore_wrapper.sh --$phred_code --gzip --stringency 3 -q 0 -a $ad_bc -a2 $ad_bc --length 19 --paired $READ1[$cf] $READ2[$cf] -o $odir";
+		}else{
+			$call= "$sanjuan_dir/trim_galore_wrapper.sh --$phred_code --gzip --stringency 3 -q 0 -a $ad_bc -a2 $ad_bc --length 19 --paired $READ1[$cf] $READ2[$cf] -o $odir 1>$basedir/log_files/01_out_trim_${cf}.txt 2>$basedir/log_files/01_err_trim_${cf}.txt";
+		}
 		print "$call\n";
 		$jobs_started=1;
 		if(!$test_run){
 			$ret=`$call`;
 			print "$ret\n\n";
-	    	($job_id)=$ret=~/job (\d+?) \(/;
-			push(@all_job_ids,$job_id);
+			if($run_without_qsub==0){
+	    		($job_id)=$ret=~/job (\d+?) \(/;
+				push(@all_job_ids,$job_id);
+			}else{
+			push(@all_job_ids,-3);
+			}
 		}
 	}
 }else{
@@ -162,13 +174,21 @@ for my $cf (0..$#READ1){
 
 	$skipping_ok{$cond}=0;
 	$jobs_started=1;
-	$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp 12 -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p 12 -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
+	if($run_without_qsub==0){
+		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
+	}else{
+		$call = "tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2 1>$basedir/log_files/02_out_mapping_${cf}.txt 2>$basedir/log_files/02_err_mapping_${cf}.txt";
+	}
 	print "$call\n";
 	if(!$test_run){
 		$ret= `$call`;
 		print "$ret\n\n";
-   		($job_id)=$ret=~/job (\d+?) \(/;
-		push(@all_job_ids,$job_id);
+		if($run_without_qsub==0){
+   			($job_id)=$ret=~/job (\d+?) \(/;
+			push(@all_job_ids,$job_id);
+		}else{
+			push(@all_job_ids,-3);
+		}
 	}
 
 	#Only for CNAG sequencing
@@ -192,16 +212,28 @@ foreach my $cond_name ($cond1_name,$cond2_name){
 
 	# only one file
 	if($bam_files_count{$cond_name}==1){
-		$call="qsub -N SANJUAN_ln_s -q short-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=1G -l h_rt=00:20:00 ~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file";
+		if($run_without_qsub==0){
+			$call="qsub -N SANJUAN_ln_s -q short-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=1G -l h_rt=00:20:00 ~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file";
+		}else{
+			$call="~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
+		}
 	}else{
-		$call = "qsub -N SANJUAN_SAMmerge_${cond_name}_${c} -q long-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
+		if($run_without_qsub==0){
+			$call = "qsub -N SANJUAN_SAMmerge_${cond_name}_${c} -q long-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
+		}else{
+			$call = "samtools merge $merged_bam_file $bam_files{$cond_name} 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";	
+		}
 	}
 	print "$call\n";
 	if(!$test_run){
 		$ret=`$call`;
 		print "$ret\n\n";
-		($job_id)=$ret=~/job (\d+?) \(/;
-		push(@all_job_ids,$job_id);
+		if($run_without_qsub==0){
+			($job_id)=$ret=~/job (\d+?) \(/;
+			push(@all_job_ids,$job_id);
+		}else{
+			push(@all_job_ids,-3);
+		}
 	}
 }
 
