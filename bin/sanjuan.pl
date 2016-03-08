@@ -78,7 +78,7 @@ sub print_help{
 	print "\t-db:    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n";
-	print "\t-nprocs number of parallel processes\n";
+	print "\t-nprocs number of parallel processes (by standard set to 12)\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
