@@ -1,3 +1,5 @@
+#!/bin/bash
+
 input_bed=$1
 genome_path=$2
 b_parameter=$3

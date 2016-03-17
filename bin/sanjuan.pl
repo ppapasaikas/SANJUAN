@@ -217,7 +217,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-lsr"){$low_seq_req="Y";}
 		if($ARGV[$i] eq "-t"){$test_run=1;}
 		if($ARGV[$i] eq "-db"){$sanjuan_genomic_data_dir=$ARGV[($i++)+1];}
-		if($ARGV[$i] eq "-nqsub"){$run_without_qsub=1;}
+		if($ARGV[$i] eq "-noqsub"){$run_without_qsub=1;}
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
 	}

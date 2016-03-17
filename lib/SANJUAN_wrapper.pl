@@ -300,14 +300,12 @@ my $NoJunctReads_bed1=$NJoutbed1;		#Generated during Preprocessing
 my $NoJunctReads_bed2=$NJoutbed2;		#Generated during Preprocessing
 my $OUT_Coverage_IntrSegm1= "$output_dir/$COND1"."_IntrSegm_coverage.bed";
 my $OUT_Coverage_IntrSegm2= "$output_dir/$COND2"."_IntrSegm_coverage.bed";
-my $str_spec="-s";
-$str_spec="" if $RNAseq eq "U";
 unless ($skip{7}){
 	print "\n\n\nCalculation intronic segments read coverage\n#####################\n\n";
 	
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_IntrCov1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp1.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp1.txt -b y","$sanjuan_dir/bedtools_intersect.sh $str_spec $OUT_INTR_SEGM_SORTED $NoJunctReads_bed1 $OUT_Coverage_IntrSegm1",\@all_job_ids,$OUT_Coverage_IntrSegm1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_IntrCov2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp2.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp2.txt -b y","$sanjuan_dir/bedtools_intersect.sh $str_spec $OUT_INTR_SEGM_SORTED $NoJunctReads_bed2 $OUT_Coverage_IntrSegm2",\@all_job_ids,$OUT_Coverage_IntrSegm2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_IntrCov1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp1.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp1.txt -b y","$sanjuan_dir/bedtools_intersect.sh $RNAseq $OUT_INTR_SEGM_SORTED $NoJunctReads_bed1 $OUT_Coverage_IntrSegm1",\@all_job_ids,$OUT_Coverage_IntrSegm1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_IntrCov2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp2.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp2.txt -b y","$sanjuan_dir/bedtools_intersect.sh $RNAseq $OUT_INTR_SEGM_SORTED $NoJunctReads_bed2 $OUT_Coverage_IntrSegm2",\@all_job_ids,$OUT_Coverage_IntrSegm2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 }
 
 
@@ -343,7 +341,7 @@ if ($IRM eq 'Y'){
 	# should this be inside the if($IRM eq "Y") or not?
 	#Annotate Differential Introns
 	@par=($OUT_calc_LC_JEFF,$OUT_calc_LC_JEFF,$olapSel_Junc2Tx,$OUT_IRM,$ENSid2Name,$ENS_Tx_Junc,$SuppJun);
-	my $OUT_IANNOT="Annotated_Diff_Introns.txt";
+	my $OUT_IANNOT=$output_dir."/Annotated_Diff_Introns.txt";
 	unless ($skip{11}){
 		print "\n\n\nAnnotation of differential introns\n#####################\n\n";
 		$job_ids=join(",",@all_job_ids);
