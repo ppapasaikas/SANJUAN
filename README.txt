@@ -31,35 +31,27 @@ In these cases, the user might feed SANJUAN
 with already trimmed RNAseq data, or already 
 mapped data in form of BAM files.
 
-XXX if mapping is done by user, does the user 
-has to guarantee that the mapping was done against
-a certain version of a genome or do the chromosomes
-have to fulfill any name conventions?
-
-
-GENERAL NOTE
-============
-SANJUAN may be used only at the CRG as it is tightly
-tailored to the cluster infra-structure of the CRG.
-Access to the ant-cluster of the CRG is essential,
-as SANJUAN will run all computations as cluster jobs. 
+XXX name convetions and other constraints that
+must be met when user does mapping by her-/himself.
 
 
 Dependencies
 ============
-Preprocessing of SANJUAN, i.e., trimming and mapping
+SANJUAN is a Perl pipeline and was tested under
+Perl v5.10.1 and v5.18.2.
+
+Pre-processing of SANJUAN, i.e., trimming and mapping
 of reads, depends on the following programs. 
 * trim_galore
 * cutadapt
 * tophat2
-These programs should be executable under the user's
-account on the CRG cluster.
+These programs need to be installed and made executable.
 
 Splicing analysis of SANJUAN does not depend on any
 external programs. That means, if the user wants to
-use the splicing analysis of SANJUAN only but not
-the preprocessing of RNAseq data, the user does not
-have to install any further programs.  
+use the splicing analysis of SANJUAN only and 
+omit pre-processing of RNAseq data, the user does not
+have to install any further programs.
 
 
 INSTALLATION
@@ -74,56 +66,60 @@ into any directory on your computer.
 The SANJUAN (SANJUAN-master) directory should contain 
 the following sub-directories:
 * bin
-* lib 
+* lib
 * perllib
+* db
+* indexes
 
 Directory bin contains the main script sanjuan.pl.
 Directory lib contains helper scripts used by sanjuan.pl.
 Directory perllib contains the two Perl modules Text and
 Statistics which are used by SANJUAN.
+Directory db contains AS annotations used 
+by SANJUAN.
 
-If necessary make the sanjuan.pl in the bin directory 
+IMPORTANT: 
+Pre-processing includes mapping using tophat2.
+Tophat2, Bowtie2, and GTF files need to be made
+available in directory indexes following the following
+structure of subfolders.
+/bowtie_dr10
+/bowtie_hg19
+/bowtie_mm10
+/tophat_dr10
+/tophat_hg19
+/tophat_mm10
+
+XXX description where to download the files and how to create them
+
+
+If necessary make the file sanjuan.pl in the bin directory 
 executable with
 
 > chmod 700 sanjuan.pl
 
 Now you can call sanjuan through its full
-path.
+path
 
 > /full/path/to/SANJUAN/bin/sanjuan.pl
 
 You might define a link to sanjuan.pl in any of
 your PATH directories to allow easier execution.
 
-> ln -s /one/of/my/directories/inPATH/sanjuan /full/path/to/SANJUAN/bin/sanjuan.pl 
-   
+> ln -s /full/path/to/SANJUAN/bin/sanjuan.pl /one/of/my/directories/inPATH/sanjuan
+
 Having set this link, you might call SANJUAN in any place by
 
-> sanjuan 
+> sanjuan
 
 
-IMPORTANT: 
-SANJUAN relies on predefined 
-exon-exon-junctions for each species. These 
-have to be downloaded from XXX.
-It is recommended to download and un-compress 
-the tar.gz-archive into a sub-directory called db 
-of the SANJUAN installation.
-The SANJUAN installation then finally contains
-the following sub-directories.
-* bin
-* lib
-* perllib
-* db
-and db should contain the two directories 
-genomes and annotation_files.
-SANJUAN will then use these sub-directories.
-
-If you decide to put the sub-directory db 
-to another place, you will have to tell SANJUAN
-the place where you put it each time you use SANJUAN.  
-See the help message of SANJUAN for more details
-on how to specify the location of the db sub-directory.
+USE OUTSIDE OF CRG, BARCELONA
+============
+SANJUAN was developed at the CRG, Barcelona, and 
+intially tailored for using local cluster resources 
+at the CRG. For use without access to the cluster 
+resources of the CRG, SANJUAN can be run with
+the option -noqsub.
 
 
 USAGE
@@ -160,3 +156,9 @@ follow a specific naming convention.
 Details on all parameters, naming conventions, and the 
 two different ways to bypass parameters to SANJUAN, 
 are given within the help message of SANJUAN.
+
+
+CONTACT
+=======
+Panagiotis Papasaikas: panagiotis.papasaikas@crg.eu
+Andre Gohr:            andre.gohr@crg.eu
