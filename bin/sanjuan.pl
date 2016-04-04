@@ -341,28 +341,14 @@ if($start_with eq "B"){
 # transcriptome index, gene annotation, bowtie index
 my ($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index);
 if($genome eq "hg"){
-	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/iGENOMES_UCSC_hg19_clean/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/iGENOMES_UCSC_hg19_clean/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/hg19/hg19");
+	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_hg19",$abs_path."/indexes/tophat_hg19/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_hg19/hg19");
 }
 if($genome eq "mm"){
-	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/ENSEMBL_mm10_GRVm30/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/ENSEMBL_mm10_GRVm30/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/mm10/mm10");
+		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_mm10",$abs_path."/indexes/tophat_mm10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_mm10/mm10");
 }
 if($genome eq "dr"){
-	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=("/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/","/users/jvalcarcel/ppapasaikas/TOPHAT_INDEXES/danRer10_ENSEMBL/cuffcmp.combined.gtf","/users/jvalcarcel/ppapasaikas/BOWTIE2_INDEXES/dr10/dr10");
-}
-
-# set paths for local execution
-if($run_without_qsub==1){
-	if($genome eq "hg"){
-	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_hg19",$abs_path."/indexes/tophat_hg19/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_hg19/hg19");
-	}
-	if($genome eq "mm"){
-		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_mm10",$abs_path."/indexes/tophat_mm10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_mm10/mm10");
-	}
-	if($genome eq "dr"){
 		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_dr10",$abs_path."/indexes/tophat_dr10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_dr10/dr10");
-	}
 }
-
 
 
 
