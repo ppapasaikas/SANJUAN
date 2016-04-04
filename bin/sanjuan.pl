@@ -16,17 +16,6 @@ my $sanjuan_dir=$abs_path."/lib";   			# should contain all scripts used by SANJ
 my $sanjuan_perllib=$abs_path."/perllib";		# should contain Perl modules Text and Statistics XXX check if we need both!
 my $sanjuan_genomic_data_dir=$abs_path."/db";	# should contain folders genomes and annotation_files
 
-my $user="unspecified"; # switch between Andre and Pan to overwrite path variables
-if($user eq "Andre"){	
-	$sanjuan_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/lib";
-	$sanjuan_perllib="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/perllib";
-	$sanjuan_genomic_data_dir="/users/mirimia/agohr/crg/projects/2015_sanjuan/git/SANJUAN/db";
-}
-if($user eq "Pan"){
-	$sanjuan_dir="";
-	$sanjuan_perllib=""; 
-	$sanjuan_genomic_data_dir="";  
-}
 
 # Are all important parts of SANJUAN in place?
 # check if all sanjuan files can be accessed
