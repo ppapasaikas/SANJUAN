@@ -48,6 +48,8 @@ Dependencies
 SANJUAN is a Perl pipeline and was tested under
 Perl v5.10.1 and v5.18.2.
 
+
+
 Pre-processing of SANJUAN, i.e., trimming and mapping
 of reads, depends on the following programs. 
 * trim_galore
@@ -60,6 +62,8 @@ external programs. That means, if the user wants to
 use the splicing analysis of SANJUAN only and 
 omit pre-processing of RNAseq data, the user does not
 have to install any further programs.
+
+samtools, bedtools, overlapSelect
 
 
 INSTALLATION
