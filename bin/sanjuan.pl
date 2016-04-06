@@ -4,7 +4,7 @@ use warnings;
 use Cwd qw(abs_path cwd);
 
 ### Verion
-my $version="1.0";
+my $version="1.0 beta";
 
 #### main paths parameters
 # is the full path to the script sanjuan.pl including sanjuan.pl
@@ -57,6 +57,8 @@ sub print_help{
 	print "\t\t For details have a look at section on library type of TopHat online manual https://ccb.jhu.edu/software/tophat/manual.shtml.\n";
 	print "\t-a:     adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b B.\n"; 
 	print "\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz)\n";
+	print "\t-d:     average inner mate distance of paired-end reads (needed only for pre-processing; if omitted, will be set to 85).\n";
+	print "\t-d_dev: std. dev. of average inner mate distance of paired-end reads (needed only for pre-processing; if omitted will be set to 25).\n";
 	print "\t-b:     Starting point; values T -> start with trimming, M -> start with mapping SKIPPING trimming, B- > start with splicing analysis SKIPPING trimming and mapping\n";	
 	print "\t-c:     threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
 	print "\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
@@ -107,7 +109,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "#######################  General parameters  #######################";
 	print $fh "GENOME=hg		### Specify Organism: hg-> human, mm-> mouse, dr-> zebrafish";
-	print $fh "OUTDIR=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/		### Directory for Output, if not given, the current working directory is used as output directory";
+	print $fh "OUTDIR=			### Directory for Output, if not given, the current working directory is used as output directory";
 	print $fh "COND1=CNT		### Label for Condition 1 (eg 'CNT' or 'WT')";
 	print $fh "COND2=KD			### Label for Condition 2 (eg 'KD' or 'OvEx')";
 	print $fh "TESTRUN=N		### values Y, N; if Y, qsub statements are printed but not sent to cluster";
@@ -125,7 +127,9 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "### 2. endings should be (r|read|R)(1|2).(fq|fastq|fq.gz|fastq.gz)";
 	print $fh "### 3. the only difference between the read-pair files should be read1 vs read2 or r1 vs r2 or R1 vs R2";
 	print $fh "### examples for COND1=cntr: test_cntr_somethingmore_r1.fq or siRNA_cntr_something_R2.fq.gz or  dec_cntr_read2.fastq.gz";
-	print $fh "RAWFASTQS_DIR=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/";
+	print $fh "RAWFASTQS_DIR=	### folder that contains RNAseq or BAM files";
+	print $fh "INNER_MATE_DIST= ### inner mate dist (round to integer) as used for mapping (if not given, will be set to 85)";
+	print $fh "DIST_STD_DEV=    ### std. deviation of inner mate dist (round to integer) (if not given, will be set to 25)";
 	print $fh "";
 	print $fh "";
 	print $fh "### You start with trimmed FASTQ files: specify this parameter TRIMMEDFASTQS to SKIP trimming, AND ONLY RUN mapping and splicing analysis.";
@@ -176,6 +180,8 @@ my ($bam1,$bam2)=("","","");
 my $start_with = "T"; # standard: we start with trimming
 my $low_seq_req="N";
 my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to cluster
+my $inner_mate_dist=85;
+my $inner_mate_dist_std_dev=25;
 
 # special arguments from parameter file
 #  if $map_no_trim=Y -> Go to mapping directly (i.e map using untrimmed fastq files)
@@ -209,6 +215,8 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-noqsub"){$run_without_qsub=1;}
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
+		if($ARGV[$i] eq "-d"){$inner_mate_dist=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-d_dev"){$inner_mate_dist_std_dev=$ARGV[($i++)+1];}
 	}
 }
 
@@ -237,6 +245,8 @@ else{
 		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=Y/;
 		$N_processes=$1      if $_=~/^\s*NPROCS\s*=(\d+)/;
 		$rmdup=1			 if $_=~/^\s*RMDUP\s*=Y/;
+		$inner_mate_dist=$1  if $_=~/^\s*INNER_MATE_DIST\s*=(\d+)/;
+		$inner_mate_dist_std_dev=$1  if $_=~/^\s*DIST_STD_DEV\s*=(\d+)/;
 	}
 	close($fh);
 }
@@ -254,6 +264,8 @@ unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined
 unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($low_seq_req =~ /Y|N/){$tmp_str="Parameter LOWSEQRQMNTS/-r not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
+unless($inner_mate_dist =~ /(\d+)/){$tmp_str="Parameter INNER_MATE_DIST/-d not or wrongly defined. Should take one integer value.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
+unless($inner_mate_dist_std_dev =~ /(\d+)/){$tmp_str="Parameter DIST_STD_DEV/-d_dev not or wrongly defined. Should take one integer value.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 
 if(@g1_files>0){
 	unless($start_with eq "M" || $start_with eq "T" || $start_with eq "B" ){$tmp_str="Parameter -b not defined. Should be set to T or M or B to start with trimming, mapping, or directly with splicing analysis\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
@@ -372,7 +384,7 @@ if($start_with ne "B"){
 	# 1. triming and mapping
 	# trim_galore needs python
 	print "\n\n*************\nTrimming & Mapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_gtf $tophat_bowtie_index $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_gtf $tophat_bowtie_index $N_processes $inner_mate_dist $inner_mate_dist_std_dev -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
 	$ret=`$call`;
 	print $ret."\n";
 }else{

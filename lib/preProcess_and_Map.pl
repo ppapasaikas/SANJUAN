@@ -27,6 +27,8 @@ my $tophat_tr_index=$ARGV[9];
 my $tophat_gtf=$ARGV[10];
 my $tophat_bowtie_index=$ARGV[11];
 my $N_processes=$ARGV[12];
+my $mate_inner_dist=$ARGV[13];
+my $mate_inner_dist_std_dev=$ARGV[14];
 ##########################################################################################################
 ##########################################################################################################
 ##########################################################################################################
@@ -175,9 +177,9 @@ for my $cf (0..$#READ1){
 	$skipping_ok{$cond}=0;
 	$jobs_started=1;
 	if($run_without_qsub==0){
-		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
+		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes --inner-mate-dist $mate_inner_dist --mate-std-dev $mate_inner_dist_std_dev -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
 	}else{
-		$call = "tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes -r 25 --mate-std-dev 85 -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2 1>$basedir/log_files/02_out_mapping_${cf}.txt 2>$basedir/log_files/02_err_mapping_${cf}.txt";
+		$call = "tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes --mate-inner-dist $mate_inner_dist --mate-std-dev $mate_inner_dist_std_dev -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2 1>$basedir/log_files/02_out_mapping_${cf}.txt 2>$basedir/log_files/02_err_mapping_${cf}.txt";
 	}
 	print "$call\n";
 	if(!$test_run){
@@ -221,7 +223,7 @@ foreach my $cond_name ($cond1_name,$cond2_name){
 		if($run_without_qsub==0){
 			$call = "qsub -N SANJUAN_SAMmerge_${cond_name}_${c} -q long-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
 		}else{
-			$call = "samtools merge $merged_bam_file $bam_files{$cond_name} 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";	
+			$call = "samtools merge $merged_bam_file $bam_files{$cond_name} 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
 		}
 	}
 	print "$call\n";
