@@ -1,3 +1,11 @@
+April 6th, 2016:
+This file will updated very soon with
+* explanations on where to get the genome gtfs from
+* how to create the necessary index structures for tophat2 and bowtie
+* how to use SANJUAN
+* how to interprete results from SANJUAN
+
+
 SANJUAN -- *S*plicing *AN*alysis & *JU*nction *AN*notation
 version 1.0
 
