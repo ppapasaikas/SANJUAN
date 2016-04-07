@@ -24,7 +24,7 @@ my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions
 foreach (@SANJUAN_files){check_file_access($sanjuan_dir."/".$_);}
 
 # check if sub-directories genomes and annotation_files exist in db sub-directory
-if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/annotation_files"){die "Sub-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
+if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/SANJUAN_annotation_files"){die "Sub-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
 
 # check if sub-directories perllib is in place
 if(!-d $sanjuan_perllib."/Text" || !-d $sanjuan_perllib."/Statistics"){die "Sud-directories / perl modules Text and/or Statistics cannot be found in $sanjuan_perllib. You might go through the installation process again to solve this problem.\n";}
@@ -33,14 +33,14 @@ if(!-d $sanjuan_perllib."/Text" || !-d $sanjuan_perllib."/Statistics"){die "Sud-
 
 
 sub print_help{
-	print "\nSANJUAN $version -- *S*plicing *AN*alysis & *JU*nction *AN*notation\n===========\n\n";
+	print "\nSANJUAN $version -- *S*plicing *AN*alysis & *JU*nction *AN*notation\n================\n\n";
 	print "Parameter definition by a dedicated parameter file or by arguments of the program call.\n\n";
 	print "Call with parameter file: sanjuan <parameter-file>\n";
 	print "To create a standard parameter file SANJUAN_parameters.txt with explanations run: sanjuan -exampleF\n";
 	print "\n";
 	print "Call with arguments (<standard value already set>):\n";
 	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -p <phred33> -l <fr-firststrand> -a <AGATCGGAAGAGC> -b <T> -c <HC> -i -s -lsr -t -db <db sub-directory of SANJUAN directory>\n\n";
-	print "\t-g:     genome / species; values: hg -> human, mm-> mouse, dr-> zebrafish\n";
+	print "\t-g:     genome / species; to see installed genomes/species run sanjuan -g\n";
 	print "\t-g1:    short name for group 1\n";
 	print "\t-f1:    input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
 	print "\t\t if -b is T or M: pairs of FASTQ/FASTQ.GZ files describing paired-end RNAseq data,\n";
@@ -74,7 +74,9 @@ sub print_help{
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
-	print "Contact: Panagiotis Papasaikas\n\n";
+	print "Contact:\n";
+	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
+	print "Andre Gohr: andre.gohr\@crg.eu (Support)\n\n";
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
@@ -83,7 +85,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -g hg -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l fr-firststrand -a AGATCGGAAGAGC -b T -c HC -i -s -lsr -t -db\n\n";
+	print "\nsanjuan -g hg19 -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l fr-firststrand -a AGATCGGAAGAGC -b T -c HC -i -s -lsr -t -db\n\n";
 	exit 0;
 }
 
@@ -156,6 +158,72 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	$\="";
 	
 	close($fh);
+	exit 0;
+}
+
+
+if(@ARGV==1 && $ARGV[0] eq "-g"){
+	# genome / species shortcuts
+	my @scs=();
+	foreach my $file (<$abs_path/db/genomes/*.*>){if( $file =~ /$abs_path\/db\/genomes\/(.+)\.genome/ ){push(@scs,$1);}}
+	
+	my %all_scs=();
+	my %splicing_ok=();
+	my $check;
+	# check if we have all files for genomes / species
+	for(my $i=0; $i<@scs;$i++){
+		my $sc=$scs[$i];
+		$check=0;
+		# genome file -> OK
+		$check++;
+		
+		# SANJUAN_annotation_files
+		if(-e "$abs_path/db/SANJUAN_annotation_files/${sc}_Transcript_Junctions.txt" && -e "$abs_path/db/SANJUAN_annotation_files/${sc}_Transcripts.bed" && -e "$abs_path/db/SANJUAN_annotation_files/${sc}_TxID2Name.txt" ){$check++;}
+		
+		# gft files
+		if(-e "$abs_path/db/gtfs/${sc}.gtf"){$check++;}
+		
+		if($check==3){$splicing_ok{$sc}=1;$all_scs{$sc}=1;}
+	}
+	
+	@scs=();
+	foreach my $dir (<$abs_path/mapping_indexes/*>){
+            if( $dir =~ /$abs_path\/mapping_indexes\/(.+)/ ){
+            	if(-d "$abs_path/mapping_indexes/$1"){push(@scs,$1);}
+             }
+	}
+	
+	my %mapping_ok=();
+	my @files;
+	for(my $i=0; $i<@scs;$i++){
+		my $sc=$scs[$i];
+		$check=0;
+		# transcriptome gtf
+		if(-e "$abs_path/mapping_indexes/$sc/${sc}_transcripts.gtf"){$check++;}
+		# transcriptome index
+		@files=<$abs_path/mapping_indexes/$sc/${sc}_transcripts*>;
+		if(@files==6){$check++;}
+		# genome index
+		@files=<$abs_path/mapping_indexes/$sc/${sc}*>;		
+		if(@files==6){$check++;}
+		
+		if($check==3){$mapping_ok{$sc}=1;$all_scs{$sc}=1;}
+	}
+	
+	print "\n   available species: ";
+	my $str="\n   ID     FOR MAPPING     FOR SPLICING ANALYSIS\n";
+	my $str2=$str;
+	foreach my $sc (sort {lc $a cmp lc $b} keys %all_scs) {
+		$str.= "   $sc";
+		for(my $i=3+length($sc);$i<18;$i++){$str.=" ";}
+		if(defined($mapping_ok{$sc})){$str.="yes";}else{$str.=" no";}
+		for(my $i=0;$i<23;$i++){$str.=" ";}
+		if(defined($splicing_ok{$sc})){$str.="yes\n";}else{$str.=" no\n";}
+	}
+	
+	if($str eq $str2){print "   none\n";}else{print $str;}
+	print "\n";
+	
 	exit 0;
 }
 
