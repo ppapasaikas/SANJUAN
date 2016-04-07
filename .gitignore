@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/erl linux,perl
 ### Perl ###
 /blib/
@@ -23,3 +22,6 @@ nytprof.out
 /_eumm/
 .project
 .DS_Store
+db/genomes
+db/gtfs
+db/SANJUAN_annotation_files
