@@ -161,7 +161,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 
 
 ## setting standard values
-my $genome="hg";# hg -> human, mm-> mouse, dr-> zebrafish
+my $genome="";# hg -> human, mm-> mouse, dr-> zebrafish
 my $RNAseq="S";	#Stranded "S" or unstranded "U" RNAseq experiment. Is set automatically depending on the parameter library_type (fr-first/secondstrand -> "S", fr-unstranded -> "U"). 
 my $conf='HC';	#Specify stringency for Differentially Spliced Junctions (VeryHighConfidence -> VHC, HighConfidence -> HC, MediumConfidence -> MC)
 my $IRM='N';	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Default 'N' 
@@ -254,7 +254,7 @@ else{
 ## parameter checks
 my ($OK_params_preprocess,$OK_params_main)=(1,1);
 my ($warnings_preprocess,$warnings_main,$tmp_str)=("","",);
-unless($genome =~ /hg|mm|dr/){$tmp_str="Parameter GENOME/-g not or wrongly defined. Should take values hg, mm, dr.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
+unless($genome eq ""){$tmp_str="Parameter GENOME/-g not defined.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($conf =~ /VHC|HC|MC/){$tmp_str="Parameter CONF/-c not or wrongly defined. Should take values VHC, HC, MC.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($IRM =~ /Y|N/){$tmp_str="Parameter IRM/-i not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($SuppJun =~ /Y|N/){$tmp_str="Parameter SUPPJUN/-s not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
@@ -351,17 +351,7 @@ if($start_with eq "B"){
 
 # tophat files:
 # transcriptome index, gene annotation, bowtie index
-my ($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index);
-if($genome eq "hg"){
-	($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_hg19",$abs_path."/indexes/tophat_hg19/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_hg19/hg19");
-}
-if($genome eq "mm"){
-		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_mm10",$abs_path."/indexes/tophat_mm10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_mm10/mm10");
-}
-if($genome eq "dr"){
-		($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/indexes/tophat_dr10",$abs_path."/indexes/tophat_dr10/cuffcmp.combined.gtf",$abs_path."/indexes/bowtie_dr10/dr10");
-}
-
+my ($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcripts",$abs_path."/mapping_indexes/$genome/${genome}_transcripts.gtf",$abs_path."/mapping_indexes/$genome/$genome");
 
 
 #########

@@ -116,30 +116,14 @@ print "SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $COND1 $COND2 $bam
 
 
 my ($ret,$genomePath,$Tx_bed,$ENS_Tx_Junc,$ENSid2Name);
-
-#### Location of SANJUAN directory
-if($genome eq "hg"){
-	#### Location of bedtools genome files (originally from ~/ppapasaikas/SOFTWARE/bedtools2-2.20.1/genomes/ )
-	$genomePath="$sanjuan_genomic_data_dir/genomes/human.hg19.genome";
-	#### Location of Transcripts bed files (downloaded from UCSC table.browser | cut -f 1-6 OR gtf2Txbed.pl -used for zebrafish-)
-	$Tx_bed="$sanjuan_genomic_data_dir/annotation_files/hg19_UCSC_Ensembl_Transcripts.bed";
-	#### Location of Transcript Junctions files (downloaded gtf from UCSC table.browser | perl TxBed_J2Tx_from_gtf.pl)
-	$ENS_Tx_Junc="$sanjuan_genomic_data_dir/annotation_files/hg19_UCSC_Ensembl_Transcript_Junctions.txt";
-	#### Location of Transcript ID2 GeneName files (downloaded from UCSC table.browser)
-	$ENSid2Name="$sanjuan_genomic_data_dir/annotation_files/hg19_UCSC_EnsemblTxID2name.txt";
-}
-if($genome eq "mm"){
-	$genomePath="$sanjuan_genomic_data_dir/genomes/mouse.mm10.genome";
-	$Tx_bed="$sanjuan_genomic_data_dir/annotation_files/mm10_UCSC_Ensembl_Transcripts.bed";
-	$ENS_Tx_Junc="$sanjuan_genomic_data_dir/annotation_files/mm10_UCSC_Ensembl_Transcript_Junctions.txt";
-	$ENSid2Name="$sanjuan_genomic_data_dir/annotation_files/mm10_UCSC_EnsemblTxID2name.txt";
-}
-if($genome eq "dr"){
-	$genomePath="$sanjuan_genomic_data_dir/genomes/zebrafish.dr10.genome";
-	$Tx_bed="$sanjuan_genomic_data_dir/annotation_files/dr10_EnsemblGRCz10_Transcripts.bed";
-	$ENS_Tx_Junc="$sanjuan_genomic_data_dir/annotation_files/dr10_EnsemblGRCz10_Transcript_Junctions.txt";
-	$ENSid2Name="$sanjuan_genomic_data_dir/annotation_files/dr10_EnsemblGRCz10TxID2Name.txt";
-}
+#### Location of bedtools genome files (originally from ~/ppapasaikas/SOFTWARE/bedtools2-2.20.1/genomes/ )
+$genomePath="$sanjuan_genomic_data_dir/genomes/${genome}.genome";
+### Location of Transcripts bed files (downloaded from UCSC table.browser | cut -f 1-6 OR gtf2Txbed.pl -used for zebrafish-)
+$Tx_bed="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_Transcripts.bed";
+### Location of Transcript Junctions files (downloaded gtf from UCSC table.browser | perl TxBed_J2Tx_from_gtf.pl)
+$ENS_Tx_Junc="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_Transcript_Junctions.txt";
+### Location of Transcript ID2 GeneName files (downloaded from UCSC table.browser)
+$ENSid2Name="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_TxID2Name.txt";
 
 #### For debugging
 #### Specify Skipping of preProcessing/Processing Steps ####
