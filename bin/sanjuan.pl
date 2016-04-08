@@ -40,7 +40,7 @@ sub print_help{
 	print "\n";
 	print "Call with arguments (<standard value already set>):\n";
 	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -p <phred33> -l <fr-firststrand> -a <AGATCGGAAGAGC> -b <T> -c <HC> -i -s -lsr -t -db <db sub-directory of SANJUAN directory>\n\n";
-	print "\t-g:     genome / species; to see installed genomes/species run sanjuan -g\n";
+	print "\t-g:     genome / species; to see installed genomes/species run sanjuan -g (standard value hg19)\n";
 	print "\t-g1:    short name for group 1\n";
 	print "\t-f1:    input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
 	print "\t\t if -b is T or M: pairs of FASTQ/FASTQ.GZ files describing paired-end RNAseq data,\n";
@@ -110,7 +110,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  General parameters  #######################";
-	print $fh "GENOME=hg		### Specify Organism: hg-> human, mm-> mouse, dr-> zebrafish";
+	print $fh "GENOME=hg19		### Specifies organism: run sanjuan -g to see species available in this installation";
 	print $fh "OUTDIR=			### Directory for Output, if not given, the current working directory is used as output directory";
 	print $fh "COND1=CNT		### Label for Condition 1 (eg 'CNT' or 'WT')";
 	print $fh "COND2=KD			### Label for Condition 2 (eg 'KD' or 'OvEx')";
@@ -161,55 +161,71 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	exit 0;
 }
 
+# check if species is available for splicing analysis
+sub is_available_for_splicing{
+	my $species=$_[0];
+	my $abs_path=$_[1];
+	my $check=0;
+	# check if we have the genome file
+	if(-e "$abs_path/db/genomes/${species}.genome"){$check++;}
+	
+	# SANJUAN_annotation_files
+	if(-e "$abs_path/db/SANJUAN_annotation_files/${species}_Transcript_Junctions.txt" && -e "$abs_path/db/SANJUAN_annotation_files/${species}_Transcripts.bed" && -e "$abs_path/db/SANJUAN_annotation_files/${species}_TxID2Name.txt" ){$check++;}
+		
+	# gft files
+	if(-e "$abs_path/db/gtfs/${species}.gtf"){$check++;}
+		
+	# FALSE
+	my $ret=0;
+	if($check==3){$ret=1;}
+return($ret);
+}
+
+sub is_available_for_mapping{
+	my $species=$_[0];
+	my $abs_path=$_[1];
+	my $check=0;
+	my @files;
+	
+	# transcriptome gtf
+	if(-e "$abs_path/mapping_indexes/$species/${species}_transcripts.gtf"){$check++;}
+	# transcriptome index
+	@files=<$abs_path/mapping_indexes/$species/${species}_transcripts*>;
+	if(@files==6){$check++;}
+	# genome index
+	@files=<$abs_path/mapping_indexes/$species/${species}*>;		
+	if(@files==6){$check++;}
+	
+	# FALSE
+	my $ret=0;
+	if($check==3){$ret=1;}
+return($ret);	
+}
+
 
 if(@ARGV==1 && $ARGV[0] eq "-g"){
 	# genome / species shortcuts
-	my @scs=();
-	foreach my $file (<$abs_path/db/genomes/*.*>){if( $file =~ /$abs_path\/db\/genomes\/(.+)\.genome/ ){push(@scs,$1);}}
-	
 	my %all_scs=();
 	my %splicing_ok=();
-	my $check;
-	# check if we have all files for genomes / species
-	for(my $i=0; $i<@scs;$i++){
-		my $sc=$scs[$i];
-		$check=0;
-		# genome file -> OK
-		$check++;
-		
-		# SANJUAN_annotation_files
-		if(-e "$abs_path/db/SANJUAN_annotation_files/${sc}_Transcript_Junctions.txt" && -e "$abs_path/db/SANJUAN_annotation_files/${sc}_Transcripts.bed" && -e "$abs_path/db/SANJUAN_annotation_files/${sc}_TxID2Name.txt" ){$check++;}
-		
-		# gft files
-		if(-e "$abs_path/db/gtfs/${sc}.gtf"){$check++;}
-		
-		if($check==3){$splicing_ok{$sc}=1;$all_scs{$sc}=1;}
-	}
-	
-	@scs=();
-	foreach my $dir (<$abs_path/mapping_indexes/*>){
-            if( $dir =~ /$abs_path\/mapping_indexes\/(.+)/ ){
-            	if(-d "$abs_path/mapping_indexes/$1"){push(@scs,$1);}
-             }
-	}
-	
+	my $species;
 	my %mapping_ok=();
-	my @files;
-	for(my $i=0; $i<@scs;$i++){
-		my $sc=$scs[$i];
-		$check=0;
-		# transcriptome gtf
-		if(-e "$abs_path/mapping_indexes/$sc/${sc}_transcripts.gtf"){$check++;}
-		# transcriptome index
-		@files=<$abs_path/mapping_indexes/$sc/${sc}_transcripts*>;
-		if(@files==6){$check++;}
-		# genome index
-		@files=<$abs_path/mapping_indexes/$sc/${sc}*>;		
-		if(@files==6){$check++;}
-		
-		if($check==3){$mapping_ok{$sc}=1;$all_scs{$sc}=1;}
+	
+	# avialable species for splicing analysis 
+	foreach my $file (<$abs_path/db/genomes/*.*>){
+		if( $file =~ /$abs_path\/db\/genomes\/(.+)\.genome/ ){
+			$species=$1;
+			if(is_available_for_splicing($species,$abs_path)){$splicing_ok{$species}=1;$all_scs{$species}=1;}
+		}
 	}
 	
+	# available species for mapping
+	foreach my $dir (<$abs_path/mapping_indexes/*>){
+		if( $dir =~ /$abs_path\/mapping_indexes\/(.+)/ ){if(-d "$abs_path/mapping_indexes/$1"){
+			$species=$1;
+			if(is_available_for_mapping($species,$abs_path)){$mapping_ok{$species}=1;$all_scs{$species}=1;}
+		}}
+	}
+
 	print "\n   available species: ";
 	my $str="\n   ID     FOR MAPPING     FOR SPLICING ANALYSIS\n";
 	my $str2=$str;
@@ -218,18 +234,18 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 		for(my $i=3+length($sc);$i<18;$i++){$str.=" ";}
 		if(defined($mapping_ok{$sc})){$str.="yes";}else{$str.=" no";}
 		for(my $i=0;$i<23;$i++){$str.=" ";}
-		if(defined($splicing_ok{$sc})){$str.="yes\n";}else{$str.=" no\n";}
+		if(defined($splicing_ok{$sc})){$str.="yes\n	";}else{$str.=" no\n";}
 	}
-	
+
 	if($str eq $str2){print "   none\n";}else{print $str;}
 	print "\n";
-	
+
 	exit 0;
 }
 
 
 ## setting standard values
-my $genome="";# hg -> human, mm-> mouse, dr-> zebrafish
+my $genome="hg19";
 my $RNAseq="S";	#Stranded "S" or unstranded "U" RNAseq experiment. Is set automatically depending on the parameter library_type (fr-first/secondstrand -> "S", fr-unstranded -> "U"). 
 my $conf='HC';	#Specify stringency for Differentially Spliced Junctions (VeryHighConfidence -> VHC, HighConfidence -> HC, MediumConfidence -> MC)
 my $IRM='N';	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Default 'N' 
@@ -416,10 +432,17 @@ if($start_with eq "B"){
 }
 
 
-
 # tophat files:
 # transcriptome index, gene annotation, bowtie index
 my ($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcripts",$abs_path."/mapping_indexes/$genome/${genome}_transcripts.gtf",$abs_path."/mapping_indexes/$genome/$genome");
+
+if($start_with ne "B"){
+	# user wants to do pre-processing and splicing analysis
+	if(!is_available_for_mapping($genome,$abs_path)){die "Pre-processing including mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
+}else{
+	# user wants to do splicing analysis only
+	if(!is_available_for_splicing($genome,$abs_path)){die "Splicing analysis for species / genome $genome is not possible\nas this species / genome is not installed for splicing analysis.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
+}
 
 
 #########
