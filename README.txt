@@ -1,4 +1,4 @@
-Last update of this file: April 7th, 2016
+Last update of this file: April 11th, 2016
 
 We are currently re-working SANJAUN to make
 integration of new genomes possible.
