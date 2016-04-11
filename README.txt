@@ -171,6 +171,22 @@ tar -xvzf SANJUAN_db.tar.gz
 5. run SANJUAN with option -g to see available species and
 corresponding short names
 
+If you prefer to obtain annotation data only for some species
+but not all, we provide individual files for download. The
+installation procedure for them is the same as for the the
+complete bundle of splicing annotations.
+
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg38.tar.gz
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_mm10.tar.gz
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_dm6.tar.gz
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_danRer10.tar.gz
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ce11.tar.gz
+
+This website lists a overview over all available annotation
+files for splicing events:
+https://s3.amazonaws.com/PAN/SANJUAN/aws_S3_index.html
+
 If you want to add more genomes, SANJUAN offers convenient
 Perl scripts helping you. Please find more details in file
 ADDING_MORE_GENOMES.txt .
