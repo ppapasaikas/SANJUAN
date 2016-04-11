@@ -172,12 +172,12 @@ sub is_available_for_splicing{
 	# SANJUAN_annotation_files
 	if(-e "$abs_path/db/SANJUAN_annotation_files/${species}_Transcript_Junctions.txt" && -e "$abs_path/db/SANJUAN_annotation_files/${species}_Transcripts.bed" && -e "$abs_path/db/SANJUAN_annotation_files/${species}_TxID2Name.txt" ){$check++;}
 		
-	# gft files
-	if(-e "$abs_path/db/gtfs/${species}.gtf"){$check++;}
+	# gft files are not necessary for splicing analysis
+	#if(-e "$abs_path/db/gtfs/${species}.gtf"){$check++;}
 		
 	# FALSE
 	my $ret=0;
-	if($check==3){$ret=1;}
+	if($check==2){$ret=1;}
 return($ret);
 }
 
@@ -227,14 +227,14 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 	}
 
 	print "\n   available species: ";
-	my $str="\n   ID     FOR MAPPING     FOR SPLICING ANALYSIS\n";
+	my $str="\n   ID          FOR MAPPING     FOR SPLICING ANALYSIS\n";
 	my $str2=$str;
 	foreach my $sc (sort {lc $a cmp lc $b} keys %all_scs) {
 		$str.= "   $sc";
-		for(my $i=3+length($sc);$i<18;$i++){$str.=" ";}
+		for(my $i=3+length($sc);$i<23;$i++){$str.=" ";}
 		if(defined($mapping_ok{$sc})){$str.="yes";}else{$str.=" no";}
 		for(my $i=0;$i<23;$i++){$str.=" ";}
-		if(defined($splicing_ok{$sc})){$str.="yes\n	";}else{$str.=" no\n";}
+		if(defined($splicing_ok{$sc})){$str.="yes\n";}else{$str.=" no\n";}
 	}
 
 	if($str eq $str2){print "   none\n";}else{print $str;}

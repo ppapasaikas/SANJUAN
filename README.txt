@@ -9,16 +9,17 @@ SANJUAN -- *S*plicing *AN*alysis & *JU*nction *AN*notation
 version 1.0 beta
 
 
-0. CONTENTS OF THIS README
-==========================
+0. CONTENTS
+===========
 1. SHORT INTRODUCTION
 2. DEPENDENCIES
 3. INSTALLATION
-4. INSTALLING INDEXES
-5. RUNNING SANJUAN
-6. OUTPUT OF SANJUAN
-7. LICENSE
-8. CONTACT / BUG REPORTS
+4. ADDING GENOMES / SPECIES
+5. ADDING MAPPING INDEXES
+6. RUNNING SANJUAN
+7. OUTPUT OF SANJUAN
+8. LICENSE
+9. CONTACT / BUG REPORTS
 
 
 1. SHORT INTRODUCTION
@@ -30,11 +31,19 @@ e.g., knock down versus wild type.
 It is not designed to determine inclusion levels of 
 alternative splicing events under only one condition.
 
-SANJUAN is applicable to data from the 
-following species.
-1. human (hg19)
-2. mouse (mm10)
-3. zebrafish (dr10)
+SANJUAN detects in a de-novo manner splicing events
+but also relies on annotation data of splicing events.
+SANJUAN comes with the capability of adding new 
+genomes / species by the user. Therefore, SANJUAN
+offers convenient scripts. In addition, the following
+genomes / species are available ready-to-use.
+1. human      (hg19)
+2. human      (hg38)
+3. mouse      (mm10)
+4. fly        (dm6)
+5. zebrafish  (danRer10)
+6. worm       (ce11)
+
 
 As input SANJUAN takes either
 1. RNAseq data (FASTQ, FASTQGZ files, only paired-end)
@@ -47,7 +56,6 @@ setps and mapping with other programs by herself
 and apply SANJUAN on the resulting BAM files,
 essentially skipping the build-in pre-processing
 of SANJUAN.
-
 
 SANJUAN is designed to run on "Linux" like platforms.
 SANJUAN is currently a beta version. You use it
@@ -99,25 +107,32 @@ the following sub-directories:
          by SANJUAN.
 3. perllib: contains two Perl modules (Text and
          Statistics) which are used internally by SANJUAN.
-4. db: contains annotations information for the 
+4. db: contains annotations data for the 
          annotation of alternative splicing events used 
          internally by SANJUAN.
-5. indexes: must contain bowtie2 and tophat2 indexes as 
+5. mapping_indexes: contains bowtie2 and tophat2 indexes as 
          well as GTF gene annotations. These indexes and 
          files are used only by the pre-processing and 
          mapping routine of SANJUAN. 
 
-IMPORTANT: you have to install indexes by yourself
-After checking-out or downloading and un-compressing 
-SANJUAN, the folder indexes is empty. If the user wants
-to use the pre-processing routine of SANJUAN, the user 
-needs to create the necessary indexes. See section 
-INSTALLING INDEXES for details.
+IMPORTANT: contents of the db folder is necessary for the
+splicing analysis. Adding genomes / species will populate
+this folder with data. See section ADDING GENOMES / SPECIES
+for installation details.
+
+IMPORTANT: contents of the indexes folder are used by
+the pre-processing routines of SANJUAN (essentially mapping).
+If the user wants to use the pre-processing routine of SANJUAN, 
+the user needs to create the necessary indexes. See section 
+ADDING MAPPING INDEXES for details. These indexes are unnecessary 
+if you want to do splicing analysis only. Because these indexes
+take much space and are unnecessary for the splicing analysis,
+they are not part of SANJUAN.
 
 If necessary make the file sanjuan.pl in the bin directory 
 executable with
 
-> chmod 700 sanjuan.pl
+> chmod 770 sanjuan.pl
 
 Now you can run sanjuan through its full
 path
@@ -133,22 +148,43 @@ Having set this link, you might call SANJUAN simply by
 
 > sanjuan
 
+4. ADDING GENOMES / SPECIES
+===========================
+Before running splicing analysis, the user needs to
+add annotation data for genomes / species.
+We offer these data ready-to-use for the species:
+1. human      (hg19)
+2. human      (hg38)
+3. mouse      (mm10)
+4. fly        (dm6)
+5. zebrafish  (danRer10)
+6. worm       (ce11)
 
-4. INSTALLING INDEXES
-=====================
-Pre-processing includes mapping using tophat2.
-Tophat2, Bowtie2, and GTF files need to be made
-available in directory indexes following the following
-structure of subfolders.
-/bowtie_dr10
-/bowtie_hg19
-/bowtie_mm10
-/tophat_dr10
-/tophat_hg19
-/tophat_mm10
+To install them, go through the following steps.
+1. go to the main SANJUAN installation folder with
+name SANJUAN
+2. download annotation data by
+wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db.tar.gz
+3. uncompress
+tar -xvzf SANJUAN_db.tar.gz
+4. delete or keep the file SANJUAN_db.tar.gz 
+5. run SANJUAN with option -g to see available species and
+corresponding short names
+
+If you want to add more genomes, SANJUAN offers convenient
+Perl scripts helping you. Please find more details in file
+ADDING_MORE_GENOMES.txt .
 
 
-5. RUNNING SANJUAN
+5. ADDING MAPPING INDEXES
+=========================
+We provide more details on the installation
+of mapping indexes as part of the manual
+for adding / installing new genomes / species.
+Please find details in ADDING_MORE_GENOMES.txt .
+
+
+6. RUNNING SANJUAN
 ==================
 
 IMPORTANT: running without access to CRG cluster 
@@ -215,7 +251,7 @@ https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 2. The genome ids must have the prefix "chr".
 
 
-6. OUTPUT OF SANJUAN
+7. OUTPUT OF SANJUAN
 ====================
 SANJUAN applies a set of contraints on differential 
 splicing junctions and reports only those which fulfill
@@ -320,7 +356,7 @@ The pre-processing routine produces a TOPHAT
 and a TRIM folder for each group / condition.
 
 
-7. LICENSE
+8. LICENSE
 ==========
 SANJUAN is free software: you can redistribute it and 
 modify under the terms of the 
@@ -331,7 +367,7 @@ or (at your option) any later version as published by the
 Free Software Foundation.
 
 
-8. CONTACT / BUG REPORTS
+9. CONTACT / BUG REPORTS
 ========================
 Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas@crg.eu
 Andre Gohr: andre.gohr@crg.eu (Support)
