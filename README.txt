@@ -164,9 +164,9 @@ To install them, go through the following steps.
 1. go to the main SANJUAN installation folder with
 name SANJUAN
 2. download annotation data by
-wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db.tar.gz
 3. uncompress
-tar -xvzf SANJUAN_db.tar.gz
+> tar -xvzf SANJUAN_db.tar.gz
 4. delete or keep the file SANJUAN_db.tar.gz 
 5. run SANJUAN with option -g to see available species and
 corresponding short names

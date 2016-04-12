@@ -97,7 +97,7 @@ for your genome of interest first and use it instead of hg38.
 
 NOTE: the downloaded files from UCSC follow the chr prefix
 convention for chromosomes. If you are using GTF and FASTA 
-sequence files following the ENSEMBL naming convention, 
+sequence files following the ENSEMBL naming convention,
 edit the downloaded file and remove the chr prefix.
 The file name, here as example hg38.genome, needs
 to follow the naming convention: 
@@ -134,6 +134,10 @@ be the same as those used in the GTF file (steps
 1. OBTAIN A TRANSCRIPTOME DESCRIPTION IN FORM OF A GTF FILE 
 and 2. BUILD SANJUAN ANNOTATION FILES). For more details
 and hints, read section MAKE CHROMOSOME IDS MATCHING.
+Please note as well that the annotation data which
+comes with SANJUAN uses the "chr" prefix. Hence, we
+recommend to download the reference sequences from the
+UCSC resources.
 
 Finally, build the bowtie indexes for the file using the bowtie2-build command(bowtie2 required):
 bowtie2-build genome_fasta_file prefix_for_output_files (should be the same as the one use for buil_SJannotation_from_gtf.pl in step 1.)
@@ -168,8 +172,8 @@ i.e., chr1 versus 1.
 If your genome sequences and the transcriptome 
 annotation come from different resources where the
 chromosome ids differ by using / or not using the "chr"
-prefix, it is recommended to add this "chr" prefix where
-it is missing. This is in most cases easier as removing
+prefix, it is recommended to add the "chr" prefix where
+it is missing. This is, in most cases, easier as removing
 this prefix where it is too much.
 
 For adding the "chr" prefix to a GTF file, run:
@@ -179,7 +183,15 @@ For example:
 sed 's/^\([^#]\)/chr\1/' Homo_sapiens.GRCh38.84.chr.gtf > Homo_sapiens.GRCh38.84.chr.added.gtf 
 
 For adding the "chr" prefix to FASTA sequences,
-you might run:
-> perl -e 'open($fh,"test.fa");while(<$fh>){if(substr($_,0,1) eq ">"){print ">chr".substr($_,1);next;}print "$_";}' > seqs.chr.added.fasta
-where you have substituted test.fa with your FASTA file.
+you might do the following.
+1. in the folder where you have your FASTA sequences, 
+create a new file, put the following line into it, 
+save it under the name addchr.pl
 
+open($fh,$ARGV[0]);while(<$fh>){if(substr($_,0,1) eq ">"){print ">chr".substr($_,1);next;}print "$_";}
+
+2. in this folder when you want to change all files with ending *.fa, run
+for file in ./*.fa; do
+perl addchr.pl $file > tmp_file.fa
+mv tmp_file.fa $file
+done

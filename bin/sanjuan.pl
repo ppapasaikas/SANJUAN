@@ -186,7 +186,7 @@ sub is_available_for_mapping{
 	my $abs_path=$_[1];
 	my $check=0;
 	my @files;
-	
+
 	# transcriptome gtf
 	if(-e "$abs_path/mapping_indexes/$species/${species}_transcripts.gtf"){$check++;}
 	# transcriptome index
@@ -195,7 +195,7 @@ sub is_available_for_mapping{
 	# genome index
 	@files=<$abs_path/mapping_indexes/$species/${species}*>;		
 	if(@files==6){$check++;}
-	
+
 	# FALSE
 	my $ret=0;
 	if($check==3){$ret=1;}
@@ -209,7 +209,7 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 	my %splicing_ok=();
 	my $species;
 	my %mapping_ok=();
-	
+
 	# avialable species for splicing analysis 
 	foreach my $file (<$abs_path/db/genomes/*.*>){
 		if( $file =~ /$abs_path\/db\/genomes\/(.+)\.genome/ ){

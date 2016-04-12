@@ -65,26 +65,34 @@ close IN;
 
 ######Build transcript 2  GeneName File
 print "\nBuilding transcript to gene name file...\n";
+%trID2gN=();
+$trID2gID=();
 open (IN, $ARGV[0]) ||die;
 while (<IN>){
 $line=$_;
 chomp $line;
 @mat=split /\t/,$line;
 $GeneName="";
-next unless $mat[2]=~/transcript/i;
-next unless $mat[8]=~/transcript_id \"([a-zA-Z0-9]+)\";/;
+$GeneID="";
+next unless $mat[8]=~/transcript_id \"(.+?)\";/;
 $TxID=$1;
-next unless $mat[8]=~/gene_id \"([a-zA-Z0-9]+)\";/;
+next unless $mat[8]=~/gene_id \"(.+?)\";/;
 $GeneID=$1;
-$GeneName=$1 if $mat[8]=~/gene_name \"([^\"]+)\";/;
-$GeneName=$GeneID if length($GeneName)<2;
-print OUTT2I "$TxID\t$GeneName\n";
+$GeneName=$1 if $mat[8]=~/gene_name \"(.+?)\";/;
 
+if(!defined($trID2gN{$TxID})){$trID2gN{$TxID}=$GeneName;}
+if(!defined($trID2gID{$TxID})){$trID2gID{$TxID}=$GeneID;}
 }
+
+foreach $trID (keys %trID2gN){
+	if($trID2gN{$trID}){print OUTT2I "$trID\t$trID2gN{$trID}\n";}
+	else{
+		# if we don't have a gene name, we take the gene id
+		if($trID2gID{$trID}){print OUTT2I "$trID\t$trID2gID{$trID}\n";}
+	}
+}
+
 print "\nDone\n";
-
-
-
 
 
 
