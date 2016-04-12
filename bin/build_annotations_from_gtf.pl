@@ -1,8 +1,8 @@
 use Cwd;
-####### Builds SANJUAN required annotatio files from gtf.
+####### Builds SANJUAN required annotation files from gtf.
 ####### This only needs to be done in the case of adding a non-provided genome/genome_version
 ####### Usage: perl build_annotations_from_gtf.pl transcriptome_gtf prefix
-### e.g: perl build_mapping_indexes.pl hg38.fa hg38 
+### e.g: perl build_annotations_from_gtf.pl hg38.gtf hg38 
 
 my $pwd=cwd();
 unless ($pwd=~/SANJUAN\/bin.*$/){
@@ -16,9 +16,12 @@ if ($#ARGV<1) {
 	e.g: 
 	perl perl build_annotations_from_gtf.pl Homo_sapiens.GRCh38.84.chr.corrrected.gtf hg38\n\n\n"; 
 	}
-open (OUTBED, ">../db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcripts.bed") || die;
-open (OUTT2J, ">../db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcript_Junctions.txt") || die;
-open (OUTT2I, ">../db/SANJUAN_annotation_files/" . $ARGV[1] . "_TxID2Name.txt") || die;
+$OUTBED="../db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcripts.bed";
+$OUTT2J="../db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcript_Junctions.txt";
+$OUTT2I="../db/SANJUAN_annotation_files/" . $ARGV[1] . "_TxID2Name.txt";
+open (OUTBED, ">$OUTBED") || die;
+open (OUTT2J, ">$OUTT2J") || die;
+open (OUTT2I, ">$OUTT2I") || die;
 
 
 ####Build transcript bed file
@@ -46,6 +49,7 @@ foreach $TxID (keys %STARTS) {
 	print OUTBED "$CHR{$TxID}\t$TxStart{$TxID}\t$TxEnd{$TxID}\t$TxID\t0\t$STRAND{$TxID}\n";	#Generate Bedfile
 	}
 
+print `sort -k1,1 -k2n,2 -k3n,3 -o $OUTBED $OUTBED`;
 print "\nDone\n";
 
 
@@ -59,6 +63,7 @@ foreach $TxID (keys %STARTS) {
 	  print OUTT2J $TxID ."\t" . $CHR{$TxID} . '_' . $E[$i]  . '_' . $end  . '_' . $STRAND{$TxID} . "\n";	#Generate Tx2Jn table
 	  }
 	}
+print `sort -k1,1 -o $OUTT2J $OUTT2J`;
 print "\nDone\n";
 close IN;
 
@@ -74,11 +79,12 @@ chomp $line;
 @mat=split /\t/,$line;
 $GeneName="";
 $GeneID="";
-next unless $mat[8]=~/transcript_id \"(.+?)\";/;
+next unless $mat[8]=~/transcript_id \"([^\"]+)\";/;
 $TxID=$1;
-next unless $mat[8]=~/gene_id \"(.+?)\";/;
+next unless $mat[8]=~/gene_id \"([^\"]+)\";/;
 $GeneID=$1;
-$GeneName=$1 if $mat[8]=~/gene_name \"(.+?)\";/;
+$GeneName=$1 if $mat[8]=~/gene_name \"([^\"]+)\";/;
+
 
 if(!defined($trID2gN{$TxID})){$trID2gN{$TxID}=$GeneName;}
 if(!defined($trID2gID{$TxID})){$trID2gID{$TxID}=$GeneID;}
@@ -91,6 +97,19 @@ foreach $trID (keys %trID2gN){
 		if($trID2gID{$trID}){print OUTT2I "$trID\t$trID2gID{$trID}\n";}
 	}
 }
+
+
+print `sort -k1,1 -o $OUTT2I $OUTT2I`;
+print "\nDone\n";
+
+
+#######Retrieving genome file from UCSC
+print "\nRetrieving genome file (chromosome sizes) from UCSC...\n";
+$OUTGENOME="../db/genomes/" . $ARGV[1] . ".genome";
+print `../lib/fetchChromSizes $ARGV[1]  > $OUTGENOME`;
+=======
+
+
 
 print "\nDone\n";
 
