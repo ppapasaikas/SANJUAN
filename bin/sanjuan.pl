@@ -187,18 +187,21 @@ sub is_available_for_mapping{
 	my $check=0;
 	my @files;
 
-	# transcriptome gtf
-	if(-e "$abs_path/mapping_indexes/$species/${species}_transcripts.gtf"){$check++;}
 	# transcriptome index
-	@files=<$abs_path/mapping_indexes/$species/${species}_transcripts*>;
+	@files=<$abs_path/mapping_indexes/$species/${species}_transcriptome.*bt2*>;
 	if(@files==6){$check++;}
+	if(-e "$abs_path/mapping_indexes/$species/${species}_transcriptome.fa"){$check++;}
+	if(-e "$abs_path/mapping_indexes/$species/${species}_transcriptome.fa.tlst"){$check++;}
+	if(-e "$abs_path/mapping_indexes/$species/${species}_transcriptome.gff"){$check++;}
+	if(-e "$abs_path/mapping_indexes/$species/${species}_transcriptome.ver"){$check++;}
+	
 	# genome index
-	@files=<$abs_path/mapping_indexes/$species/${species}*>;		
+	@files=<$abs_path/mapping_indexes/$species/${species}.*bt2*>;		
 	if(@files==6){$check++;}
 
 	# FALSE
 	my $ret=0;
-	if($check==3){$ret=1;}
+	if($check==6){$ret=1;}
 return($ret);	
 }
 
@@ -434,7 +437,7 @@ if($start_with eq "B"){
 
 # tophat files:
 # transcriptome index, gene annotation, bowtie index
-my ($tophat_tr_index,$tophat_gtf,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcripts",$abs_path."/mapping_indexes/$genome/${genome}_transcripts.gtf",$abs_path."/mapping_indexes/$genome/$genome");
+my ($tophat_tr_index,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcriptome",$abs_path."/mapping_indexes/$genome/$genome");
 
 if($start_with ne "B"){
 	# user wants to do pre-processing and splicing analysis
@@ -465,7 +468,7 @@ if($start_with ne "B"){
 	# 1. triming and mapping
 	# trim_galore needs python
 	print "\n\n*************\nTrimming & Mapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_gtf $tophat_bowtie_index $N_processes $inner_mate_dist $inner_mate_dist_std_dev -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_bowtie_index $N_processes $inner_mate_dist $inner_mate_dist_std_dev -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
 	$ret=`$call`;
 	print $ret."\n";
 }else{

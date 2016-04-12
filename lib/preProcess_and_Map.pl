@@ -24,11 +24,10 @@ my $run_without_qsub=$ARGV[7]; # 1 = local run without qsub, 0 = with qsub
 my $sanjuan_dir=$ARGV[8]; # location of SANJUAN program files
 
 my $tophat_tr_index=$ARGV[9];
-my $tophat_gtf=$ARGV[10];
-my $tophat_bowtie_index=$ARGV[11];
-my $N_processes=$ARGV[12];
-my $mate_inner_dist=$ARGV[13];
-my $mate_inner_dist_std_dev=$ARGV[14];
+my $tophat_bowtie_index=$ARGV[10];
+my $N_processes=$ARGV[11];
+my $mate_inner_dist=$ARGV[12];
+my $mate_inner_dist_std_dev=$ARGV[13];
 ##########################################################################################################
 ##########################################################################################################
 ##########################################################################################################
@@ -52,7 +51,7 @@ my @g1_files=();
 my @g2_files=();
 my @skipping_ok=();
 
-for(my $i=13; $i<@ARGV; $i++){
+for(my $i=14; $i<@ARGV; $i++){
 	if(substr($ARGV[$i],0,3) eq "-g1"){
 		$i++;
 		$cond1_name=$ARGV[$i];
@@ -90,7 +89,7 @@ $skipping_ok{$cond1_name}=1;
 $skipping_ok{$cond2_name}=1;
 
 print "Call of sub routine:\n";
-print "preProcess_and_Map.pl $basedir $genome $adapter_seq $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_gtf $tophat_bowtie_index $N_processes -g1 $cond1_name ".join(",",@g1_files)." -g2 $cond2_name ".join(",",@g2_files)."\n";
+print "preProcess_and_Map.pl $basedir $genome $adapter_seq $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_bowtie_index $N_processes -g1 $cond1_name ".join(",",@g1_files)." -g2 $cond2_name ".join(",",@g2_files)."\n";
 
 ########################################	T R I M M I N G		##########################################
 if($start_with eq "T"){
@@ -177,9 +176,9 @@ for my $cf (0..$#READ1){
 	$skipping_ok{$cond}=0;
 	$jobs_started=1;
 	if($run_without_qsub==0){
-		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes --inner-mate-dist $mate_inner_dist --mate-std-dev $mate_inner_dist_std_dev -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
+		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -p $N_processes --inner-mate-dist $mate_inner_dist --mate-std-dev $mate_inner_dist_std_dev -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2";
 	}else{
-		$call = "tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -G $tophat_gtf -p $N_processes --mate-inner-dist $mate_inner_dist --mate-std-dev $mate_inner_dist_std_dev -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2 1>$basedir/log_files/02_out_mapping_${cf}.txt 2>$basedir/log_files/02_err_mapping_${cf}.txt";
+		$call = "tophat2 --no-mixed --library-type $library_type -o $top_out --transcriptome-index=$tophat_tr_index -p $N_processes --mate-inner-dist $mate_inner_dist --mate-std-dev $mate_inner_dist_std_dev -i 50 -I 800000 -x 1 $tophat_bowtie_index $fq1 $fq2 1>$basedir/log_files/02_out_mapping_${cf}.txt 2>$basedir/log_files/02_err_mapping_${cf}.txt";
 	}
 	print "$call\n";
 	if(!$test_run){
