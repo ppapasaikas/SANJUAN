@@ -107,7 +107,7 @@ print "\nDone\n";
 print "\nRetrieving genome file (chromosome sizes) from UCSC...\n";
 $OUTGENOME="../db/genomes/" . $ARGV[1] . ".genome";
 print `../lib/fetchChromSizes $ARGV[1]  > $OUTGENOME`;
-=======
+
 
 
 
