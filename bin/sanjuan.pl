@@ -316,7 +316,7 @@ else{
 	open (my $fh,"<".$ARGV[0]) || die "Cannot open parameter file $ARGV[0] for reading: $!\n";
 	while (<$fh>){
 		$genome=$1           if $_=~/^\s*GENOME\s*=\s*(hg|mm|dr)/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
-		$rawinput_dir=$1     if $_=~/^\s*RAWFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory
+		$rawinput_dir=$1     if $_=~/^\s*RAWFASTQS_DIR\s*=\s*([\w\/\.\_\-]+)/;	#Input directory
 		#NRS $trimmedinput_dir=$1 if $_=~/^\s*TRIMMEDFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory of trimmed fastq files (if given, trimming is skipped)
 		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=\s*([\w\/\.\_\-]+)/;	#Base directory for Output
 		$adapter=$1          if $_=~/^\s*ADAPTER\s*=\s*([ACGTNUacgtnu]+)/;	#Adapter sequence
@@ -405,11 +405,11 @@ if($start_with eq "M" && @g1_files==0 && @g2_files==0){	#CinS
 		my $file=$_;
 		next unless (-f $file);
 		
-		if($file =~ /$g1_shortname.*\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/){
+		if($file =~ /$g1_shortname.*\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){
 			push(@g1_files,$file);
 			next;
 		}
-		if($file =~ /$g2_shortname.*\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/){
+		if($file =~ /$g2_shortname.*\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){
 			push(@g2_files,$file);
 			next;
 		}
@@ -471,14 +471,14 @@ unless (-d $output_dir){print `mkdir -p $output_dir`;}
 unless (-d "$output_dir/log_files"){print `mkdir -p $output_dir/log_files`;}
 
 my $ret="Job ids:";
-if($start_with ne "S"){
+if($start_with eq "M"){
 	# mapping
 	print "\n\n*************\nMapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $start_with $test_run $run_without_qsub $sanjuan_dir $STAR_index  $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $test_run $run_without_qsub $sanjuan_dir $STAR_index $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
 	$ret=`$call`;
 	print $ret."\n";
 }else{
-	print "\n\n\nTrimming\n#####################\n\nSkipped\n\n\n\n\nMapping\n#####################\n\nSkipped\n\n\n\n\nMerging BAM files\n#####################\n\nSkipped\n\n";
+	print "\n\n\n\nMapping\n#####################\n\nSkipped\n\n\n\n\nMerging BAM files\n#####################\n\nSkipped\n\n";
 }
 
 my $job_ids=-1;
@@ -490,8 +490,9 @@ if(@fs>0){
 
 print "job ids from preProcess_and_Map: $job_ids\n\n\n";
 
-my $merged_bam_file_1 = ($start_with eq "S")? $bam1 : $output_dir . '/MAPPING/' . $g1_shortname . "_merged.bam";
-my $merged_bam_file_2 = ($start_with eq "S")? $bam2 : $output_dir . '/MAPPING/' . $g1_shortname . "_merged.bam";
+
+my $merged_bam_file_1 = ($start_with eq "S")? $bam1 : $output_dir . '/MAPPING/' . $g1_shortname ."_Aligned.sortedByCoord.out.merged.bam";
+my $merged_bam_file_2 = ($start_with eq "S")? $bam2 : $output_dir . '/MAPPING/' . $g2_shortname ."_Aligned.sortedByCoord.out.merged.bam";
 
 print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_2\n\n";
 
