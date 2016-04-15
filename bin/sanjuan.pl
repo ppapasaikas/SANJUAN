@@ -58,6 +58,7 @@ sub print_help{
 	#NRS print "\t\t For details have a look at section on library type of TopHat online manual https://ccb.jhu.edu/software/tophat/manual.shtml.\n";
 	print "\t-a:     adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b S.\n"; 
 	print "\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz)\n";
+	print "\t-tpm:    If given it activates the Basic twopassMode STAR mapping option. More sensitive novel junction discovery at the cost of speed.\n"; #NinS
 	#NRS print "\t-d:     average inner mate distance of paired-end reads (needed only for pre-processing; if omitted, will be set to 85).\n";
 	#NRS print "\t-d_dev: std. dev. of average inner mate distance of paired-end reads (needed only for pre-processing; if omitted will be set to 25).\n";
 	print "\t-b:     M -> start with mapping, S -> start with splicing analysis SKIPPING mapping\n";	#CinS 
@@ -144,11 +145,12 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "# BAM2=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/TOPHAT_SF3B1/accepted_hits.bam		### Path to condition2 (merged) bam file";
 	print $fh "";
 	print $fh "";
-	print $fh "#######################  Preprocessing and Mapping parameters  #######################";
+	print $fh "#######################  Preprocessing/Mapping parameters  #######################";
 	print $fh "ADAPTER=AGATCGGAAGAGC	### Specify adapter sequence if other than CRG facility default (AGATCGGAAGAGC...).  Leave empty if unknown.";
 	print $fh "LIBTYPE=2S	###library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded) or 2S (Paired-end, Stranded)."; #CinS 
    	print $fh " Can be omitted if -b B\n"; #CinS 
-#NRS print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
+#NRS 	print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
+	print $fh "TPM=None			### None or Basic. Setting to Basic activates the STAR twoPassMode mapping for more sensitive novel junction discovery at the cost of speed.";
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Splicing Analysis parameters  #######################";
@@ -255,6 +257,7 @@ my $IRM='N';	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Def
 my $SuppJun='N';#Require Supporting Junction Evidence for IR identification (IRM mode). Default 'N'
 my $output_dir="";
 #NRS my $phred_code="phred33";#Instructs Cutadapt to use ASCII+33 / ASCII+64 quality scores as Phred scores (Sanger/Illumina 1.9+ encoding) / (Illumina 1.5 encoding) for quality trimming.
+my $tpm="None";	#No two pass mapping by default  
 my $library_type="2S";# 1S|1U|2S|2U: Single or Paired end (1|2), Stranded or Unstranded (S|U)
 my $adapter="AGATCGGAAGAGC";	#Specify adapter sequence to be trimmed. To find adapter: minion search-adapter -i FASTQFILE.gz (Default adapter sequence for CRG facility, RNAseq )
 my $g1_shortname="grp1";
@@ -292,6 +295,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-a"){$adapter=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-g1"){$g1_shortname=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-g2"){$g2_shortname=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-tpm"){$tpm="Basic"}
 		if($ARGV[$i] eq "-f1"){@g1_files=split(",",$ARGV[($i++)+1]);}
 		if($ARGV[$i] eq "-f2"){@g2_files=split(",",$ARGV[($i++)+1]);}
 		if($ARGV[$i] eq "-o"){$output_dir=$ARGV[($i++)+1];}
@@ -312,26 +316,27 @@ else{
 	# Read and parse parameter file:
 	open (my $fh,"<".$ARGV[0]) || die "Cannot open parameter file $ARGV[0] for reading: $!\n";
 	while (<$fh>){
-		$genome=$1           if $_=~/^\s*GENOME\s*=(hg|mm|dr)/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
+		$genome=$1           if $_=~/^\s*GENOME\s*=\s*(hg|mm|dr)/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
 		$rawinput_dir=$1     if $_=~/^\s*RAWFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory
 		#NRS $trimmedinput_dir=$1 if $_=~/^\s*TRIMMEDFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory of trimmed fastq files (if given, trimming is skipped)
-		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=([\w\/\.\_\-]+)/;	#Base directory for Output
-		$adapter=$1          if $_=~/^\s*ADAPTER\s*=([ACGTNUacgtnu]+)/;	#Adapter sequence
-		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=(1S|1U|2S|2U)/;	#CinS
+		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=\s*([\w\/\.\_\-]+)/;	#Base directory for Output
+		$adapter=$1          if $_=~/^\s*ADAPTER\s*=\s*([ACGTNUacgtnu]+)/;	#Adapter sequence
+		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=\s*(1S|1U|2S|2U)/;	#CinS
 		#NRS $phred_code=$1       if $_=~/^\s*PHRED\s*=(phred33|phred64)/;
-		$g1_shortname=$1     if $_=~/^\s*COND1\s*=(\w+)/;
-		$g2_shortname=$1     if $_=~/^\s*COND2\s*=(\w+)/;
-		$bam1=$1             if $_=~/^\s*INFDIR\s*=([\w\/\.\_\-]+)/;	# bam files; if given mapping is skipped
-		$bam2=$1             if $_=~/^\s*INFDIR\s*=([\w\/\.\_\-]+)/;
-		$conf=$1             if $_=~/^\s*CONF\s*=(VHC|HC|MC)/;
-		$SuppJun=$1          if $_=~/^\s*SUPPJUN\s*=(Y|N)/;
-		$IRM=$1              if $_=~/^\s*IRM\s*=(Y|N)/;
-		$low_seq_req=$1      if $_=~/^\s*LOWSEQRQMNTS\s*=(Y|N)/;
-		$test_run=1          if $_=~/^\s*TESTRUN\s*=Y/;
-		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=([\w\/\.\_\-]+)/;
-		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=Y/;
-		$N_processes=$1      if $_=~/^\s*NPROCS\s*=(\d+)/;
-		$rmdup=1	     if $_=~/^\s*RMDUP\s*=Y/;
+		$g1_shortname=$1     if $_=~/^\s*COND1\s*=\s*(\w+)/;
+		$g2_shortname=$1     if $_=~/^\s*COND2\s*=\s*(\w+)/;
+		$tpm=$1		     if $_=~/^\s*TPM\s*=\s*(Basic|None)/;	#CinS
+		$bam1=$1             if $_=~/^\s*INFDIR\s*=\s*([\w\/\.\_\-]+)/;	# bam files; if given mapping is skipped
+		$bam2=$1             if $_=~/^\s*INFDIR\s*=\s*([\w\/\.\_\-]+)/;
+		$conf=$1             if $_=~/^\s*CONF\s*=\s*(VHC|HC|MC)/;
+		$SuppJun=$1          if $_=~/^\s*SUPPJUN\s*=\s*(Y|N)/;
+		$IRM=$1              if $_=~/^\s*IRM\s*=\s*(Y|N)/;
+		$low_seq_req=$1      if $_=~/^\s*LOWSEQRQMNTS\s*=\s*(Y|N)/;
+		$test_run=1          if $_=~/^\s*TESTRUN\s*=\s*Y/;
+		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=\s*([\w\/\.\_\-]+)/;
+		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=\s*Y/;
+		$N_processes=$1      if $_=~/^\s*NPROCS\s*=\s*(\d+)/;
+		$rmdup=1	     if $_=~/^\s*RMDUP\s*=\s*Y/;
 		#NRS $inner_mate_dist=$1  if $_=~/^\s*INNER_MATE_DIST\s*=(\d+)/;
 		#NRS $inner_mate_dist_std_dev=$1  if $_=~/^\s*DIST_STD_DEV\s*=(\d+)/;
 	}
@@ -347,6 +352,7 @@ unless($IRM =~ /Y|N/){$tmp_str="Parameter IRM/-i not or wrongly defined. Should 
 unless($SuppJun =~ /Y|N/){$tmp_str="Parameter SUPPJUN/-s not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 #NRS unless($phred_code =~ /phred33|phred64/){$tmp_str="Parameter PHRED/-p not or wrongly defined. Should take values phred33 or phred64.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
 unless($library_type =~ /1S|1U|2S|2U/)  {$tmp_str="Parameter LIBTYPE/-l not defined. Should take values 1S,1U, 2S or 2U\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
+unless($tpm =~ /Basic|None/)  {$tmp_str="Parameter TPM/-tpm not defined. Should take values Basic or None\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined. Should be a sequence composed of any letter of ACGTNUacgtnu.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
 unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
@@ -459,18 +465,17 @@ my $suffix="";
 if($test_run){$suffix.="-t ";}
 if($run_without_qsub){$suffix.="-nqsub ";}
 
-print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
+print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
 unless (-d "$output_dir/log_files"){print `mkdir -p $output_dir/log_files`;}
 
 my $ret="Job ids:";
-if($start_with ne "B"){
-	# 1. triming and mapping
-	# trim_galore needs python
-	print "\n\n*************\nTrimming & Mapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $STAR_index  $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
+if($start_with ne "S"){
+	# mapping
+	print "\n\n*************\nMapping\n*************\n\n";
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $start_with $test_run $run_without_qsub $sanjuan_dir $STAR_index  $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
 	$ret=`$call`;
 	print $ret."\n";
 }else{
@@ -486,9 +491,8 @@ if(@fs>0){
 
 print "job ids from preProcess_and_Map: $job_ids\n\n\n";
 
-
-my $merged_bam_file_1 = ($start_with eq "B")? $bam1 : $output_dir . '/TOPHAT_' . $g1_shortname."/accepted_hits_merged.bam";
-my $merged_bam_file_2 = ($start_with eq "B")? $bam2 : $output_dir . '/TOPHAT_' . $g2_shortname."/accepted_hits_merged.bam";
+my $merged_bam_file_1 = ($start_with eq "S")? $bam1 : $output_dir . '/MAPPING/' . $g1_shortname . "_merged.bam";
+my $merged_bam_file_2 = ($start_with eq "S")? $bam2 : $output_dir . '/MAPPING/' . $g1_shortname . "_merged.bam";
 
 print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_2\n\n";
 
