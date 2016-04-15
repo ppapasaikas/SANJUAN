@@ -147,10 +147,9 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "#######################  Preprocessing/Mapping parameters  #######################";
 	print $fh "ADAPTER=AGATCGGAAGAGC	### Specify adapter sequence if other than CRG facility default (AGATCGGAAGAGC...).  Leave empty if unknown.";
-	print $fh "LIBTYPE=2S	###library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded) or 2S (Paired-end, Stranded)."; #CinS 
-   	print $fh " Can be omitted if -b B\n"; #CinS 
-#NRS 	print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
-	print $fh "TPM=None			### None or Basic. Setting to Basic activates the STAR twoPassMode mapping for more sensitive novel junction discovery at the cost of speed.";
+	print $fh "LIBTYPE=2S		###library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded) or 2S (Paired-end, Stranded).Can be omitted if -b B"; #CinS 
+	#NRS 	print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
+	print $fh "TPM=None		### None or Basic. Setting to Basic activates the STAR twoPassMode mapping for more sensitive novel junction discovery at the cost of speed.";	#NinS
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Splicing Analysis parameters  #######################";
@@ -257,7 +256,7 @@ my $IRM='N';	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Def
 my $SuppJun='N';#Require Supporting Junction Evidence for IR identification (IRM mode). Default 'N'
 my $output_dir="";
 #NRS my $phred_code="phred33";#Instructs Cutadapt to use ASCII+33 / ASCII+64 quality scores as Phred scores (Sanger/Illumina 1.9+ encoding) / (Illumina 1.5 encoding) for quality trimming.
-my $tpm="None";	#No two pass mapping by default  
+my $tpm="None";	#NinS No two pass mapping by default  
 my $library_type="2S";# 1S|1U|2S|2U: Single or Paired end (1|2), Stranded or Unstranded (S|U)
 my $adapter="AGATCGGAAGAGC";	#Specify adapter sequence to be trimmed. To find adapter: minion search-adapter -i FASTQFILE.gz (Default adapter sequence for CRG facility, RNAseq )
 my $g1_shortname="grp1";
@@ -295,7 +294,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-a"){$adapter=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-g1"){$g1_shortname=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-g2"){$g2_shortname=$ARGV[($i++)+1];}
-		if($ARGV[$i] eq "-tpm"){$tpm="Basic"}
+		if($ARGV[$i] eq "-tpm"){$tpm="Basic"}	#NinS
 		if($ARGV[$i] eq "-f1"){@g1_files=split(",",$ARGV[($i++)+1]);}
 		if($ARGV[$i] eq "-f2"){@g2_files=split(",",$ARGV[($i++)+1]);}
 		if($ARGV[$i] eq "-o"){$output_dir=$ARGV[($i++)+1];}
@@ -325,7 +324,7 @@ else{
 		#NRS $phred_code=$1       if $_=~/^\s*PHRED\s*=(phred33|phred64)/;
 		$g1_shortname=$1     if $_=~/^\s*COND1\s*=\s*(\w+)/;
 		$g2_shortname=$1     if $_=~/^\s*COND2\s*=\s*(\w+)/;
-		$tpm=$1		     if $_=~/^\s*TPM\s*=\s*(Basic|None)/;	#CinS
+		$tpm=$1		     if $_=~/^\s*TPM\s*=\s*(Basic|None)/;	#NinS
 		$bam1=$1             if $_=~/^\s*INFDIR\s*=\s*([\w\/\.\_\-]+)/;	# bam files; if given mapping is skipped
 		$bam2=$1             if $_=~/^\s*INFDIR\s*=\s*([\w\/\.\_\-]+)/;
 		$conf=$1             if $_=~/^\s*CONF\s*=\s*(VHC|HC|MC)/;
