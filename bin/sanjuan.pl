@@ -195,9 +195,9 @@ sub is_available_for_mapping{
 	if(@txtfiles==6){$check++;}
 	@tabfiles=<$abs_path/mapping_indexes/$species/*.tab>;
 	if(@tabfiles==6){$check++;}
-	if(-e "$abs_path/mapping_indexes/$species/.*Genome"){$check++;}
-	if(-e "$abs_path/mapping_indexes/$species/.*SA"){$check++;}
-	if(-e "$abs_path/mapping_indexes/$species/.*SAindex"){$check++;}	
+	if(-e "$abs_path/mapping_indexes/$species/Genome"){$check++;}
+	if(-e "$abs_path/mapping_indexes/$species/SA"){$check++;}
+	if(-e "$abs_path/mapping_indexes/$species/SAindex"){$check++;}	
 
 	# FALSE
 	my $ret=0;
@@ -331,9 +331,9 @@ else{
 		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=([\w\/\.\_\-]+)/;
 		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=Y/;
 		$N_processes=$1      if $_=~/^\s*NPROCS\s*=(\d+)/;
-		$rmdup=1			 if $_=~/^\s*RMDUP\s*=Y/;
-		$inner_mate_dist=$1  if $_=~/^\s*INNER_MATE_DIST\s*=(\d+)/;
-		$inner_mate_dist_std_dev=$1  if $_=~/^\s*DIST_STD_DEV\s*=(\d+)/;
+		$rmdup=1	     if $_=~/^\s*RMDUP\s*=Y/;
+		#NRS $inner_mate_dist=$1  if $_=~/^\s*INNER_MATE_DIST\s*=(\d+)/;
+		#NRS $inner_mate_dist_std_dev=$1  if $_=~/^\s*DIST_STD_DEV\s*=(\d+)/;
 	}
 	close($fh);
 }
@@ -390,7 +390,7 @@ $trimmedinput_dir=~ s/\/$//;
 $output_dir=~ s/\/$//;
 
 # generate arrays with fastq files for group1 and group2 if given through parameter file
-if($start_with eq "M" && $library_type=~/1/ && @g1_files==0 && @g2_files==0){	#CinS
+if($start_with eq "M" && @g1_files==0 && @g2_files==0){	#CinS
 	my $input_dir = $rawinput_dir; #CinS
 	# file names should be like *_[g1shortname|g2shortname]_*_[r|read|R][1|2].[fq|fastq].[gz]
 	# .gz is optional
@@ -400,11 +400,11 @@ if($start_with eq "M" && $library_type=~/1/ && @g1_files==0 && @g2_files==0){	#C
 		my $file=$_;
 		next unless (-f $file);
 		
-		if($file =~ /$g1_shortname.*(r|read|R)(1|2)\.(fq$|fastq$|fq\.gz$|fastq\.gz$)/){
+		if($file =~ /$g1_shortname.*\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/){
 			push(@g1_files,$file);
 			next;
 		}
-		if($file =~ /$g2_shortname.*(r|read|R)(1|2)\.(fq$|fastq$|fq\.gz$|fastq\.gz$)/){
+		if($file =~ /$g2_shortname.*\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/){
 			push(@g2_files,$file);
 			next;
 		}
@@ -417,31 +417,33 @@ if($start_with eq "M" && $library_type=~/1/ && @g1_files==0 && @g2_files==0){	#C
 # @g1_files and @g2_files might contain two different kinds of files depending on start_with 
 # start_with=T(rimming) -> they contain raw fastq files
 # start_with=M(apping) -> they contain trimmed fastq files
-# start_with=B (splicing analysis) -> they contain for each group one bam file
+# start_with=S (splicing analysis) -> they contain for each group one bam file
 #
 # file checks: do files exist and can they be opened
 if($start_with eq "S"){
 	open(my $fh,"<".$bam1) or die "Cannot open BAM file $bam1: $!\n";close($fh);
 	open($fh,"<".$bam2) or die "Cannot open BAM file $bam2: $!\n";close($fh);
 }else{
-	if(@g1_files <2 || scalar(@g1_files) % 2 != 0){die "Wrong number of FASTQ input files for group 1 given. Number must be even and at least 2.\n";}
-	if(@g2_files <2 || scalar(@g2_files) % 2 != 0){die "Wrong number of FASTQ input files for group 2 given. Number must be even and at least 2.\n";}	
+	if(@g1_files <2 || ($library_type=~/2/ && scalar(@g1_files) % 2 != 0)){die "Wrong number of FASTQ input files for group 1. Number must be non-zero and even if pair end sequencing was specified.\n";}
+	if(@g2_files <2 || ($library_type=~/2/ && scalar(@g2_files) % 2 != 0)){die "Wrong number of FASTQ input files for group 2. Number must be non-zero and even if pair end sequencing (-l 2S or -l 2U) was specified.\n";}
+
 	foreach my $fname (@g1_files,@g2_files){
 		# do files exsist and can be opened?
 		open(my $fh,"<".$fname) or die "Cannot open FASTQ file $fname: $!\n";close($fh);
 		# check file endings 
-		unless( $fname =~ /(\.fastq\.gz$|\.fq\.gz$|\.fq$|\.fastq$)/ ){die "FASTQ input files should have endings fastq, fq, fastq.gz or fq.gz but file $fname doesn't have\n";}
+		unless( $fname =~ /(\.fq\.bz2$|fastq\.bz2$|\.fastq\.gz$|\.fq\.gz$|\.fq$|\.fastq$)/ ){die "FASTQ input files should have endings fastq, fq, fastq.gz, fq.gz, fastq.bz2 or fq.bz2 but file $fname doesn't have\n";}
 	}
 }
 
 
 # tophat files:
 # transcriptome index, gene annotation, bowtie index
-my ($tophat_tr_index,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcriptome",$abs_path."/mapping_indexes/$genome/$genome");
+#NRS my ($tophat_tr_index,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcriptome",$abs_path."/mapping_indexes/$genome/$genome");
+my $STAR_index=$abs_path."/mapping_indexes/$genome/"; #NiS
 
 if($start_with ne "S"){
-	# user wants to do pre-processing and splicing analysis
-	if(!is_available_for_mapping($genome,$abs_path)){die "Pre-processing including mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
+	# user wants to do mapping and splicing analysis
+	if(!is_available_for_mapping($genome,$abs_path)){die "Mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
 }else{
 	# user wants to do splicing analysis only
 	if(!is_available_for_splicing($genome,$abs_path)){die "Splicing analysis for species / genome $genome is not possible\nas this species / genome is not installed for splicing analysis.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
@@ -457,7 +459,7 @@ my $suffix="";
 if($test_run){$suffix.="-t ";}
 if($run_without_qsub){$suffix.="-nqsub ";}
 
-print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -p $phred_code -l $library_type -a $adapter -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
+print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -g1 $g1_shortname -f1 ".join(" ",@g1_files)." -g2 $g2_shortname -f2 ".join(" ",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
@@ -468,7 +470,7 @@ if($start_with ne "B"){
 	# 1. triming and mapping
 	# trim_galore needs python
 	print "\n\n*************\nTrimming & Mapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $phred_code $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $tophat_tr_index $tophat_bowtie_index $N_processes $inner_mate_dist $inner_mate_dist_std_dev -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files";
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $start_with $test_run $run_without_qsub $sanjuan_dir $STAR_index  $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
 	$ret=`$call`;
 	print $ret."\n";
 }else{
