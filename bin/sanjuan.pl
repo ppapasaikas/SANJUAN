@@ -315,10 +315,10 @@ else{
 	# Read and parse parameter file:
 	open (my $fh,"<".$ARGV[0]) || die "Cannot open parameter file $ARGV[0] for reading: $!\n";
 	while (<$fh>){
-		$genome=$1           if $_=~/^\s*GENOME\s*=\s*(hg|mm|dr)/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
-		$rawinput_dir=$1     if $_=~/^\s*RAWFASTQS_DIR\s*=\s*([\w\/\.\_\-]+)/;	#Input directory
+		$genome=$1           if $_=~/^\s*GENOME\s*=\s*([\w\/\.\_\-]+)\s*/;	#Species genome: hg-> human, mm-> mouse, dr-> zebrafish
+		$rawinput_dir=$1     if $_=~/^\s*RAWFASTQS_DIR\s*=\s*([\w\/\.\_\-\~]+)/;	#Input directory
 		#NRS $trimmedinput_dir=$1 if $_=~/^\s*TRIMMEDFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory of trimmed fastq files (if given, trimming is skipped)
-		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=\s*([\w\/\.\_\-]+)/;	#Base directory for Output
+		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=\s*([\w\/\.\_\-\~]+)/;	#Base directory for Output
 		$adapter=$1          if $_=~/^\s*ADAPTER\s*=\s*([ACGTNUacgtnu]+)/;	#Adapter sequence
 		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=\s*(1S|1U|2S|2U)/;	#CinS
 		#NRS $phred_code=$1       if $_=~/^\s*PHRED\s*=(phred33|phred64)/;
@@ -342,16 +342,17 @@ else{
 	close($fh);
 }
 
+
 ## parameter checks
 my ($OK_params_preprocess,$OK_params_main)=(1,1);
 my ($warnings_preprocess,$warnings_main,$tmp_str)=("","",);
-unless($genome eq ""){$tmp_str="Parameter GENOME/-g not defined.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
+unless($genome){$tmp_str="Parameter GENOME/-g not defined.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($conf =~ /VHC|HC|MC/){$tmp_str="Parameter CONF/-c not or wrongly defined. Should take values VHC, HC, MC.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($IRM =~ /Y|N/){$tmp_str="Parameter IRM/-i not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($SuppJun =~ /Y|N/){$tmp_str="Parameter SUPPJUN/-s not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 #NRS unless($phred_code =~ /phred33|phred64/){$tmp_str="Parameter PHRED/-p not or wrongly defined. Should take values phred33 or phred64.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
 unless($library_type =~ /1S|1U|2S|2U/)  {$tmp_str="Parameter LIBTYPE/-l not defined. Should take values 1S,1U, 2S or 2U\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
-unless($tpm =~ /Basic|None/)  {$tmp_str="Parameter TPM/-tpm not defined. Should take values Basic or None\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
+unless($tpm =~ /Basic|None/)  {$tmp_str="Parameter TPM/-tpm not defined. Should take values Basic or None\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined. Should be a sequence composed of any letter of ACGTNUacgtnu.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
 unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
@@ -425,13 +426,15 @@ if($start_with eq "M" && @g1_files==0 && @g2_files==0){	#CinS
 # start_with=S (splicing analysis) -> they contain for each group one bam file
 #
 # file checks: do files exist and can they be opened
+
+
 if($start_with eq "S"){
 	open(my $fh,"<".$bam1) or die "Cannot open BAM file $bam1: $!\n";close($fh);
 	open($fh,"<".$bam2) or die "Cannot open BAM file $bam2: $!\n";close($fh);
 }else{
-	if(@g1_files <2 || ($library_type=~/2/ && scalar(@g1_files) % 2 != 0)){die "Wrong number of FASTQ input files for group 1. Number must be non-zero and even if pair end sequencing was specified.\n";}
-	if(@g2_files <2 || ($library_type=~/2/ && scalar(@g2_files) % 2 != 0)){die "Wrong number of FASTQ input files for group 2. Number must be non-zero and even if pair end sequencing (-l 2S or -l 2U) was specified.\n";}
+	if(@g1_files <1 || ($library_type=~/2/ && scalar(@g1_files) % 2 != 0)){die "Wrong number of FASTQ input files for group 1. Number must be non-zero and even if pair end sequencing was specified.\n";}
 
+	if(@g2_files <1 || ($library_type=~/2/ && scalar(@g2_files) % 2 != 0)){die "Wrong number of FASTQ input files for group 2. Number must be non-zero and even if pair end sequencing (-l 2S or -l 2U) was specified.\n";}
 	foreach my $fname (@g1_files,@g2_files){
 		# do files exsist and can be opened?
 		open(my $fh,"<".$fname) or die "Cannot open FASTQ file $fname: $!\n";close($fh);
@@ -439,6 +442,7 @@ if($start_with eq "S"){
 		unless( $fname =~ /(\.fq\.bz2$|fastq\.bz2$|\.fastq\.gz$|\.fq\.gz$|\.fq$|\.fastq$)/ ){die "FASTQ input files should have endings fastq, fq, fastq.gz, fq.gz, fastq.bz2 or fq.bz2 but file $fname doesn't have\n";}
 	}
 }
+
 
 
 # tophat files:
@@ -469,7 +473,6 @@ print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJu
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
 unless (-d "$output_dir/log_files"){print `mkdir -p $output_dir/log_files`;}
-
 my $ret="Job ids:";
 if($start_with eq "M"){
 	# mapping
@@ -495,6 +498,9 @@ my $merged_bam_file_1 = ($start_with eq "S")? $bam1 : $output_dir . '/MAPPING/' 
 my $merged_bam_file_2 = ($start_with eq "S")? $bam2 : $output_dir . '/MAPPING/' . $g2_shortname ."_Aligned.sortedByCoord.out.merged.bam";
 
 print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_2\n\n";
+die;
+
+
 
 print "\n\n*************\nSplicing Analysis\n*************\n\n";
 $call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $rmdup $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
