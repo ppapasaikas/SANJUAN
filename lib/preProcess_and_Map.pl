@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-$,="\n";
-print @ARGV;
 
 #Specify base directory for Output:
 my $basedir=$ARGV[0];
