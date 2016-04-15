@@ -51,8 +51,9 @@ sub print_help{
 	print "\t-o:     output directory; If omitted current working directory is taken.\n";
 	#NRS print "\t-p:     encoding of base qualities in FASTQ files; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
 	#NRS print "\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
-	print "\t-l:     library type of RNAseq samples; values S (Stranded) or U (Unstranded).  Can be omitted if -b B\n"; #CinS 
-	print "\t\t Set to U if you are in doubt about the library type; though this parameter is critical and it is recommended\n"; #CinS 
+	print "\t-l:     library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded), 2S (Paired-end, Stranded).\n";
+   	print "\t\t Can be omitted if -b B.\nPaired-end experiments (i.e 2U, 2S) should have two files per condition. "; #CinS 
+	print "\t\t Set to 1U/2U if you are in doubt about whether your experiment is strand specific, though, this parameter is critical and it's highly recommended\n"; #CinS 
 	print "\t\t setting it correctly according to the RNAseq data you are working with.\n";
 	#NRS print "\t\t For details have a look at section on library type of TopHat online manual https://ccb.jhu.edu/software/tophat/manual.shtml.\n";
 	print "\t-a:     adapter used in RNAseq measurement; CRG standard is AGATCGGAAGAGC. Can be omitted if -b S.\n"; 
@@ -145,8 +146,9 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "#######################  Preprocessing and Mapping parameters  #######################";
 	print $fh "ADAPTER=AGATCGGAAGAGC	### Specify adapter sequence if other than CRG facility default (AGATCGGAAGAGC...).  Leave empty if unknown.";
-	print $fh "LIBTYPE=S	### library type of RNAseq samples; values S (Stranded) or U (Unstranded).  Can be omitted if -b B\n"; #CinS 
-	#NRS print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
+	print $fh "LIBTYPE=2S	###library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded) or 2S (Paired-end, Stranded)."; #CinS 
+   	print $fh " Can be omitted if -b B\n"; #CinS 
+#NRS print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Splicing Analysis parameters  #######################";
@@ -253,7 +255,7 @@ my $IRM='N';	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Def
 my $SuppJun='N';#Require Supporting Junction Evidence for IR identification (IRM mode). Default 'N'
 my $output_dir="";
 #NRS my $phred_code="phred33";#Instructs Cutadapt to use ASCII+33 / ASCII+64 quality scores as Phred scores (Sanger/Illumina 1.9+ encoding) / (Illumina 1.5 encoding) for quality trimming.
-my $library_type="S";# Stranded or Unstranded
+my $library_type="2S";# 1S|1U|2S|2U: Single or Paired end (1|2), Stranded or Unstranded (S|U)
 my $adapter="AGATCGGAAGAGC";	#Specify adapter sequence to be trimmed. To find adapter: minion search-adapter -i FASTQFILE.gz (Default adapter sequence for CRG facility, RNAseq )
 my $g1_shortname="grp1";
 my $g2_shortname="grp2";
@@ -262,7 +264,7 @@ my @g1_files=();# fastq files of group 1
 my @g2_files=();# fastq files of group 2
 # qsub jobs
 my ($bam1,$bam2)=("","","");
-my $start_with = "T"; # standard: we start with trimming
+my $start_with = "M"; # standard: we start with mapping
 my $low_seq_req="N";
 my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to cluster
 #NRS my $inner_mate_dist=85;
@@ -315,7 +317,7 @@ else{
 		#NRS $trimmedinput_dir=$1 if $_=~/^\s*TRIMMEDFASTQS_DIR\s*=([\w\/\.\_\-]+)/;	#Input directory of trimmed fastq files (if given, trimming is skipped)
 		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=([\w\/\.\_\-]+)/;	#Base directory for Output
 		$adapter=$1          if $_=~/^\s*ADAPTER\s*=([ACGTNUacgtnu]+)/;	#Adapter sequence
-		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=(S|U)/;	#CinS
+		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=(1S|1U|2S|2U)/;	#CinS
 		#NRS $phred_code=$1       if $_=~/^\s*PHRED\s*=(phred33|phred64)/;
 		$g1_shortname=$1     if $_=~/^\s*COND1\s*=(\w+)/;
 		$g2_shortname=$1     if $_=~/^\s*COND2\s*=(\w+)/;
@@ -344,7 +346,7 @@ unless($conf =~ /VHC|HC|MC/){$tmp_str="Parameter CONF/-c not or wrongly defined.
 unless($IRM =~ /Y|N/){$tmp_str="Parameter IRM/-i not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($SuppJun =~ /Y|N/){$tmp_str="Parameter SUPPJUN/-s not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 #NRS unless($phred_code =~ /phred33|phred64/){$tmp_str="Parameter PHRED/-p not or wrongly defined. Should take values phred33 or phred64.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
-#NRS unless($library_type =~ /fr\-firststrand|fr\-secondstrand|fr\-unstranded/){$tmp_str="Parameter LIBTYPE/-l not defined. Should take values fr-firststrand, fr-secondstrand, fr-unstranded.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
+unless($library_type =~ /1S|1U|2S|2U/)  {$tmp_str="Parameter LIBTYPE/-l not defined. Should take values 1S,1U, 2S or 2U\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined. Should be a sequence composed of any letter of ACGTNUacgtnu.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
 unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
@@ -379,7 +381,7 @@ if($start_with ne "S" && !$OK_params_preprocess){die $warnings_preprocess;}
 if(!$OK_params_main){die $warnings_main;}
 
 # is set automatically depending on library type
-if($library_type eq "fr-unstranded"){$RNAseq="U";}else{$RNAseq="S";}
+if($library_type=~/S/){$RNAseq="S";}else{$RNAseq="U";}	#CinS
 
 if($output_dir eq "" || $output_dir eq "."){$output_dir=cwd();}
 # remove trailing / if exists
@@ -388,8 +390,8 @@ $trimmedinput_dir=~ s/\/$//;
 $output_dir=~ s/\/$//;
 
 # generate arrays with fastq files for group1 and group2 if given through parameter file
-if($start_with ne "B" && @g1_files==0 && @g2_files==0){
-	my $input_dir = ($start_with eq "M")? $trimmedinput_dir : $rawinput_dir;
+if($start_with eq "M" && $library_type=~/1/ && @g1_files==0 && @g2_files==0){	#CinS
+	my $input_dir = $rawinput_dir; #CinS
 	# file names should be like *_[g1shortname|g2shortname]_*_[r|read|R][1|2].[fq|fastq].[gz]
 	# .gz is optional
 	# files get sorted into the two groups according to [g1shortname|g2shortname] and according to read1/2 according to [r|read|R][1|2]  
@@ -418,7 +420,7 @@ if($start_with ne "B" && @g1_files==0 && @g2_files==0){
 # start_with=B (splicing analysis) -> they contain for each group one bam file
 #
 # file checks: do files exist and can they be opened
-if($start_with eq "B"){
+if($start_with eq "S"){
 	open(my $fh,"<".$bam1) or die "Cannot open BAM file $bam1: $!\n";close($fh);
 	open($fh,"<".$bam2) or die "Cannot open BAM file $bam2: $!\n";close($fh);
 }else{
@@ -437,7 +439,7 @@ if($start_with eq "B"){
 # transcriptome index, gene annotation, bowtie index
 my ($tophat_tr_index,$tophat_bowtie_index)=($abs_path."/mapping_indexes/$genome/${genome}_transcriptome",$abs_path."/mapping_indexes/$genome/$genome");
 
-if($start_with ne "B"){
+if($start_with ne "S"){
 	# user wants to do pre-processing and splicing analysis
 	if(!is_available_for_mapping($genome,$abs_path)){die "Pre-processing including mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
 }else{
