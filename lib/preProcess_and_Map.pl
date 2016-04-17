@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-
+my $Lqueue="long-sl65";		#Long queue
+my $Squeue="short-sl65";	#Short queue
 #Specify base directory for Output:
 my $basedir=$ARGV[0];
-
 my $genome=$ARGV[1]; 	#Specify species genome: hg -> human, mm-> mouse, dr-> zebrafish
 
 # remove trailing "/" if exists
@@ -55,8 +55,9 @@ my @g1_files=();
 my @g2_files=();
 my @skipping_ok=();
 
+
 #for(my $i=10; $i<@ARGV; $i++){
-for(my $i=10; $i<$#ARGV; $i++){
+for(my $i=10; $i<=$#ARGV; $i++){
 	if(substr($ARGV[$i],0,3) eq "-g1"){
 		$i++;
 		$cond1_name=$ARGV[$i];
@@ -87,15 +88,16 @@ for(my $i=10; $i<$#ARGV; $i++){
 		next;
 	}
 	#NinS: pass single end sequencing files:
-	if($library_type=~/1/ && $ARGV[$i]=~/\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){	#CinS
+	if($library_type=~/1/ && $ARGV[$i]=~/\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){		#CinS
 		push(@READS,$ARGV[$i]);
 		if($group==1){push(@g1_files,$ARGV[$i]);push(@COND,$cond1_name)};
-		if($group==2){push(@g2_files,$ARGV[$i]);push(@COND,$cond1_name)};
+		if($group==2){push(@g2_files,$ARGV[$i]);push(@COND,$cond2_name)};
 		next;
 	}
 }
 
 @READC=($library_type=~/2/)? @READ1 : @READS;
+
 
 
 for(my $i=0; $i<@READC; $skipping_ok[$i++]=1){}
@@ -112,13 +114,16 @@ print "preProcess_and_Map.pl $basedir $genome $adapter_seq $library_type $tpm $t
 print `mkdir -p $basedir/MAPPING`;
 
 print "\n\n\nMapping\n#####################\n\n";
-my $job_ids=join(",",@all_job_ids);
 my %bam_files=();
 my %bam_files_count=();
 my $readCommand="";
 #my ($fq1,$fq2,$top_out);
 my ($fq, $star_out);
 my $trimCommand=($adapter_seq=~/\w+/)? "--clip3pAdapterSeq $adapter_seq" : "";
+
+$,="\t";
+
+
 for my $cf (0..$#READC){
 	my $cond=$COND[$cf];
 	my $jname="MAP_" . $cond ."_$cf";
@@ -144,13 +149,12 @@ for my $cf (0..$#READC){
 	$skipping_ok{$cond}=0;
 	$jobs_started=1;
 	if($run_without_qsub==0){
-		$call = "qsub -q long-sl65 -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -hold_jid $job_ids -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y STAR --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";} else{
+		$call = "qsub -q $Lqueue -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y STAR --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";}
+		else{
 		$call = "STAR --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";
 	}
 
 
-
-	}
 	print "$call\n";
 	if(!$test_run){
 		$ret= `$call`;
@@ -163,11 +167,15 @@ for my $cf (0..$#READC){
 		}
 	}
 
+}
+
+
+
 
 
 print "\n\n\nMerging BAM files\n#####################\n\n";
 
-$job_ids=join(",",@all_job_ids);
+my $job_ids=join(",",@all_job_ids);
 my $tmpdir="";
 my $c=0;
 foreach my $cond_name ($cond1_name,$cond2_name){
@@ -181,13 +189,13 @@ foreach my $cond_name ($cond1_name,$cond2_name){
 	# only one file
 	if($bam_files_count{$cond_name}==1){
 		if($run_without_qsub==0){
-			$call="qsub -N SANJUAN_ln_s -q short-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=1G -l h_rt=00:20:00 ~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file";
+			$call="qsub -N SANJUAN_ln_s -q $Squeue -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=1G -l h_rt=00:20:00 $sanjuan_dir/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file";
 		}else{
-			$call="~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
+			$call="$sanjuan_dir/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
 		}
 	}else{
 		if($run_without_qsub==0){
-			$call = "qsub -N SANJUAN_SAMmerge_${cond_name}_${c} -q long-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
+			$call = "qsub -N SANJUAN_SAMmerge_${cond_name}_${c} -q $Lqueue -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
 		}else{
 			$call = "samtools merge $merged_bam_file $bam_files{$cond_name} 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
 		}

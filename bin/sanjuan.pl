@@ -498,7 +498,6 @@ my $merged_bam_file_1 = ($start_with eq "S")? $bam1 : $output_dir . '/MAPPING/' 
 my $merged_bam_file_2 = ($start_with eq "S")? $bam2 : $output_dir . '/MAPPING/' . $g2_shortname ."_Aligned.sortedByCoord.out.merged.bam";
 
 print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_2\n\n";
-die;
 
 
 
