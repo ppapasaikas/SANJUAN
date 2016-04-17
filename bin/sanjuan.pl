@@ -387,7 +387,7 @@ if($start_with ne "S" && !$OK_params_preprocess){die $warnings_preprocess;}
 if(!$OK_params_main){die $warnings_main;}
 
 # is set automatically depending on library type
-if($library_type=~/S/){$RNAseq="S";}else{$RNAseq="U";}	#CinS
+$RNAseq=($library_type=~/S/)? "S":"U";	#CinS
 
 if($output_dir eq "" || $output_dir eq "."){$output_dir=cwd();}
 # remove trailing / if exists
@@ -502,7 +502,7 @@ print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_
 
 
 print "\n\n*************\nSplicing Analysis\n*************\n\n";
-$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $rmdup $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
+$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $library_type $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $rmdup $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
 system($call);
 
 exit(0);

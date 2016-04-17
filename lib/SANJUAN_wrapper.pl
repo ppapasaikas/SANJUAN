@@ -59,7 +59,7 @@ sub run_cmd { # $_[0]: command / job call as string / qsub part; $_[1]: command 
 }
 
 # a reference to this array is a parameter to the sub qsub
-# internally qsub checks if output of current job already exists; if yes, the job is not startet
+# internally qsub checks if output of current job already exists; if yes, the job is not started
 # the output file is a parameter to qsub
 # exception: when $ENFORCE_RUN[0]=1, 1. the output file is delete (if it exists), and 2. the job is sent to the cluster
 # $ENFORCE_RUN[0] is set to 1 internally in qsub whenever it happens that one output file does not exists
@@ -69,7 +69,9 @@ my @ENFORCE_RUN=(0);
 ################# Setting Parameters ##################################################################################################
 #######################################################################################################################################
 my $genome=$ARGV[0];	#Specify species genome: hg-> human, mm-> mouse, dr-> zebrafish
-my $RNAseq=$ARGV[1];	#Stranded "S" (e.g firstrand) or unstranded "U" RNAseq experiment. Default "S". 
+my $library_type=$ARGV[1];	#1S|2S|1U|2U: Single end 1 or Pair-end 2 Stranded "S" (e.g firstrand) or unstranded "U" RNAseq experiment. Default "S". 
+my $RNAseq=($library_type=~/S/)? "S":"U";
+
 my $conf=$ARGV[2];	#Specify stringency for Differentially Spliced Junctions (VeryHighConfidence -> VHC, HighConfidence -> HC, MediumConfidence -> MC)
 my $IRM=$ARGV[3];	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Default 'N' 
 my $SuppJun=$ARGV[4];	#Require Supporting Junction Evidence for IR identification (IRM mode). Default 'N'
@@ -147,29 +149,32 @@ for (0..$skip_nsteps){ $skip{$_}=1; }
 #######################################################################################################################################
 
 #SANITIZE i.e remove unmapped reads and secondary alignments, keep only proper mates
-my $PPoutbam1=$output_dir."/".$COND1 . '_ProperPReads.bam';
-my $PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads.bam';
-my $Rmd_PPoutbam1=$output_dir."/".$COND1 . '_ProperPReads_rmdup.bam';
-my $Rmd_PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads_rmdup.bam';
-my $NSort_PPoutbam1=$output_dir."/".$COND1 . '_ProperPReads_Nsorted';
-my $NSort_PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads_Nsorted';
-my $paired = ($low_seq_req eq "N")? "-bf 0x2" : "-b";	#set to '-b' to keep non properly aligned mates / '-bf 0x2' to discard them
+#NRS my $PPoutbam1=$output_dir."/".$COND1 . '_ProperPReads.bam';
+#NRS my $PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads.bam';
+my $Rmd_bam1=$output_dir."/".$COND1 . '_rmdup.bam';
+my $Rmd_bam2=$output_dir."/".$COND2 . '_rmdup.bam';
+#NRS my $paired = ($low_seq_req eq "N")? "-bf 0x2" : "-b";	#set to '-b' to keep non properly aligned mates / '-bf 0x2' to discard them
 my $rmdup=$rmdup_as_argument;	#set to 0 to keep PCR duplicates / 1 to discard them
 
-unless ($skip{1}){
-	print "\n\n\nRemoval of unmapped reads and secondary alignments\n#####################\n\n";
-	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_buildPPbam1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -e $output_dir/log_files/04_err_samtools_view_grp1.txt -o $output_dir/log_files/04_out_samtools_view_grp1.txt -b y","samtools view $paired -F 260 -o $PPoutbam1 $bam1",\@all_job_ids,$PPoutbam1,\@ENFORCE_RUN,$test_run,$run_without_qsub);	
-	run_cmd("qsub -N ${prefix}_buildPPbam2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -e $output_dir/log_files/04_err_samtools_view_grp2.txt -o $output_dir/log_files/04_out_samtools_view_grp2.txt -b y","samtools view $paired -F 260 -o $PPoutbam2 $bam2",\@all_job_ids,$PPoutbam2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-
-	if ($rmdup>0){
+unless ($skip{1} || $rmdup==0){
+	#print "\n\n\nRemoval of unmapped reads and secondary alignments\n#####################\n\n";
+	print "\n\n\nRemoval of duplicate reads\n#####################\n\n";
+#NRS	$job_ids=join(",",@all_job_ids);
+#NRS	run_cmd("qsub -N ${prefix}_buildPPbam1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -e $output_dir/log_files/04_err_samtools_view_grp1.txt -o $output_dir/log_files/04_out_samtools_view_grp1.txt -b y","samtools view $paired -F 260 -o $PPoutbam1 $bam1",\@all_job_ids,$PPoutbam1,\@ENFORCE_RUN,$test_run,$run_without_qsub);	
+#NRS	run_cmd("qsub -N ${prefix}_buildPPbam2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -e $output_dir/log_files/04_err_samtools_view_grp2.txt -o $output_dir/log_files/04_out_samtools_view_grp2.txt -b y","samtools view $paired -F 260 -o $PPoutbam2 $bam2",\@all_job_ids,$PPoutbam2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	if ($library_type=~/1/){
 		$job_ids=join(",",@all_job_ids);
-		run_cmd("qsub -N ${prefix}_rmdup1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/05_out_samtools_rmdup_grp1.txt -e $output_dir/log_files/05_err_samtools_rmdup_grp1.txt -b y","samtools rmdup $PPoutbam1 $Rmd_PPoutbam1",\@all_job_ids,$Rmd_PPoutbam1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-		run_cmd("qsub -N ${prefix}_rmdup2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/05_out_samtools_rmdup_grp2.txt -e $output_dir/log_files/05_err_samtools_rmdup_grp2.txt -b y","samtools rmdup $PPoutbam2 $Rmd_PPoutbam2",\@all_job_ids,$Rmd_PPoutbam2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-		
-		$PPoutbam1=$Rmd_PPoutbam1;
-		$PPoutbam2=$Rmd_PPoutbam2;
+		run_cmd("qsub -N ${prefix}_rmdup1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/05_out_samtools_rmdup_grp1.txt -e $output_dir/log_files/05_err_samtools_rmdup_grp1.txt -b y","samtools rmdup -s $bam1 $Rmd_bam1",\@all_job_ids,$Rmd_bam1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+		run_cmd("qsub -N ${prefix}_rmdup2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/05_out_samtools_rmdup_grp2.txt -e $output_dir/log_files/05_err_samtools_rmdup_grp2.txt -b y","samtools rmdup -s $bam2 $Rmd_bam2",\@all_job_ids,$Rmd_bam2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+
 	}
+	else 	{
+		$job_ids=join(",",@all_job_ids);
+		run_cmd("qsub -N ${prefix}_rmdup1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/05_out_samtools_rmdup_grp1.txt -e $output_dir/log_files/05_err_samtools_rmdup_grp1.txt -b y","samtools rmdup $bam1 $Rmd_bam1",\@all_job_ids,$Rmd_bam1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+		run_cmd("qsub -N ${prefix}_rmdup2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/05_out_samtools_rmdup_grp2.txt -e $output_dir/log_files/05_err_samtools_rmdup_grp2.txt -b y","samtools rmdup $bam2 $Rmd_bam2",\@all_job_ids,$Rmd_bam2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	}
+$bam1=$Rmd_bam1;
+$bam2=$Rmd_bam2;
 }
 
 ### Build Non-Junction-Reads bam files.  (Keep Only pairs overlapping Junction Introns for both mates (pairtobed -type both))
@@ -178,10 +183,9 @@ my $NJoutbed1=$output_dir."/".$COND1 . '_NoJunctReads.bed';
 my $NJoutbed2=$output_dir."/".$COND2 . '_NoJunctReads.bed';
 
 unless ($skip{2}){
-
 	print "\n\n\nBuilding bed files for non-junction reads\n#####################\n\n";
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/06_out_write_buildNJ1.txt -e $output_dir/log_files/06_err_write_buildNJ1.txt -b y","perl $sanjuan_dir/job1.pl $PPoutbam1 $output_dir/buildNJ1.sh $NJoutbed1",\@all_job_ids,"$output_dir/buildNJ1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/06_out_write_buildNJ2.txt -e $output_dir/log_files/06_err_write_buildNJ2.txt -b y","perl $sanjuan_dir/job1.pl $PPoutbam2 $output_dir/buildNJ2.sh $NJoutbed2",\@all_job_ids,"$output_dir/buildNJ2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/06_out_write_buildNJ1.txt -e $output_dir/log_files/06_err_write_buildNJ1.txt -b y","perl $sanjuan_dir/job1.pl $bam1 $output_dir/buildNJ1.sh $NJoutbed1",\@all_job_ids,"$output_dir/buildNJ1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/06_out_write_buildNJ2.txt -e $output_dir/log_files/06_err_write_buildNJ2.txt -b y","perl $sanjuan_dir/job1.pl $bam2 $output_dir/buildNJ2.sh $NJoutbed2",\@all_job_ids,"$output_dir/buildNJ2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
 	$job_ids=join(",",@all_job_ids);
 	# this job does all in one step:
@@ -207,8 +211,8 @@ unless ($skip{3}){	#Get Junctions from SAM files, parse Cond1, Cond2, Merge and 
 	#print `echo "samtools view $PPoutbam2 | awk $d6 ~ /N/' " > buildSAM2.sh`;
 	
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_buildSAM1.txt -e $output_dir/log_files/08_err_write_buildSAM1.txt -b y","perl $sanjuan_dir/job2.pl $PPoutbam1 $output_dir/buildSAM1.sh $JSAM1",\@all_job_ids,"$output_dir/buildSAM1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_buildSAM2.txt -e $output_dir/log_files/08_err_write_buildSAM2.txt -b y","perl $sanjuan_dir/job2.pl $PPoutbam2 $output_dir/buildSAM2.sh $JSAM2",\@all_job_ids,"$output_dir/buildSAM2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_buildSAM1.txt -e $output_dir/log_files/08_err_write_buildSAM1.txt -b y","perl $sanjuan_dir/job2.pl $bam1 $output_dir/buildSAM1.sh $JSAM1",\@all_job_ids,"$output_dir/buildSAM1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_buildSAM2.txt -e $output_dir/log_files/08_err_write_buildSAM2.txt -b y","perl $sanjuan_dir/job2.pl $bam2 $output_dir/buildSAM2.sh $JSAM2",\@all_job_ids,"$output_dir/buildSAM2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_buildSAM1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildSAM1.txt -e $output_dir/log_files/09_err_run_buildSAM1.txt -b y","$output_dir/buildSAM1.sh",\@all_job_ids,$JSAM1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
@@ -237,7 +241,6 @@ my $FileB2=$output_dir.'/Merged_Junctions.bed';
 my $OUT_Jun2Tx_bed=$output_dir.'/olapSel_ENSTX_JUNC.bed';
 unless ($skip{4}){
 	print "\n\n\nFinding neighboring junctions and junction-subsuming transcripts\n#####################\n\n";
-
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_OLSLN -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_overlapSelect_1.txt -e $output_dir/log_files/13_err_overlapSelect_1.txt -b y","overlapSelect -strand -mergeOutput $FileA $FileB $OUT_NJ_bed",\@all_job_ids,$OUT_NJ_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	run_cmd("qsub -N ${prefix}_OLSLT -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_overlapSelect_2.txt -e $output_dir/log_files/13_err_overlapSelect_2.txt -b y","overlapSelect -strand -overlapThreshold=1.0 -mergeOutput $FileA2 $FileB2 $OUT_Jun2Tx_bed",\@all_job_ids,$OUT_Jun2Tx_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
@@ -312,7 +315,6 @@ unless ($skip{9}){
 }
 
 if ($IRM eq 'Y'){
-
 	#Calculate Differential Intron Retention (IRM mode)
 	@par=($OUT_calc_LC_JEFF,$OUT_Coverage_IntrSegm1,$OUT_Coverage_IntrSegm2,$olapSel_NJunc12,$olapSel_Junc2Tx,$ENS_Tx_Junc,$Proc_Junctions1,$Proc_Junctions2,"IRM");
 	my $OUT_IRM=$output_dir."/Diff_RetIntr_IRM.txt";

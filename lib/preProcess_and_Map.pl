@@ -195,7 +195,7 @@ foreach my $cond_name ($cond1_name,$cond2_name){
 		}
 	}else{
 		if($run_without_qsub==0){
-			$call = "qsub -N SANJUAN_SAMmerge_${cond_name}_${c} -q $Lqueue -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
+			$call = "qsub -N SANJUAN_BAMmerge_${cond_name}_${c} -q $Lqueue -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=40G -l h_rt=24:00:00 -b y samtools merge $merged_bam_file $bam_files{$cond_name}";
 		}else{
 			$call = "samtools merge $merged_bam_file $bam_files{$cond_name} 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
 		}
