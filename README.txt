@@ -52,7 +52,7 @@ As input SANJUAN takes either
 2. mapped reads (BAM files)
 
 For adapter removal, trimming and mapping,
-SANJUAN relies on Cutadapt, Trim-Galore and Tophat2.
+SANJUAN relies on the STAR aligner software.
 The user might decide to do these pre-processing
 steps and mapping with other programs by herself
 and apply SANJUAN on the resulting BAM files,
@@ -255,15 +255,16 @@ RNAseq reads by himself. The user would then apply the
 splicing analysis of SANJUAN to her BAM files. The splicin 
 analysis of SANJUAN relies amongst other things on the 
 XS attribute field for junction reads in the BAM files. 
-This attribute field is present by default when mapping 
-with Tophat2. When using the STAR aligner the XS attribute 
-for (canonical) junction reads can be generated for all 
-types of libraries by setting the "--outSAMstrandField" 
-switch to "intronMotif". The STAR aligner manual gives
-more details.
+When using the STAR aligner the XS attribute for (canonical)
+junction reads can be generated for all types of libraries
+by setting the "--outSAMstrandField" switch to "intronMotif".
+The STAR aligner manual gives more details:
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+This attribute field is present by default when mapping 
+with Tophat2. 
 
-2. The genome ids must have the prefix "chr".
+2. The genome ids must have the prefix "chr" (though we are 
+working to change this).
 
 
 7. OUTPUT OF SANJUAN
