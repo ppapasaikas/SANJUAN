@@ -48,7 +48,8 @@ and ready-to-use:
 7. arabidopsis (ath10)
 
 As input SANJUAN takes either
-1. RNAseq data (FASTQ, FASTQGZ files, only paired-end), or directly
+1. RNAseq data: FASTQ files from paired or single end experiments
+(raw, gzipped -.gz- or bzipped -.bz2-), or directly
 2. mapped reads (BAM files)
 
 For adapter removal, trimming and mapping,
