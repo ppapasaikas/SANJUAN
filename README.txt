@@ -73,11 +73,9 @@ following programs.
 1. samtools
 2. bedtools
 3. overlapSelect
-7. awk                    (+)
-8. command line tool sort (+)
-4. trim_galore            (*)
-5. cutadapt               (*)
-6. tophat2 (& botwie2)    (*)
+4. awk                    (+)
+5. command line tool sort (+)
+6. STAR aligner v.>=2.4.x   (*)
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
@@ -111,7 +109,7 @@ the following sub-directories:
          Statistics) which are used internally by SANJUAN.
 4. db: contains annotation data used 
          internally by SANJUAN.
-5. mapping_indexes: There, bowtie2 and tophat2 indexes
+5. mapping_indexes: There, STAR indexes
          compiled by the user, are stored.
          These indexes and files are used only by the
          pre-processing and mapping routine of SANJUAN. 
