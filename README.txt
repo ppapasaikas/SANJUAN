@@ -1,4 +1,4 @@
-Last update of this file: April 18th, 2016
+Last update of this file: April 19th, 2016
 
 We are currently re-working SANJUAN to make
 integration of new genomes possible.
@@ -54,10 +54,10 @@ As input SANJUAN takes either
 
 For adapter removal, trimming and mapping,
 SANJUAN relies on the STAR aligner software.
-The user might decide to do these pre-processing
-steps and mapping with other programs by herself
-and apply SANJUAN on the resulting BAM files,
-skipping the build-in pre-processing and mapping of SANJUAN.
+The user might decide to perform these pre-processing
+steps and mapping, independently, and to apply
+SANJUAN on the resulting BAM files, skipping the build-in
+pre-processing and mapping functionality of SANJUAN.
 
 SANJUAN is designed to run on "Linux" like platforms
 (including OSX).
@@ -73,15 +73,15 @@ following programs.
 
 1. samtools v.>=1.1
 2. bedtools v.>=2.24
-4. awk                    (+)
-5. command line tool sort (+)
-6. STAR aligner v.>=2.4.0   (*)
+3. awk                    (+)
+4. command line tool sort (+)
+5. STAR aligner v.>=2.4.0   (*)
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
-(*): These marked prorgams need to be installed only
-if you will use the pre-processing (adapter removal, 
-trimming) and mapping routine of SANJUAN.
+(*): These programs need only be installed if you
+intend to use the pre-processing and mapping
+functionality of SANJUAN.
 
 
 
