@@ -79,9 +79,9 @@ following programs.
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
-(*): These marked prorgams need to be installed only
-if you will use the pre-processing (adapter removal, 
-trimming) and mapping routine of SANJUAN.
+(*): These programs need only be installed if you
+intend to use the pre-processing and mapping
+functionality of SANJUAN.
 
 
 
