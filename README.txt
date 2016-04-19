@@ -1,4 +1,4 @@
-Last update of this file: April 18th, 2016
+Last update of this file: April 19th, 2016
 
 We are currently re-working SANJUAN to make
 integration of new genomes possible.
@@ -73,9 +73,9 @@ following programs.
 
 1. samtools v.>=1.1
 2. bedtools v.>=2.24
-4. awk                    (+)
-5. command line tool sort (+)
-6. STAR aligner v.>=2.4.0   (*)
+3. awk                    (+)
+4. command line tool sort (+)
+5. STAR aligner v.>=2.4.0   (*)
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
