@@ -71,12 +71,11 @@ SANJUAN is a Perl pipeline and was tested under
 Perl v5.10.1 and v5.18.2. It relies on the
 following programs.
 
-1. samtools
-2. bedtools
-3. overlapSelect
+1. samtools v.>=1.1
+2. bedtools v.>=2.24
 4. awk                    (+)
 5. command line tool sort (+)
-6. STAR aligner v.>=2.4.x   (*)
+6. STAR aligner v.>=2.4.0   (*)
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
