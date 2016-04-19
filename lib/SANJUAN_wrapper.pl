@@ -5,10 +5,10 @@ use warnings;
 ### *S*plicing *AN*alysis & *JU*nction *AN*notation
 ### Software Requirements:
 ### samtools, bedtools, overlapSelect
-### Perl Scripts: Found in SANJUAN directory
-### Annotation Files: Found in SANJUAN directory/annotation files
-### Ensembl_Transcript Junctions 'path2SANJUAN/annotation_files/...Transcript_Junctions.txt', EnsemblID2Name,
-### Ensembl_Transcripts 'path2SANJUAN/annotation_files/...Transcripts.bed';
+### Perl Scripts: Found in SANJUAN lib directory
+### Annotation Files: Found in SANJUAN db/SANJUAN_annotation_files:
+### Transcripts.bed Transcript_Junctions.txt, TxID2Name,
+
 
 ################### Subs ##############################################################################################################
 #######################################################################################################################################
@@ -61,7 +61,7 @@ sub run_cmd { # $_[0]: command / job call as string / qsub part; $_[1]: command 
 # a reference to this array is a parameter to the sub qsub
 # internally qsub checks if output of current job already exists; if yes, the job is not started
 # the output file is a parameter to qsub
-# exception: when $ENFORCE_RUN[0]=1, 1. the output file is delete (if it exists), and 2. the job is sent to the cluster
+# exception: when $ENFORCE_RUN[0]=1, 1. the output file is deletes (if it exists), and 2. the job is sent to the cluster
 # $ENFORCE_RUN[0] is set to 1 internally in qsub whenever it happens that one output file does not exists
 # this enforces that all later runs of qsub are enforced to send the jobs to the cluster (if their output exists or not) 
 my @ENFORCE_RUN=(0);
@@ -116,7 +116,6 @@ my $prefix="SANJUAN";
 print "Call of sub routine:\n";
 print "SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $COND1 $COND2 $bam1 $bam2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir\n";
 
-
 my ($ret,$genomePath,$Tx_bed,$ENS_Tx_Junc,$ENSid2Name);
 #### Location of bedtools genome files (originally from ~/ppapasaikas/SOFTWARE/bedtools2-2.20.1/genomes/ )
 $genomePath="$sanjuan_genomic_data_dir/genomes/${genome}.genome";
@@ -131,16 +130,16 @@ $ENSid2Name="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_TxID2N
 #### Specify Skipping of preProcessing/Processing Steps ####
 my %skip=();
 $skip{1}=0;	#skip preprocessing step: -> bam file preprocessing
-$skip{2}=0; #skip preprocessing step: -> Building of Non-Junction bam files
-$skip{3}=0;	#skip: build SAM junction files, parsing, merging, slopping
-$skip{4}=0;	#Skip  Run overlapSelect to find Neighboring Junctions and Junction-subsuming Transcripts
-$skip{5}=0;	#skip: Calculate Differential Junction Efficiencies
-$skip{6}=0;	#skip: Generate Intronic Segments and sorting
-$skip{7}=0;	#skip: Calculate Coverage of Intronic Segments by NonJunction Reads:
-$skip{8}=0;	#skip: Calculate Differential Intron Retention  
-$skip{9}=0;	#skip: Annotate Differential Junctions
-$skip{10}=0;#skip: Calculate Differential Intron Retention (IRM mode)
-$skip{11}=0;#skip: Annotate Differential Introns
+#$skip{2}=0; 	#skip preprocessing step: -> Building of Non-Junction bam files. Deprecated. No coverage of intronic segments is calculated drectly from BAM file
+$skip{2}=0;	#skip: build SAM junction files, parsing, merging, slopping
+$skip{3}=0;	#Skip  Run overlapSelect to find Neighboring Junctions and Junction-subsuming Transcripts
+$skip{4}=0;	#skip: Calculate Differential Junction Efficiencies
+$skip{5}=0;	#skip: Generate Intronic Segments and sorting
+$skip{6}=0;	#skip: Calculate Coverage of Intronic Segments by NonJunction Reads:
+$skip{7}=0;	#skip: Calculate Differential Intron Retention  
+$skip{8}=0;	#skip: Annotate Differential Junctions
+$skip{9}=0;#skip: Calculate Differential Intron Retention (IRM mode)
+$skip{10}=0;#skip: Annotate Differential Introns
 
 my $skip_nsteps=0;	#Number of processing steps to skip in analysis. e.g set to 2 to repeat analysis with different stringency
 for (0..$skip_nsteps){ $skip{$_}=1; }
@@ -148,7 +147,8 @@ for (0..$skip_nsteps){ $skip{$_}=1; }
 ################### Main ##############################################################################################################
 #######################################################################################################################################
 
-#SANITIZE i.e remove unmapped reads and secondary alignments, keep only proper mates
+#SANITIZE i.e remove unmapped reads and secondary alignments, keep only proper mates. Deprecated after STAR transition.
+#Now only removal of duplicate reads...
 #NRS my $PPoutbam1=$output_dir."/".$COND1 . '_ProperPReads.bam';
 #NRS my $PPoutbam2=$output_dir."/".$COND2 . '_ProperPReads.bam';
 my $Rmd_bam1=$output_dir."/".$COND1 . '_rmdup.bam';
@@ -177,31 +177,13 @@ $bam1=$Rmd_bam1;
 $bam2=$Rmd_bam2;
 }
 
-### Build Non-Junction-Reads bam files.  (Keep Only pairs overlapping Junction Introns for both mates (pairtobed -type both))
-### Generate bed and fix orientation of reads: Strand for mate /1 needs to be switched OR use -S in bedtools intersect
-my $NJoutbed1=$output_dir."/".$COND1 . '_NoJunctReads.bed';
-my $NJoutbed2=$output_dir."/".$COND2 . '_NoJunctReads.bed';
-
-unless ($skip{2}){
-	print "\n\n\nBuilding bed files for non-junction reads\n#####################\n\n";
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/06_out_write_buildNJ1.txt -e $output_dir/log_files/06_err_write_buildNJ1.txt -b y","perl $sanjuan_dir/job1.pl $bam1 $output_dir/buildNJ1.sh $NJoutbed1",\@all_job_ids,"$output_dir/buildNJ1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/06_out_write_buildNJ2.txt -e $output_dir/log_files/06_err_write_buildNJ2.txt -b y","perl $sanjuan_dir/job1.pl $bam2 $output_dir/buildNJ2.sh $NJoutbed2",\@all_job_ids,"$output_dir/buildNJ2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	
-	$job_ids=join(",",@all_job_ids);
-	# this job does all in one step:
-	# Keep Only pairs overlapping Junction Introns for both mates (pairtobed -type both)
-	# Fix orientation
-	run_cmd("qsub -N ${prefix}_buildNJbam1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/07_out_run_buildNJ1.txt -e $output_dir/log_files/07_err_run_buildNJ1.txt -b y","$output_dir/buildNJ1.sh",\@all_job_ids,$NJoutbed1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_buildNJbam2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/07_out_run_buildNJ2.txt -e $output_dir/log_files/07_err_run_buildNJ2.txt -b y","$output_dir/buildNJ2.sh",\@all_job_ids,$NJoutbed2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	
-}
 
 
 ###################################################################################################################
 my $JSAM1=$output_dir."/".$COND1 . '_JUNCT.sam';
 my $JSAM2=$output_dir."/".$COND2 . '_JUNCT.sam';
-my $Tophat_Junctions1=$output_dir."/"."Junctions_$COND1.bed";
-my $Tophat_Junctions2=$output_dir."/"."Junctions_$COND2.bed";
+my $Mapped_Junctions1=$output_dir."/"."Junctions_$COND1.bed";
+my $Mapped_Junctions2=$output_dir."/"."Junctions_$COND2.bed";
 my $SLOP1=$output_dir.'/Processed_pm' . '1000_Merged_Junctions.bed';
 my $SLOP2=$output_dir.'/Processed_pm' . '10_Merged_Junctions.bed';
 
@@ -219,11 +201,11 @@ unless ($skip{3}){	#Get Junctions from SAM files, parse Cond1, Cond2, Merge and 
 	run_cmd("qsub -N ${prefix}_buildSAM2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildSAM2.txt -e $output_dir/log_files/09_err_run_buildSAM2.txt -b y","$output_dir/buildSAM2.sh",\@all_job_ids,$JSAM2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_getJN1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/10_out_get_juncts_grp1.txt -e $output_dir/log_files/10_err_get_juncts_grp1.txt -b y","perl $sanjuan_dir/get_juncts.pl $JSAM1 $low_seq_req $Tophat_Junctions1",\@all_job_ids,$Tophat_Junctions1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_getJN2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/10_out_get_juncts_grp2.txt -e $output_dir/log_files/10_err_get_juncts_grp2.txt -b y","perl $sanjuan_dir/get_juncts.pl $JSAM2 $low_seq_req $Tophat_Junctions2",\@all_job_ids,$Tophat_Junctions2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_getJN1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/10_out_get_juncts_grp1.txt -e $output_dir/log_files/10_err_get_juncts_grp1.txt -b y","perl $sanjuan_dir/get_juncts.pl $JSAM1 $low_seq_req $Mapped_Junctions1",\@all_job_ids,$Mapped_Junctions1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_getJN2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/10_out_get_juncts_grp2.txt -e $output_dir/log_files/10_err_get_juncts_grp2.txt -b y","perl $sanjuan_dir/get_juncts.pl $JSAM2 $low_seq_req $Mapped_Junctions2",\@all_job_ids,$Mapped_Junctions2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -q short-sl65 -N ${prefix}_merge_junctions -hold_jid $job_ids -V -cwd -l virtual_free=20G -o $output_dir/log_files/11_out_merge_juncts.txt -e $output_dir/log_files/11_err_merge_juncts.txt -b y","perl $sanjuan_dir/merge_junctions.pl $Tophat_Junctions1 $Tophat_Junctions2 $output_dir/Merged_Junctions.bed",\@all_job_ids,"$output_dir/Merged_Junctions.bed",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -q short-sl65 -N ${prefix}_merge_junctions -hold_jid $job_ids -V -cwd -l virtual_free=20G -o $output_dir/log_files/11_out_merge_juncts.txt -e $output_dir/log_files/11_err_merge_juncts.txt -b y","perl $sanjuan_dir/merge_junctions.pl $Mapped_Junctions1 $Mapped_Junctions2 $output_dir/Merged_Junctions.bed",\@all_job_ids,"$output_dir/Merged_Junctions.bed",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
 	############### SLOP
 	$job_ids=join(",",@all_job_ids);
@@ -242,14 +224,14 @@ my $OUT_Jun2Tx_bed=$output_dir.'/olapSel_ENSTX_JUNC.bed';
 unless ($skip{4}){
 	print "\n\n\nFinding neighboring junctions and junction-subsuming transcripts\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_OLSLN -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_overlapSelect_1.txt -e $output_dir/log_files/13_err_overlapSelect_1.txt -b y","overlapSelect -strand -mergeOutput $FileA $FileB $OUT_NJ_bed",\@all_job_ids,$OUT_NJ_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_OLSLT -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_overlapSelect_2.txt -e $output_dir/log_files/13_err_overlapSelect_2.txt -b y","overlapSelect -strand -overlapThreshold=1.0 -mergeOutput $FileA2 $FileB2 $OUT_Jun2Tx_bed",\@all_job_ids,$OUT_Jun2Tx_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_INTSN -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_bedtools_intersect_NJ.txt -e $output_dir/log_files/13_err_bedtools_intersect_NJ.txt -b y","$sanjuan_dir/bedtools_intersect_NJ.sh $FileB $FileA $OUT_NJ_bed",\@all_job_ids,$OUT_NJ_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_INTST -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_bedtools_intersect_ST.txt -e $output_dir/log_files/13_err_bedtools_intersect_ST.txt -b y","$sanjuan_dir/bedtools_intersect_ST.sh $FileB2 $FileA2 $OUT_Jun2Tx_bed",\@all_job_ids,$OUT_Jun2Tx_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 }
 
 
 #Calculate Differential Junction Efficiencies:
-my $Proc_Junctions1=$Tophat_Junctions1;
-my $Proc_Junctions2=$Tophat_Junctions2;
+my $Proc_Junctions1=$Mapped_Junctions1;
+my $Proc_Junctions2=$Mapped_Junctions2;
 my $olapSel_NJunc12=$OUT_NJ_bed;
 my $olapSel_Junc2Tx=$OUT_Jun2Tx_bed;
 my $OUT_calc_HC_JEFF=$output_dir."/Diff_Junctions_".$conf.".txt";
@@ -273,7 +255,7 @@ my $OUT_INTR_SEGM_SORTED=$output_dir.'/Junctions_IntronicSegments_sorted.bed';
 unless ($skip{6}){
 	print "\n\n\nGeneration of intronic segments bed file\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N $prefix -hold_jid $job_ids -V -cwd -l virtual_free=20G -o $output_dir/log_files/15_out_juncts2Introns.txt -e $output_dir/log_files/15_err_juncts2Introns.txt -b y","perl $sanjuan_dir/tophat_junctions2IntronSegments.pl $output_dir/Merged_Junctions.bed $OUT_INTR_SEGM",\@all_job_ids,$OUT_INTR_SEGM,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -hold_jid $job_ids -V -cwd -l virtual_free=20G -o $output_dir/log_files/15_out_juncts2Introns.txt -e $output_dir/log_files/15_err_juncts2Introns.txt -b y","perl $sanjuan_dir/Mapped_junctions2IntronSegments.pl $output_dir/Merged_Junctions.bed $OUT_INTR_SEGM",\@all_job_ids,$OUT_INTR_SEGM,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 		
 	print "\n\n\nSorting intronic segments file\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
@@ -283,16 +265,14 @@ unless ($skip{6}){
 
 
 #Calculate Coverage of Intronic Segments by NonJunction Reads:
-my $NoJunctReads_bed1=$NJoutbed1;		#Generated during Preprocessing
-my $NoJunctReads_bed2=$NJoutbed2;		#Generated during Preprocessing
 my $OUT_Coverage_IntrSegm1= "$output_dir/$COND1"."_IntrSegm_coverage.bed";
 my $OUT_Coverage_IntrSegm2= "$output_dir/$COND2"."_IntrSegm_coverage.bed";
 unless ($skip{7}){
-	print "\n\n\nCalculation intronic segments read coverage\n#####################\n\n";
+	print "\n\n\nCalculation of intronic segments read coverage\n#####################\n\n";
 	
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_IntrCov1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp1.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp1.txt -b y","$sanjuan_dir/bedtools_intersect.sh $RNAseq $OUT_INTR_SEGM_SORTED $NoJunctReads_bed1 $OUT_Coverage_IntrSegm1",\@all_job_ids,$OUT_Coverage_IntrSegm1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_IntrCov2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp2.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp2.txt -b y","$sanjuan_dir/bedtools_intersect.sh $RNAseq $OUT_INTR_SEGM_SORTED $NoJunctReads_bed2 $OUT_Coverage_IntrSegm2",\@all_job_ids,$OUT_Coverage_IntrSegm2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_IntrCov1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp1.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp1.txt -b y","$sanjuan_dir/bedtools_intersect.sh $RNAseq $OUT_INTR_SEGM_SORTED $bam1 $OUT_Coverage_IntrSegm1",\@all_job_ids,$OUT_Coverage_IntrSegm1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_IntrCov2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/17_out_bedtools_intersect_grp2.txt -e $output_dir/log_files/17_err_bedtools_intersect_grp2.txt -b y","$sanjuan_dir/bedtools_intersect.sh $RNAseq $OUT_INTR_SEGM_SORTED $bam2 $OUT_Coverage_IntrSegm2",\@all_job_ids,$OUT_Coverage_IntrSegm2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 }
 
 
