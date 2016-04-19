@@ -1,6 +1,6 @@
-Last update of this file: April 11th, 2016
+Last update of this file: April 18th, 2016
 
-We are currently re-working SANJAUN to make
+We are currently re-working SANJUAN to make
 integration of new genomes possible.
 A first complete version of SANJUAN shall be available
 within a few days.
@@ -48,11 +48,12 @@ and ready-to-use:
 7. arabidopsis (ath10)
 
 As input SANJUAN takes either
-1. RNAseq data (FASTQ, FASTQGZ files, only paired-end), or directly
+1. RNAseq data: FASTQ files from paired or single end experiments
+(raw, gzipped -.gz- or bzipped -.bz2-), or directly
 2. mapped reads (BAM files)
 
 For adapter removal, trimming and mapping,
-SANJUAN relies on Cutadapt, Trim-Galore and Tophat2.
+SANJUAN relies on the STAR aligner software.
 The user might decide to do these pre-processing
 steps and mapping with other programs by herself
 and apply SANJUAN on the resulting BAM files,
@@ -70,14 +71,11 @@ SANJUAN is a Perl pipeline and was tested under
 Perl v5.10.1 and v5.18.2. It relies on the
 following programs.
 
-1. samtools
-2. bedtools
-3. overlapSelect
-7. awk                    (+)
-8. command line tool sort (+)
-4. trim_galore            (*)
-5. cutadapt               (*)
-6. tophat2 (& botwie2)    (*)
+1. samtools v.>=1.1
+2. bedtools v.>=2.24
+4. awk                    (+)
+5. command line tool sort (+)
+6. STAR aligner v.>=2.4.0   (*)
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
@@ -111,7 +109,7 @@ the following sub-directories:
          Statistics) which are used internally by SANJUAN.
 4. db: contains annotation data used 
          internally by SANJUAN.
-5. mapping_indexes: There, bowtie2 and tophat2 indexes
+5. mapping_indexes: There, STAR indexes
          compiled by the user, are stored.
          These indexes and files are used only by the
          pre-processing and mapping routine of SANJUAN. 
@@ -257,15 +255,16 @@ RNAseq reads by himself. The user would then apply the
 splicing analysis of SANJUAN to her BAM files. The splicin 
 analysis of SANJUAN relies amongst other things on the 
 XS attribute field for junction reads in the BAM files. 
-This attribute field is present by default when mapping 
-with Tophat2. When using the STAR aligner the XS attribute 
-for (canonical) junction reads can be generated for all 
-types of libraries by setting the "--outSAMstrandField" 
-switch to "intronMotif". The STAR aligner manual gives
-more details.
+When using the STAR aligner the XS attribute for (canonical)
+junction reads can be generated for all types of libraries
+by setting the "--outSAMstrandField" switch to "intronMotif".
+The STAR aligner manual gives more details:
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+This attribute field is present by default when mapping 
+with Tophat2. 
 
-2. The genome ids must have the prefix "chr".
+2. The genome ids must have the prefix "chr" (though we are 
+working to change this).
 
 
 7. OUTPUT OF SANJUAN

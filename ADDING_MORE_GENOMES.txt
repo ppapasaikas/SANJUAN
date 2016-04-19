@@ -139,12 +139,23 @@ comes with SANJUAN uses the "chr" prefix. Hence, we
 recommend to download the reference sequences from the
 UCSC resources.
 
-Finally, build the bowtie indexes for the file using the bowtie2-build command(bowtie2 required):
-bowtie2-build genome_fasta_file prefix_for_output_files (should be the same as the one use for buil_SJannotation_from_gtf.pl in step 1.)
-e.g:
-bowtie2-build hg38.fa hg38
+Finally, build the STAR genome index for the file using the
+STAR genome generatate command (STAR v>2.4.x required). eg.:
+> STAR --runThreadN 64 --runMode genomeGenerate --genomeDir SANJUAN/mapping_indexes/hg38/ --genomeFastaFiles hg38.fa --sjdbGTFfile SANJUAN/db/gtfs/hg38.gtf --sjdbOverhang 124 
+Where the number specified for --sjdbOverhang is optimally
+the length of your most commonly used reads minus 1 or the
+more generic value 100 (see also STAR manual for details).
 
-and move the output .bt2 files to ??????
+Notice that the specified genomeDir HAS to be inside the
+mapping_indexes directory of SANJUAN and its name HAS to match
+the prefix_for_output_files used in previous steps (e.g here hg19)
+
+If you have already built STAR genome indices for your genome(s)
+of interest you can move them to the appropriate SANJUAN folder
+to use them from within SANJUAN. e.g:
+> mkdir SANJUAN/mapping_indexes/hg38/
+> mv MY_STAR_INDICES/Human_hg38/* SANJUAN/mapping_indexes/hg38/
+
 
 You can view the list of all available genomes and genome 
 versions from UCSC here:
