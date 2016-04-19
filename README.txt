@@ -54,10 +54,10 @@ As input SANJUAN takes either
 
 For adapter removal, trimming and mapping,
 SANJUAN relies on the STAR aligner software.
-The user might decide to do these pre-processing
-steps and mapping with other programs by herself
-and apply SANJUAN on the resulting BAM files,
-skipping the build-in pre-processing and mapping of SANJUAN.
+The user might decide to perform these pre-processing
+steps and mapping, independently, and to apply
+SANJUAN on the resulting BAM files, skipping the build-in
+pre-processing and mapping functionality of SANJUAN.
 
 SANJUAN is designed to run on "Linux" like platforms
 (including OSX).
