@@ -130,7 +130,7 @@ $ENSid2Name="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_TxID2N
 #### Specify Skipping of preProcessing/Processing Steps ####
 my %skip=();
 $skip{1}=0;	#skip preprocessing step: -> bam file preprocessing
-#$skip{2}=0; 	#skip preprocessing step: -> Building of Non-Junction bam files. Deprecated. No coverage of intronic segments is calculated drectly from BAM file
+#$skip{2}=0; 	#skip preprocessing step: -> Building of Non-Junction bam files. Deprecated. Now coverage of intronic segments is calculated drectly from BAM file
 $skip{2}=0;	#skip: build SAM junction files, parsing, merging, slopping
 $skip{3}=0;	#Skip  Run overlapSelect to find Neighboring Junctions and Junction-subsuming Transcripts
 $skip{4}=0;	#skip: Calculate Differential Junction Efficiencies
@@ -187,7 +187,7 @@ my $Mapped_Junctions2=$output_dir."/"."Junctions_$COND2.bed";
 my $SLOP1=$output_dir.'/Processed_pm' . '1000_Merged_Junctions.bed';
 my $SLOP2=$output_dir.'/Processed_pm' . '10_Merged_Junctions.bed';
 
-unless ($skip{3}){	#Get Junctions from SAM files, parse Cond1, Cond2, Merge and slop
+unless ($skip{2}){	#Get Junctions from SAM files, parse Cond1, Cond2, Merge and slop
 	print "\n\n\nCreation of junction files\n#####################\n\n";
 	#print `echo "samtools view $PPoutbam1 | awk $d6 ~ /N/' " > buildSAM1.sh`;
 	#print `echo "samtools view $PPoutbam2 | awk $d6 ~ /N/' " > buildSAM2.sh`;
@@ -221,7 +221,7 @@ my $OUT_NJ_bed=$output_dir.'/olapSel_JUNCpm1000_JUNCpm10.bed';
 my $FileA2=$Tx_bed;
 my $FileB2=$output_dir.'/Merged_Junctions.bed';
 my $OUT_Jun2Tx_bed=$output_dir.'/olapSel_ENSTX_JUNC.bed';
-unless ($skip{4}){
+unless ($skip{3}){
 	print "\n\n\nFinding neighboring junctions and junction-subsuming transcripts\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_INTSN -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/13_out_bedtools_intersect_NJ.txt -e $output_dir/log_files/13_err_bedtools_intersect_NJ.txt -b y","$sanjuan_dir/bedtools_intersect_NJ.sh $FileB $FileA $OUT_NJ_bed",\@all_job_ids,$OUT_NJ_bed,\@ENFORCE_RUN,$test_run,$run_without_qsub);
@@ -238,7 +238,7 @@ my $OUT_calc_HC_JEFF=$output_dir."/Diff_Junctions_".$conf.".txt";
 my $OUT_calc_LC_JEFF=$output_dir.'/Diff_Junctions_LC.txt';
 my $OUT_calc_NC_JEFF=$output_dir.'/Diff_Junctions_NC.txt';
 my @par=($Proc_Junctions1,$Proc_Junctions2,$olapSel_NJunc12,$olapSel_Junc2Tx,$ENS_Tx_Junc);
-unless ($skip{5}){
+unless ($skip{4}){
 	print "\n\n\nCalculation of high- and low-confidence differential junctions\n#####################\n\n";
 	
 	$job_ids=join(",",@all_job_ids);
@@ -252,7 +252,7 @@ unless ($skip{5}){
 #Generate Intronic Segments
 my $OUT_INTR_SEGM=$output_dir.'/Junctions_IntronicSegments.bed';
 my $OUT_INTR_SEGM_SORTED=$output_dir.'/Junctions_IntronicSegments_sorted.bed';
-unless ($skip{6}){
+unless ($skip{5}){
 	print "\n\n\nGeneration of intronic segments bed file\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N $prefix -hold_jid $job_ids -V -cwd -l virtual_free=20G -o $output_dir/log_files/15_out_juncts2Introns.txt -e $output_dir/log_files/15_err_juncts2Introns.txt -b y","perl $sanjuan_dir/Mapped_junctions2IntronSegments.pl $output_dir/Merged_Junctions.bed $OUT_INTR_SEGM",\@all_job_ids,$OUT_INTR_SEGM,\@ENFORCE_RUN,$test_run,$run_without_qsub);
@@ -267,7 +267,7 @@ unless ($skip{6}){
 #Calculate Coverage of Intronic Segments by NonJunction Reads:
 my $OUT_Coverage_IntrSegm1= "$output_dir/$COND1"."_IntrSegm_coverage.bed";
 my $OUT_Coverage_IntrSegm2= "$output_dir/$COND2"."_IntrSegm_coverage.bed";
-unless ($skip{7}){
+unless ($skip{6}){
 	print "\n\n\nCalculation of intronic segments read coverage\n#####################\n\n";
 	
 	$job_ids=join(",",@all_job_ids);
@@ -279,7 +279,7 @@ unless ($skip{7}){
 #Calculate Differential Intron Retention
 @par=($OUT_calc_HC_JEFF,$OUT_Coverage_IntrSegm1,$OUT_Coverage_IntrSegm2,$olapSel_NJunc12,$olapSel_Junc2Tx,$ENS_Tx_Junc,$Proc_Junctions1,$Proc_Junctions2,"noIRM");
 my $OUT_INTR_RET=$output_dir."/Diff_RetIntr.txt";
-unless ($skip{8}){
+unless ($skip{7}){
 	print "\n\n\nCalculation of differential intron retention\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_DIR -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/18_out_calcIntronRet.txt -e $output_dir/log_files/18_err_calcIntronRet.txt -b y","perl $sanjuan_dir/calc_INTRON_retention.pl $par[0] $par[1] $par[2] $par[3] $par[4] $par[5] $par[6] $par[7] $par[8] $sanjuan_perllib $OUT_INTR_RET",\@all_job_ids,$OUT_INTR_RET,\@ENFORCE_RUN,$test_run,$run_without_qsub);
@@ -288,7 +288,7 @@ unless ($skip{8}){
 #Annotate Differential Junctions
 @par=($OUT_calc_HC_JEFF,$OUT_calc_LC_JEFF,$olapSel_Junc2Tx,$OUT_INTR_RET,$ENSid2Name,$ENS_Tx_Junc);
 my $OUT_ANNOT=$output_dir."/Annotated_Diff_Junctions.txt";
-unless ($skip{9}){
+unless ($skip{8}){
 	print "\n\n\nAnnotation of differential junctions\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $par[0] $par[1] $par[2] $par[3] $par[4] $par[5] $conf $COND1 $COND2 $OUT_ANNOT",\@all_job_ids,$OUT_ANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
