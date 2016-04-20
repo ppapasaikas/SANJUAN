@@ -12,7 +12,9 @@ while (<IN>){
 $line=$_;
 @mat=split /\t/,$line;
 
-next unless length($mat[2])<6;	#Remove junctions coming from non-canonical chromosomes. 03-2015
+
+#next unless length($mat[2])<8;	#Remove junctions coming from non-canonical chromosomes. 03-2015
+next if ( (length($mat[2])>7 && $mat[2]=~/chr/) ||  (length($mat[2])>4 && $mat[2]!~/chr/) );
 
 next unless $mat[5]=~/^[\dMN]+$/;
 
