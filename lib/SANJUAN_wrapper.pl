@@ -69,9 +69,8 @@ my @ENFORCE_RUN=(0);
 ################# Setting Parameters ##################################################################################################
 #######################################################################################################################################
 my $genome=$ARGV[0];	#Specify species genome: hg-> human, mm-> mouse, dr-> zebrafish
-my $library_type=$ARGV[1];	#1S|2S|1U|2U: Single end 1 or Pair-end 2 Stranded "S" (e.g firstrand) or unstranded "U" RNAseq experiment. Default "S". 
+my $library_type=$ARGV[1];	#1S|2S|1U|2U: Single end 1 or Pair-end 2. Stranded "S" (e.g firstrand) or unstranded "U" RNAseq experiment.
 my $RNAseq=($library_type=~/S/)? "S":"U";
-
 my $conf=$ARGV[2];	#Specify stringency for Differentially Spliced Junctions (VeryHighConfidence -> VHC, HighConfidence -> HC, MediumConfidence -> MC)
 my $IRM=$ARGV[3];	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Default 'N' 
 my $SuppJun=$ARGV[4];	#Require Supporting Junction Evidence for IR identification (IRM mode). Default 'N'
@@ -117,13 +116,13 @@ print "Call of sub routine:\n";
 print "SANJUAN_wrapper.pl $genome $RNAseq $conf $IRM $SuppJun $COND1 $COND2 $bam1 $bam2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir\n";
 
 my ($ret,$genomePath,$Tx_bed,$ENS_Tx_Junc,$ENSid2Name);
-#### Location of bedtools genome files (originally from ~/ppapasaikas/SOFTWARE/bedtools2-2.20.1/genomes/ )
+#### Location of bedtools genome files:
 $genomePath="$sanjuan_genomic_data_dir/genomes/${genome}.genome";
-### Location of Transcripts bed files (downloaded from UCSC table.browser | cut -f 1-6 OR gtf2Txbed.pl -used for zebrafish-)
+### Location of Transcripts bed files:
 $Tx_bed="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_Transcripts.bed";
-### Location of Transcript Junctions files (downloaded gtf from UCSC table.browser | perl TxBed_J2Tx_from_gtf.pl)
+### Location of Transcript Junctions files:
 $ENS_Tx_Junc="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_Transcript_Junctions.txt";
-### Location of Transcript ID2 GeneName files (downloaded from UCSC table.browser)
+### Location of Transcript ID2 GeneName files:
 $ENSid2Name="$sanjuan_genomic_data_dir/SANJUAN_annotation_files/${genome}_TxID2Name.txt";
 
 #### For debugging
@@ -180,33 +179,29 @@ $bam2=$Rmd_bam2;
 
 
 ###################################################################################################################
-my $JSAM1=$output_dir."/".$COND1 . '_JUNCT.sam';
-my $JSAM2=$output_dir."/".$COND2 . '_JUNCT.sam';
+#my $JSAM1=$output_dir."/".$COND1 . '_JUNCT.sam';
+#my $JSAM2=$output_dir."/".$COND2 . '_JUNCT.sam';
 my $Mapped_Junctions1=$output_dir."/"."Junctions_$COND1.bed";
 my $Mapped_Junctions2=$output_dir."/"."Junctions_$COND2.bed";
 my $SLOP1=$output_dir.'/Processed_pm' . '1000_Merged_Junctions.bed';
 my $SLOP2=$output_dir.'/Processed_pm' . '10_Merged_Junctions.bed';
 
-unless ($skip{2}){	#Get Junctions from SAM files, parse Cond1, Cond2, Merge and slop
+unless ($skip{2}){	#Get Junctions from BAM files, parse Cond1, Cond2, Merge and slop
 	print "\n\n\nCreation of junction files\n#####################\n\n";
-	#print `echo "samtools view $PPoutbam1 | awk $d6 ~ /N/' " > buildSAM1.sh`;
-	#print `echo "samtools view $PPoutbam2 | awk $d6 ~ /N/' " > buildSAM2.sh`;
 	
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_buildSAM1.txt -e $output_dir/log_files/08_err_write_buildSAM1.txt -b y","perl $sanjuan_dir/job2.pl $bam1 $output_dir/buildSAM1.sh $JSAM1",\@all_job_ids,"$output_dir/buildSAM1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_buildSAM2.txt -e $output_dir/log_files/08_err_write_buildSAM2.txt -b y","perl $sanjuan_dir/job2.pl $bam2 $output_dir/buildSAM2.sh $JSAM2",\@all_job_ids,"$output_dir/buildSAM2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_BAM2JUNCT1.txt -e $output_dir/log_files/08_err_write_BAM2JUNCT1.txt -b y","perl $sanjuan_dir/BAM2JUNCTjob.pl $sanjuan_dir $output_dir/buildJUNCT1.sh $bam1 $low_seq_req $Mapped_Junctions1",\@all_job_ids,"$output_dir/buildJUNCT1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_BAM2JUNT1.txt -e $output_dir/log_files/08_err_write_BAM2JUNCT1.txt -b y","perl $sanjuan_dir/BAM2JUNCTjob.pl $sanjuan_dir $output_dir/buildJUNCT2.sh $bam2 $low_seq_req $Mapped_Junctions2",\@all_job_ids,"$output_dir/buildJUNCT2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
 	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_buildSAM1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildSAM1.txt -e $output_dir/log_files/09_err_run_buildSAM1.txt -b y","$output_dir/buildSAM1.sh",\@all_job_ids,$JSAM1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_buildSAM2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildSAM2.txt -e $output_dir/log_files/09_err_run_buildSAM2.txt -b y","$output_dir/buildSAM2.sh",\@all_job_ids,$JSAM2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	
-	$job_ids=join(",",@all_job_ids);
-	run_cmd("qsub -N ${prefix}_getJN1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/10_out_get_juncts_grp1.txt -e $output_dir/log_files/10_err_get_juncts_grp1.txt -b y","perl $sanjuan_dir/get_juncts.pl $JSAM1 $low_seq_req $Mapped_Junctions1",\@all_job_ids,$Mapped_Junctions1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_getJN2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/10_out_get_juncts_grp2.txt -e $output_dir/log_files/10_err_get_juncts_grp2.txt -b y","perl $sanjuan_dir/get_juncts.pl $JSAM2 $low_seq_req $Mapped_Junctions2",\@all_job_ids,$Mapped_Junctions2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_buildSAM1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildJUNCT1.txt -e $output_dir/log_files/09_err_run_buildJUNCT1.txt -b y","$output_dir/buildJUNCT1.sh",\@all_job_ids,$Mapped_Junctions1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_buildSAM2 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildJUNCT2.txt -e $output_dir/log_files/09_err_run_buildJUNCT2.txt -b y","$output_dir/buildJUNCT2.sh",\@all_job_ids,$Mapped_Junctions2,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -q short-sl65 -N ${prefix}_merge_junctions -hold_jid $job_ids -V -cwd -l virtual_free=20G -o $output_dir/log_files/11_out_merge_juncts.txt -e $output_dir/log_files/11_err_merge_juncts.txt -b y","perl $sanjuan_dir/merge_junctions.pl $Mapped_Junctions1 $Mapped_Junctions2 $output_dir/Merged_Junctions.bed",\@all_job_ids,"$output_dir/Merged_Junctions.bed",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
+
+
 	############### SLOP
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_SLOP1K -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/12_out_bedtools_slop1000.txt -e $output_dir/log_files/12_err_bedtools_slop1000.txt -b y","$sanjuan_dir/bedtools_slop.sh $output_dir/Merged_Junctions.bed $genomePath 1000 $SLOP1",\@all_job_ids,$SLOP1,\@ENFORCE_RUN,$test_run,$run_without_qsub);
@@ -214,7 +209,7 @@ unless ($skip{2}){	#Get Junctions from SAM files, parse Cond1, Cond2, Merge and 
 }
 
 
-#Run overlapSelect to find Neighboring Junctions and Junction-subsuming Transcripts
+#Run bedtools intersect to find Neighboring Junctions and Junction-subsuming Transcripts
 my $FileA=$SLOP1;
 my $FileB=$SLOP2;
 my $OUT_NJ_bed=$output_dir.'/olapSel_JUNCpm1000_JUNCpm10.bed';

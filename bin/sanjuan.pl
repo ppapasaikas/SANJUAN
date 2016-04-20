@@ -20,7 +20,7 @@ my $sanjuan_genomic_data_dir=$abs_path."/db";	# should contain folders genomes a
 # Are all important parts of SANJUAN in place?
 # check if all sanjuan files can be accessed
 sub check_file_access{open(my $fh,"<".$_[0]) or die "Cannot open file $_[0] which is essential for SANJUAN. You might go through the installation process again to solve this problem.\n";close($fh);}
-my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions.pl","bedtools_intersect_NJ.sh","bedtools_intersect_ST.sh","bedtools_intersect.sh","bedtools_slop.sh","calc_INTRON_retention.pl","calc_JUNCT_efficiency.pl","fetchChromSizes","get_juncts.pl","ln_s_wrapper.sh","Mapped_junctions2IntronSegments.pl","merge_junctions.pl","preProcess_and_Map.pl","SANJUAN_wrapper.pl","sort_wrapper.sh");
+my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions.pl","BAM2JUNCTjob.pl","bedtools_intersect_NJ.sh","bedtools_intersect_ST.sh","bedtools_intersect.sh","bedtools_slop.sh","calc_INTRON_retention.pl","calc_JUNCT_efficiency.pl","fetchChromSizes","get_juncts.pl","ln_s_wrapper.sh","Mapped_junctions2IntronSegments.pl","merge_junctions.pl","preProcess_and_Map.pl","SANJUAN_wrapper.pl","sort_wrapper.sh");
 foreach (@SANJUAN_files){check_file_access($sanjuan_dir."/".$_);}
 
 # check if sub-directories genomes and annotation_files exist in db sub-directory
