@@ -214,9 +214,9 @@ foreach my $cond_name ($cond1_name,$cond2_name){
 	# only one file
 	if($bam_files_count{$cond_name}==1){
 		if($run_without_qsub==0){
-			$call="qsub -N SANJUAN_ln_s -q short-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=1G -l h_rt=00:20:00 ~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file";
+			$call="qsub -N SANJUAN_ln_s -q short-sl65 -o $basedir/log_files/03_out_merging_bams_${c}.txt -e $basedir/log_files/03_err_merging_bams_${c}.txt -hold_jid $job_ids -V -cwd -l virtual_free=1G -l h_rt=00:20:00 $sanjuan_dir/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file";
 		}else{
-			$call="~/crg/projects/2015_sanjuan/dev/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
+			$call="$sanjuan_dir/ln_s_wrapper.sh $bam_files{$cond_name} $merged_bam_file 1>$basedir/log_files/03_out_merging_bams_${c}.txt 2>$basedir/log_files/03_err_merging_bams_${c}.txt";
 		}
 	}else{
 		if($run_without_qsub==0){
