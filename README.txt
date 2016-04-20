@@ -31,33 +31,35 @@ e.g., knock down versus wild type.
 It is not designed to determine inclusion levels of 
 alternative splicing events under only one condition.
 
-SANJUAN detects in a de-novo manner splicing events
-but also relies on annotation data of splicing events.
-SANJUAN comes with the capability of adding new 
-genomes / species by the user. Therefore, SANJUAN
-offers convenient scripts. In addition, the following
-genomes / species are available ready-to-use.
+SANJUAN relies mostly on the RNAseq data to de-novo detect
+splicing junctions and alternative splicing events and
+only minimally on available annotation data of transcript structure
+for refining results.
+SANJUAN comes with the capability of adding custom new 
+genomes / species by the user with a few easy steps.
+In addition, the following genomes / species are precompiled
+and ready-to-use:
 1. human      (hg19)
 2. human      (hg38)
 3. mouse      (mm10)
 4. fly        (dm6)
 5. zebrafish  (danRer10)
 6. worm       (ce11)
-
+7. arabidopsis (ath10)
 
 As input SANJUAN takes either
-1. RNAseq data (FASTQ, FASTQGZ files, only paired-end)
+1. RNAseq data (FASTQ, FASTQGZ files, only paired-end), or directly
 2. mapped reads (BAM files)
 
 For adapter removal, trimming and mapping,
 SANJUAN relies on Cutadapt, Trim-Galore and Tophat2.
 The user might decide to do these pre-processing
-setps and mapping with other programs by herself
+steps and mapping with other programs by herself
 and apply SANJUAN on the resulting BAM files,
-essentially skipping the build-in pre-processing
-of SANJUAN.
+skipping the build-in pre-processing and mapping of SANJUAN.
 
-SANJUAN is designed to run on "Linux" like platforms.
+SANJUAN is designed to run on "Linux" like platforms
+(including OSX).
 SANJUAN is currently a beta version. You use it
 on your own risk.
 
@@ -68,21 +70,21 @@ SANJUAN is a Perl pipeline and was tested under
 Perl v5.10.1 and v5.18.2. It relies on the
 following programs.
 
-1. trim_galore            (*)
-2. cutadapt               (*)
-3. tophat2 (& botwie2)    (*)
-4. samtools
-5. bedtools
-6. overlapSelect
+1. samtools
+2. bedtools
+3. overlapSelect
 7. awk                    (+)
 8. command line tool sort (+)
+4. trim_galore            (*)
+5. cutadapt               (*)
+6. tophat2 (& botwie2)    (*)
 
-
+(+): These programs / tools are normally already
+installed on "Linux" like platforms.
 (*): These marked prorgams need to be installed only
 if you will use the pre-processing (adapter removal, 
 trimming) and mapping routine of SANJUAN.
-(+): These programs / tools are normally already
-installed on "Linux" like platforms.
+
 
 
 3. INSTALLATION
@@ -107,13 +109,12 @@ the following sub-directories:
          by SANJUAN.
 3. perllib: contains two Perl modules (Text and
          Statistics) which are used internally by SANJUAN.
-4. db: contains annotations data for the 
-         annotation of alternative splicing events used 
+4. db: contains annotation data used 
          internally by SANJUAN.
-5. mapping_indexes: contains bowtie2 and tophat2 indexes as 
-         well as GTF gene annotations. These indexes and 
-         files are used only by the pre-processing and 
-         mapping routine of SANJUAN. 
+5. mapping_indexes: There, bowtie2 and tophat2 indexes
+         compiled by the user, are stored.
+         These indexes and files are used only by the
+         pre-processing and mapping routine of SANJUAN. 
 
 IMPORTANT: contents of the db folder is necessary for the
 splicing analysis. Adding genomes / species will populate
