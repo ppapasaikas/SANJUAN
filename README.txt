@@ -1,4 +1,4 @@
-Last update of this file: April 19th, 2016
+Last update of this file: April 20th, 2016
 
 We are currently re-working SANJUAN to make
 integration of new genomes possible.
@@ -72,7 +72,7 @@ Perl v5.10.1 and v5.18.2. It relies on the
 following programs.
 
 1. samtools v.>=1.1
-2. bedtools v.>=2.24
+2. bedtools v.>=2.25
 3. awk                    (+)
 4. command line tool sort (+)
 5. STAR aligner v.>=2.4.0   (*)
@@ -221,15 +221,15 @@ Once SANJUAN is installed, the user might call
 to obtain a help message with further explanations.
 
 Definition of parameters: 
-SANJUAN allows the following two ways.
-1. by arguments of the command line call
+SANJUAN can be run in two different ways:
+1. by passing arguments on the command line, or 
 2. by a text file containing parameter definitions
 
 Both ways of defining parameters are almost identical
 with one important exception regarding the way of
-defining the input files.
+defining the input files
 
-If input files are given as arguments to the comman 
+If input files are given as arguments to the command
 line call, they have to be specified with full path 
 and be given in a predefined order. The file names
 do not have to follow any specific naming convention.
