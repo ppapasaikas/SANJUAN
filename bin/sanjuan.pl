@@ -325,8 +325,8 @@ else{
 		$g1_shortname=$1     if $_=~/^\s*COND1\s*=\s*(\w+)/;
 		$g2_shortname=$1     if $_=~/^\s*COND2\s*=\s*(\w+)/;
 		$tpm=$1		     if $_=~/^\s*TPM\s*=\s*(Basic|None)/;	#NinS
-		$bam1=$1             if $_=~/^\s*INFDIR\s*=\s*([\w\/\.\_\-]+)/;	# bam files; if given mapping is skipped
-		$bam2=$1             if $_=~/^\s*INFDIR\s*=\s*([\w\/\.\_\-]+)/;
+		$bam1=$1             if $_=~/^\s*BAM1\s*=\s*([\w\/\.\_\-]+)/;	# bam files; if given mapping is skipped
+		$bam2=$1             if $_=~/^\s*BAM2\s*=\s*([\w\/\.\_\-]+)/;
 		$conf=$1             if $_=~/^\s*CONF\s*=\s*(VHC|HC|MC)/;
 		$SuppJun=$1          if $_=~/^\s*SUPPJUN\s*=\s*(Y|N)/;
 		$IRM=$1              if $_=~/^\s*IRM\s*=\s*(Y|N)/;
