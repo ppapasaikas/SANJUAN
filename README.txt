@@ -69,7 +69,7 @@ on your own risk.
 ===============
 SANJUAN is a Perl pipeline and was tested under
 Perl v5.10.1 and v5.18.2. It relies on the
-following programs.
+following programs:
 
 1. samtools v.>=1.1
 2. bedtools v.>=2.25
@@ -158,33 +158,31 @@ We offer these data ready-to-use for the species:
 4. fly        (dm6)
 5. zebrafish  (danRer10)
 6. worm       (ce11)
+7. arabidopsis thaliana (ath10)
+To see an overview of all available annotation files 
+of splicing events, go to:
+https://s3.amazonaws.com/PAN/SANJUAN/aws_S3_index.html
 
 To install them, go through the following steps.
 1. go to the main SANJUAN installation folder with
 name SANJUAN
-2. download annotation data by
-> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db.tar.gz
+2. download the annotation data 
+e.g:
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
 3. uncompress
 > tar -xvzf SANJUAN_db.tar.gz
 4. delete or keep the file SANJUAN_db.tar.gz 
 5. run SANJUAN with option -g to see available species and
 corresponding short names
 
-If you prefer to obtain annotation data only for some species
-but not all, we provide individual files for download. The
-installation procedure is the same as for the complete bundle 
-of splicing annotations.
-
+The links for the annotation data of all avaialable genomes:
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg38.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_mm10.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_dm6.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_danRer10.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ce11.tar.gz
-
-To see an overview over all available annotation files 
-of splicing events, go to:
-https://s3.amazonaws.com/PAN/SANJUAN/aws_S3_index.html
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ath10.tar.gz
 
 If you want to add more genomes, SANJUAN offers convenient
 Perl scripts helping you. Please find more details in file
