@@ -33,7 +33,7 @@ SANJUAN comes with the capability of making available
 new genomes for splicing analysis to your
 local SANJUAN installation with a few easy steps. 
 
-The following genomes are precompiled and ready-to-use.
+The following genomes are pre-compiled and ready-to-use.
 1.  hg19       (human)
 2.  hg38       (human)
 3.  mm10       (mouse)
@@ -52,7 +52,7 @@ or directly
   RNAseq data and mapping by himself
 - BAM files
 
-When you supply RNASeq read data, SANJUAN relies
+When you supply RNAseq read data, SANJUAN relies
 on the STAR aligner using it for adapter removal, 
 read trimming and mapping.
 
@@ -177,7 +177,7 @@ interested in
 > wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ce11.tar.gz
 > wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_dm6.tar.gz
 > wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ath10.tar.gz
-3. uncompress all downloaded files
+3. un-compress all downloaded files
 > ls SANJUAN_db_*.tar.gz | xargs -i tar xfzv {}
 4. Delete or keep the downloaded archives.
 5. Run SANJUAN with option -g to see available genomes and
@@ -254,7 +254,7 @@ IMPORTANT: when doing pre-processing and mapping by yourself,
 please note the following important points,
 
 1. the XS attribute field in BAM files is necessary
-as SANJUAN relies amongst other things on the 
+as SANJUAN relies among st other things on the 
 XS attribute field for junction reads in the BAM files. 
 When using the STAR aligner the XS attribute for (canonical)
 junction reads can be generated for all types of libraries
@@ -270,7 +270,7 @@ working to change this).
 
 7. OUTPUT OF SANJUAN
 ====================
-SANJUAN applies a set of contraints on differential 
+SANJUAN applies a set of constraints on differential 
 splicing junctions and reports only those which fulfill
 the constraints.
 The constraints are grouped according to different

@@ -53,13 +53,13 @@ TIP: If available, use the file with extension
 annotation only for the reference chromosomes.
 
 Download the GTF file into the SANJUAN installation
-folder db/gtfs, uncompress it if necessray, and 
+folder db/gtfs, un-compress it if necessary, and 
 rename it if necessary such that its name is
 
 GENOMEID.gtf
 
 IMPORTANT: the GTF file uses IDs to identify
-chomosomes / scaffolds. If you plan to
+chromosomes / scaffolds. If you plan to
 install mapping indexes as well, you need to obtain
 the sequences of the reference chromosomes.
 The IDs of the chromosomes in the GTF file and
@@ -96,10 +96,10 @@ two columns: chromosome and chromosome size.
 You can try to use the fetchChromSizes script
 provided by UCSC and included in the SANJUAN distribution
 to download the chromosome size file and move it to the 
-genomes subfolder as follows.
+genomes sub-folder as follows.
 
 If the name of the downloaded file does not match
-GENOMEID.genome, reanem this file accordingly.
+GENOMEID.genome, rename this file accordingly.
 
 NOTE: the downloaded files from UCSC follow the chr prefix
 convention for chromosomes. If you are using GTF and FASTA 
@@ -119,7 +119,7 @@ You can view the list of all available genomes and genome
 versions from UCSC here:
 ftp://hgdownload.cse.ucsc.edu/goldenPath/
 
-Go into the folder bigZips and download the compressed fasta file.
+Go into the folder bigZips and download the compressed FASTA file.
 
 For example,
 ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
@@ -132,9 +132,9 @@ For previous ENSEMBL releases see:
 ftp://ftp.ensembl.org/pub/
 
 Download the genome sequences into any folder you want
-and un-comress the file if necessary.
+and un-compress the file if necessary.
 
-Create a dictory which will contain the index inside the
+Create a directory which will contain the index inside the
 SANJUAN installation inside folder mapping_indexes
 
 mkdir /path/to/SANJUAN/mapping_indexes/GENOMEID
@@ -169,16 +169,16 @@ IMPORTANT: the specified genomeDir has to be inside the
 mapping_indexes directory of SANJUAN and its name has to match
 the GENOMEID used in previous steps.
 
-If you have already built a STAR genome indexe for the genome
+If you have already built a STAR genome index for the genome
 to be added to SANJUAN, you might create symbolic links inside 
 the directory
 /path/to/SANJUAN/mapping_indexes/GENOMEID 
-pointing to the alreadx existing index files.
+pointing to the already existing index files.
 
 
 6. MAKE CHROMOSOME IDS MATCHING
 ===============================
-If you install the mapping indexe for a new genome as well, 
+If you install the mapping index for a new genome as well, 
 you will have to obtain the genome sequences of this species.
 In this case, you need to make sure that the chromosome ids
 in both, the GTF file and the FASTA files(s) match. 
