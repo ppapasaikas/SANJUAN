@@ -112,8 +112,9 @@ print "preProcess_and_Map.pl $basedir $genome $adapter_seq $library_type $tpm $t
 
 
 ########################################	M A P P I N G		##########################################
-
 print `mkdir -p $basedir/MAPPING`;
+
+my $last_exit_code;
 
 print "\n\n\nMapping\n#####################\n\n";
 my %bam_files=();
@@ -163,12 +164,14 @@ for my $cf (0..$#READC){
 	print "$call\n";
 	if(!$test_run){
 		$ret= `$call`;
+		$last_exit_code=$?;
 		print "$ret\n\n";
 		if($run_without_qsub==0){
    			($job_id)=$ret=~/job (\d+?) \(/;
 			push(@all_job_ids,$job_id);
 		}else{
 			push(@all_job_ids,-3);
+			unless($last_exit_code == 0){unlink($bampath);die "ERROR! during mapping of $fq\n";}
 		}
 	}
 
@@ -206,12 +209,14 @@ foreach my $cond_name ($cond1_name,$cond2_name){
 	print "$call\n";
 	if(!$test_run){
 		$ret=`$call`;
+		$last_exit_code=$?;
 		print "$ret\n\n";
 		if($run_without_qsub==0){
 			($job_id)=$ret=~/job (\d+?) \(/;
 			push(@all_job_ids,$job_id);
 		}else{
 			push(@all_job_ids,-3);
+			unless($last_exit_code == 0){unlink($merged_bam_file);die "ERROR! during merging of BAM files\n";}
 		}
 	}
 }

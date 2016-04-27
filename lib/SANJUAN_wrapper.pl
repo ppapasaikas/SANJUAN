@@ -41,11 +41,14 @@ sub run_cmd { # $_[0]: command / job call as string / qsub part; $_[1]: command 
 			unlink($1) if ($_[0] =~ /\-e (.+?) /);
 			sleep(1);
 			my $ret = `$call`;
+			my $last_exit_code=$?;
 			print "$ret\n\n";
 			# run with qsub
 			if($_[6]==0){
 				my ($job_id)=$ret=~/job (\d+?) \(/;
 				push(@{$_[2]},$job_id);
+			}else{
+				unless($last_exit_code == 0){unlink($_[3]);die "ERROR! The follwing call did not end with status 0: $call\n";}
 			}
 		}
 
