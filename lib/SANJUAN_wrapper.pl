@@ -191,7 +191,7 @@ unless ($skip{2}){	#Get Junctions from BAM files, parse Cond1, Cond2, Merge and 
 	
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_BAM2JUNCT1.txt -e $output_dir/log_files/08_err_write_BAM2JUNCT1.txt -b y","perl $sanjuan_dir/BAM2JUNCTjob.pl $sanjuan_dir $output_dir/buildJUNCT1.sh $bam1 $low_seq_req $Mapped_Junctions1",\@all_job_ids,"$output_dir/buildJUNCT1.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_BAM2JUNT1.txt -e $output_dir/log_files/08_err_write_BAM2JUNCT1.txt -b y","perl $sanjuan_dir/BAM2JUNCTjob.pl $sanjuan_dir $output_dir/buildJUNCT2.sh $bam2 $low_seq_req $Mapped_Junctions2",\@all_job_ids,"$output_dir/buildJUNCT2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -q short-sl65 -V -cwd -l virtual_free=1G -l h_rt=00:10:00 -o $output_dir/log_files/08_out_write_BAM2JUNCT1.txt -e $output_dir/log_files/08_err_write_BAM2JUNCT1.txt -b y","perl $sanjuan_dir/BAM2JUNCTjob.pl $sanjuan_dir $output_dir/buildJUNCT2.sh $bam2 $low_seq_req $Mapped_Junctions2",\@all_job_ids,"$output_dir/buildJUNCT2.sh",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_buildSAM1 -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/09_out_run_buildJUNCT1.txt -e $output_dir/log_files/09_err_run_buildJUNCT1.txt -b y","$output_dir/buildJUNCT1.sh",\@all_job_ids,$Mapped_Junctions1,\@ENFORCE_RUN,$test_run,$run_without_qsub);

@@ -171,8 +171,6 @@ for my $cf (0..$#READC){
 
 
 
-
-
 print "\n\n\nMerging BAM files\n#####################\n\n";
 
 my $job_ids=join(",",@all_job_ids);
