@@ -30,6 +30,9 @@ my $STAR_index=$ARGV[8];
 
 #NRS my $tophat_bowtie_index=$ARGV[10];
 my $N_processes=$ARGV[9];
+
+my $phred_code=$ARGV[10];
+
 #NRS	my $mate_inner_dist=$ARGV[12];
 #NRS	my $mate_inner_dist_std_dev=$ARGV[13];
 ##########################################################################################################
@@ -56,8 +59,7 @@ my @g2_files=();
 my @skipping_ok=();
 
 
-#for(my $i=10; $i<@ARGV; $i++){
-for(my $i=10; $i<=$#ARGV; $i++){
+for(my $i=11; $i<@ARGV; $i++){
 	if(substr($ARGV[$i],0,3) eq "-g1"){
 		$i++;
 		$cond1_name=$ARGV[$i];
@@ -124,6 +126,9 @@ my $trimCommand=($adapter_seq=~/\w+/)? "--clip3pAdapterSeq $adapter_seq" : "";
 $,="\t";
 
 
+my $outQSconversionAdd=0; # phred33
+if($phred_code eq "phred64"){$outQSconversionAdd=-31;}
+
 for my $cf (0..$#READC){
 	my $cond=$COND[$cf];
 	my $jname="MAP_" . $cond ."_$cf";
@@ -149,9 +154,9 @@ for my $cf (0..$#READC){
 	$skipping_ok{$cond}=0;
 	$jobs_started=1;
 	if($run_without_qsub==0){
-		$call = "qsub -q $Lqueue -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y STAR --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";}
+		$call = "qsub -q $Lqueue -V -cwd -N $jname -o $basedir/log_files/02_out_mapping_${cf}.txt -e $basedir/log_files/02_err_mapping_${cf}.txt -pe smp $N_processes -l virtual_free=64G -l h_rt=48:00:00 -b y STAR --outQSconversionAdd $outQSconversionAdd --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";}
 		else{
-		$call = "STAR --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";
+		$call = "STAR --outQSconversionAdd $outQSconversionAdd --runThreadN $N_processes --genomeDir $STAR_index --readFilesIn $fq $readCommand $trimCommand --outSJfilterReads Unique --outFilterType BySJout --outFilterMultimapNmax 10 --alignSJoverhangMin 6 --alignSJDBoverhangMin 3 --outFilterMismatchNoverLmax 0.1 --alignIntronMin 20 --alignIntronMax 1000000 --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outSAMtype BAM SortedByCoordinate --seedSearchStartLmax 50 --twopassMode $tpm --outFileNamePrefix $star_out";
 	}
 
 

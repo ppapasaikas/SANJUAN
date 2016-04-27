@@ -48,9 +48,9 @@ sub print_help{
 	print "\t-g2:    like argument -g1 but for group 2\n";
 	print "\t-f2:    like argument -f1 but for group 2\n";
 	print "\t-o:     output directory; If omitted current working directory is taken.\n";
-	#NRS print "\t-p:     encoding of base qualities in FASTQ files; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
-	#NRS print "\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
-	print "\t-l:     library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded), 2S (Paired-end, Stranded).\n";
+	print "\t-p:     encoding of base qualities in FASTQ files; values phred33 -> ASCII+33, phred64 -> ASCII+64; Can be omitted if -b B.\n";
+	print "\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
+	print "\t-l:     library type of RNAseq; values: 1S (Single-end, Stranded), 1U (Single-end, Unstranded), 2U (Paired-end, Unstranded), 2S (Paired-end, Stranded).\n";
    	print "\t\t Can be omitted if -b B.\nPaired-end experiments (i.e 2U, 2S) should have two files per condition. "; #CinS 
 	print "\t\t Set to 1U/2U if you are in doubt about whether your experiment is strand specific, though, this parameter is critical and it's highly recommended\n"; #CinS 
 	print "\t\t setting it correctly according to the RNAseq data you are working with.\n";
@@ -86,7 +86,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -g hg19 -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l fr-firststrand -a AGATCGGAAGAGC -b T -c HC -i -s -lsr -t -db\n\n";
+	print "\nsanjuan -g hg19 -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l 2U -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -t\n\n";
 	exit 0;
 }
 
@@ -114,10 +114,10 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "GENOME=hg19		### Specifies organism: run sanjuan -g to see species available in this installation";
 	print $fh "OUTDIR=			### Directory for Output, if not given, the current working directory is used as output directory";
 	print $fh "COND1=CNT		### Label for Condition 1 (eg 'CNT' or 'WT')";
-	print $fh "COND2=KD		### Label for Condition 2 (eg 'KD' or 'OvEx')";
+	print $fh "COND2=KD			### Label for Condition 2 (eg 'KD' or 'OvEx')";
 	print $fh "TESTRUN=N		### values Y, N; if Y, qsub statements are printed but not sent to cluster";
 	print $fh "DBLOCATION=		### the location of the sub-directory db containing predefined exon-exon junctions. Needs to be specified only if db sun-directory is not in main SANJUAN directory.";
-	print $fh "NOQSUB=N		### run SANJUAN without sending jobs to CRG cluster";
+	print $fh "NOQSUB=N			### run SANJUAN without sending jobs to CRG cluster";
 	print $fh "NPROCS=12		### run SANJUAN with this maximal number of parallel processes";	
 	print $fh "";
 	print $fh "";
@@ -140,15 +140,15 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "### You start with BAM files: specify these parameters BAM1 and BAM2to SKIP mapping, AND ONLY RUN splicing analysis.";
 	print $fh "### BAM1 is the merged BAM files for group 1, BAM2 corresponds to group2.";
-	print $fh "# BAM1=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/TOPHAT_NTsi/accepted_hits.bam		### Path to condition1 (merged) bam file";
+	print $fh "# BAM1=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/TOPHAT_NTsi/accepted_hits.bam			### Path to condition1 (merged) bam file";
 	print $fh "# BAM2=/users/jvalcarcel/ppapasaikas/SOPHIE/SF3B1_Ast_Data/TOPHAT_SF3B1/accepted_hits.bam		### Path to condition2 (merged) bam file";
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Preprocessing/Mapping parameters  #######################";
 	print $fh "ADAPTER=AGATCGGAAGAGC	### Specify adapter sequence if other than CRG facility default (AGATCGGAAGAGC...).  Leave empty if unknown.";
-	print $fh "LIBTYPE=2S		###library type of RNAseq; values: 1S (Single-strand, Stranded), 1U (Single-strand, Unstranded), 2U (Paired-end, Unstranded) or 2S (Paired-end, Stranded).Can be omitted if -b B"; #CinS 
-	#NRS 	print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
-	print $fh "TPM=None		### None or Basic. Setting to Basic activates the STAR twoPassMode mapping for more sensitive novel junction discovery at the cost of speed.";	#NinS
+	print $fh "LIBTYPE=2S				###library type of RNAseq; values: 1S (Single-end, Stranded), 1U (Single-end, Unstranded), 2U (Paired-end, Unstranded) or 2S (Paired-end, Stranded).Can be omitted if -b B"; #CinS 
+	print $fh "PHRED=phred33			### encoding of base qualities in FASTQ files ASCII+33 -> phred33, ASCII+64 -> phred64 (only used for trimming, see article on the FASTQ file format on Wikipedia)";
+	print $fh "TPM=None					### None or Basic. Setting to Basic activates the STAR twoPassMode mapping for more sensitive novel junction discovery at the cost of speed.";	#NinS
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  Splicing Analysis parameters  #######################";
@@ -254,8 +254,8 @@ my $conf='HC';	#Specify stringency for Differentially Spliced Junctions (VeryHig
 my $IRM='N';	#IRM mode: Perform  High Sensitivity Intron Retention Anlaysis. Default 'N' 
 my $SuppJun='N';#Require Supporting Junction Evidence for IR identification (IRM mode). Default 'N'
 my $output_dir="";
-#NRS my $phred_code="phred33";#Instructs Cutadapt to use ASCII+33 / ASCII+64 quality scores as Phred scores (Sanger/Illumina 1.9+ encoding) / (Illumina 1.5 encoding) for quality trimming.
-my $tpm="None";	#NinS No two pass mapping by default  
+my $phred_code="phred33";#Instructs STAR to interpret fastq quality scores correctly 
+my $tpm="None";	#NiS   None or Basic: No two pass mapping by default  
 my $library_type="2S";# 1S|1U|2S|2U: Single or Paired end (1|2), Stranded or Unstranded (S|U)
 my $adapter="AGATCGGAAGAGC";	#Specify adapter sequence to be trimmed. To find adapter: minion search-adapter -i FASTQFILE.gz (Default adapter sequence for CRG facility, RNAseq )
 my $g1_shortname="grp1";
@@ -288,7 +288,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-c"){$conf=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-i"){$IRM="Y";}
 		if($ARGV[$i] eq "-s"){$SuppJun="Y";}
-		#NRS if($ARGV[$i] eq "-p"){$phred_code=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-p"){$phred_code=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-l"){$library_type=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-a"){$adapter=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-g1"){$g1_shortname=$ARGV[($i++)+1];}
@@ -320,7 +320,7 @@ else{
 		$output_dir=$1       if $_=~/^\s*OUTDIR\s*=\s*([\w\/\.\_\-\~]+)/;	#Base directory for Output
 		$adapter=$1          if $_=~/^\s*ADAPTER\s*=\s*([ACGTNUacgtnu]+)/;	#Adapter sequence
 		$library_type=$1     if $_=~/^\s*LIBTYPE\s*=\s*(1S|1U|2S|2U)/;	#CinS
-		#NRS $phred_code=$1       if $_=~/^\s*PHRED\s*=(phred33|phred64)/;
+		$phred_code=$1       if $_=~/^\s*PHRED\s*=\s*(phred33|phred64)/;
 		$g1_shortname=$1     if $_=~/^\s*COND1\s*=\s*(\w+)/;
 		$g2_shortname=$1     if $_=~/^\s*COND2\s*=\s*(\w+)/;
 		$tpm=$1		     if $_=~/^\s*TPM\s*=\s*(Basic|None)/;	#NinS
@@ -349,7 +349,7 @@ unless($genome){$tmp_str="Parameter GENOME/-g not defined.\n";$OK_params_preproc
 unless($conf =~ /VHC|HC|MC/){$tmp_str="Parameter CONF/-c not or wrongly defined. Should take values VHC, HC, MC.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($IRM =~ /Y|N/){$tmp_str="Parameter IRM/-i not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 unless($SuppJun =~ /Y|N/){$tmp_str="Parameter SUPPJUN/-s not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
-#NRS unless($phred_code =~ /phred33|phred64/){$tmp_str="Parameter PHRED/-p not or wrongly defined. Should take values phred33 or phred64.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
+unless($phred_code =~ /phred33|phred64/){$tmp_str="Parameter PHRED/-p not or wrongly defined. Should take values phred33 or phred64.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
 unless($library_type =~ /1S|1U|2S|2U/)  {$tmp_str="Parameter LIBTYPE/-l not defined. Should take values 1S,1U, 2S or 2U\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess-=$tmp_str;$warnings_main.=$tmp_str;}
 unless($tpm =~ /Basic|None/)  {$tmp_str="Parameter TPM/-tpm not defined. Should take values Basic or None\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined. Should be a sequence composed of any letter of ACGTNUacgtnu.\n";$OK_params_preprocess=0;$warnings_preprocess-=$tmp_str;}
@@ -476,7 +476,7 @@ my $ret="Job ids:";
 if($start_with eq "M"){
 	# mapping
 	print "\n\n*************\nMapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $test_run $run_without_qsub $sanjuan_dir $STAR_index $N_processes -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $test_run $run_without_qsub $sanjuan_dir $STAR_index $N_processes $phred_code -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
 	$ret=`$call`;
 	print $ret."\n";
 }else{
