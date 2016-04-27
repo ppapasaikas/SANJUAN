@@ -71,7 +71,7 @@ sub print_help{
 	print "\t-db:    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n";
-	print "\t-nprocs number of parallel processes (by standard set to 12)\n";
+	print "\t-nprocs number of parallel processes (by standard set to 1)\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
@@ -282,7 +282,7 @@ my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to 
 my ($rawinput_dir,$trimmedinput_dir)=("","");# input_dir contains all input fastq files 
 # this SANJUAN run should not use qsub but run locally
 my $run_without_qsub=0;
-my $N_processes=12;
+my $N_processes=1;
 my $rmdup=0; #set to 0 to keep PCR duplicates / 1 to discard them
 
 # parameters through arguments
