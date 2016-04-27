@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use Cwd;
 ####### Builds SANJUAN required annotation files from gtf.
 ####### This only needs to be done in the case of adding a non-provided genome/genome_version

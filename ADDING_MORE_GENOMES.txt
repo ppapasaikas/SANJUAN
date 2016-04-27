@@ -1,4 +1,4 @@
-If you want to install / add more genomes,
+If you want to add more genomes,
 SANJUAN comes with convenient Perl scripts
 helping you. A step-by-step explanation is
 given below.
@@ -11,31 +11,36 @@ removal, trimming, mapping) of SANJUAN.
 
 0. CONTENTS / STEPS
 ==================
-1. OBTAIN A TRANSCRIPTOME DESCRIPTION IN FORM OF A GTF FILE
-2. BUILD SANJUAN ANNOTATION FILES
-3. OBTAIN A CHROMOSOME SIZE FILE
-4. ADDING MAPPING INDEXES
-5. MAKE CHROMOSOME IDS MATCHING
+1. DECIDE FOR A SHORT NAME
+2. OBTAIN A TRANSCRIPTOME DESCRIPTION (GTF FILE)
+3. BUILD SANJUAN ANNOTATION FILES
+4. OBTAIN A CHROMOSOME SIZE FILE
+5. ADDING MAPPING INDEXES
+6. MAKE CHROMOSOME IDS MATCHING
 
 
-1. OBTAIN A TRANSCRIPTOME DESCRIPTION IN FORM OF A GTF FILE
-===========================================================
+1. DECIDE FOR A SHORT NAME
+==========================
+To integrate a new genome into the SANJUAN installation, you
+first need to decide for a short name for the genome to be added.
+This short name is later the internal key for SANJUAN to find
+all necessary files and you use this key when running SANJUAN
+to specify the genome.
 
+IMPORTANT: the short name should not yet be in use. Run SANJUAN
+with option -g to see already available genomes.
+
+This short name should reflect the genome and its version
+which you want to install, e.g., hg19 or mm10.
+
+We refer to this short name in the rest 
+of this document by GENOMEID.
+
+
+2. OBTAIN A TRANSCRIPTOME DESCRIPTION (GTF FILE)
+================================================
 If available for your species, we recommend to download a
 ENSEMBL transcriptome gtf annotation.
-You may find a ENSEMBL GTF_FILE for species SPECIES and 
-release RELEASE_NUMBER under:
-
-ftp://ftp.ensembl.org/pub/<RELEASE_NUMBER>/gtf/<SPECIES>/<GTF_FILE>.gz
-
-For example, you might download for Homo sampiens hg38, 
-release 84 the following GTF file.
-
-> wget ftp://ftp.ensembl.org/pub/release-84/gtf/homo_sapiens/Homo_sapiens.GRCh38.84.chr.gtf.gz
-
-This file needs to be un-compressed:
-> gunzip Homo_sapiens.GRCh38.84.chr.gtf.gz
-
 
 Find links to all ENSEMBL GTF files available for the 
 current release here:
@@ -47,6 +52,12 @@ TIP: If available, use the file with extension
 "chr.gtf.gz" as opposed to only ".gtf.gz" to get the
 annotation only for the reference chromosomes.
 
+Download the GTF file into the SANJUAN installation
+folder db/gtfs, uncompress it if necessray, and 
+rename it if necessary such that its name is
+
+GENOMEID.gtf
+
 IMPORTANT: the GTF file uses IDs to identify
 chomosomes / scaffolds. If you plan to
 install mapping indexes as well, you need to obtain
@@ -55,127 +66,123 @@ The IDs of the chromosomes in the GTF file and
 in the sequence files must match. For more details
 and hints, read section MAKE CHROMOSOME IDS MATCHING.
 
-2. BUILD SANJUAN ANNOTATION FILES
+
+3. BUILD SANJUAN ANNOTATION FILES
 =================================
-
-From the GTF file, build the SANJUAN annotation files with
-help of the script build_annotations_from_gtf.pl contained
-in the bin folder of the SANJUAN installation. Here you
-have to decide under which short name 
-(prefix_for_output_files) this genome should be available 
-from within SANJAUN. Whenever you want to run SANJUAN on 
-data of this genome / species, you will have to specify 
-it by this short name.
-
-> perl build_annotations_from_gtf.pl gtf_file prefix_for_output_files
+Go into the bin folder of the SANJUAN 
+installation and run
+> perl build_annotations_from_gtf.pl ../db/gtfs/GENOMEID.gtf GENOMEID
 For example,
-> perl build_annotations_from_gtf.pl Homo_sapiens.GRCh38.84.chr.added.gtf hg38
+> perl build_annotations_from_gtf.pl ../db/gtfs/hg38.gtf hg38
 
-Move the generated files to the folder 
-SANJUAN_annotation_files which is inside the db folder
-of the SANJUAN installation.
-For example,
-> mv hg38_T* /path/to/SANJUAN/installation/db/SANJUAN_annotation_files
+If successful, this script populates the folder 
+-> db/SANJUAN_annotation_files with
+GENOMEID_Transcript_Junctions.txt
+GENOMEID_Transcripts.bed
+GENOMEID_TxID2Name.txt
+-> and db/genomes with
+GENOMEID.genome
 
-IMPORTANT: the short name should not yet be in use. Run SANJUAN
-with option -g to see already available species / genomes.
+If the last file GENOMEID.genome was not generated,
+go on with OBTAIN A CHROMOSOME SIZE FILE,
+otherwise you are done. See section ADDING MAPPING INDEXES
+on how to compile the STAR index for the new genome.
 
-
-3. OBTAIN A CHROMOSOME SIZE FILE
+4. OBTAIN A CHROMOSOME SIZE FILE
 ================================
-This is a text file with two columns: chromosome 
-and chromosome size. Use the fetchChromSizes script
+SANJUAN expects a file in db/genomes with name
+GENOMEID.genome. This file is a text file with 
+two columns: chromosome and chromosome size. 
+You can try to use the fetchChromSizes script
 provided by UCSC and included in the SANJUAN distribution
 to download the chromosome size file and move it to the 
 genomes subfolder as follows.
-> /path/to/SANJUAN/installation/bin/fetchChromSizes hg38 > /path/to/SANJUAN/installation/db/genomes/hg38.genome
 
-IMPORTANT: here hg38 is the UCSC identifier for the 
-genome of interest. You have to determine this identifier
-for your genome of interest first and use it instead of hg38.
-
+If the name of the downloaded file does not match
+GENOMEID.genome, reanem this file accordingly.
 
 NOTE: the downloaded files from UCSC follow the chr prefix
 convention for chromosomes. If you are using GTF and FASTA 
 sequence files following the ENSEMBL naming convention,
 edit the downloaded file and remove the chr prefix.
-The file name, here as example hg38.genome, needs
-to follow the naming convention: 
-
-prefix_for_output_files.genome
-
-where prefix_for_output_files was chosen in step 2.
 
 
-4. ADDING MAPPING INDEXES
+5. ADDING MAPPING INDEXES
 =========================
-If you are use SANJUAN for mapping you will need to 
-make available to SANJUAN mapping indexes as well.
+If you will use SANJUAN for mapping you will need to make 
+available STAR mapping indexes for the new genome as well.
 
 Therefore, download the sequence files for the 
 reference chromosomes. You can download these files from
-the corresponding UCSC database (chr prefix convention):
-
-ftp://hgdownload.cse.ucsc.edu/goldenPath/GENOME_VERSION/bigZips/fasta_file.gz
-For example, for hg38 run
-> wget ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
-
-Alternatively, you can use ENSEMBL (no chr prefix convention):
-ftp://ftp.ensembl.org/pub/RELEASE_NUMBER/fasta/SPECIES/dna/fasta_file.gz
-For example, for hg38 run
-> wget ftp://ftp.ensembl.org/pub/release-84/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz
-
-Next, un-compress these files.
-For example,
-> gunzip hg38.fa.gz 
-
-IMPORTANT: the IDs of the reference chromosomes must
-be the same as those used in the GTF file (steps
-1. OBTAIN A TRANSCRIPTOME DESCRIPTION IN FORM OF A GTF FILE 
-and 2. BUILD SANJUAN ANNOTATION FILES). For more details
-and hints, read section MAKE CHROMOSOME IDS MATCHING.
-Please note as well that the annotation data which
-comes with SANJUAN uses the "chr" prefix. Hence, we
-recommend to download the reference sequences from the
-UCSC resources.
-
-Finally, build the STAR genome index for the file using the
-STAR genome generatate command (STAR v>2.4.x required). eg.:
-> STAR --runThreadN 64 --runMode genomeGenerate --genomeDir SANJUAN/mapping_indexes/hg38/ --genomeFastaFiles hg38.fa --sjdbGTFfile SANJUAN/db/gtfs/hg38.gtf --sjdbOverhang 124 
-Where the number specified for --sjdbOverhang is optimally
-the length of your most commonly used reads minus 1 or the
-more generic value 100 (see also STAR manual for details).
-
-Notice that the specified genomeDir HAS to be inside the
-mapping_indexes directory of SANJUAN and its name HAS to match
-the prefix_for_output_files used in previous steps (e.g here hg19)
-
-If you have already built STAR genome indices for your genome(s)
-of interest you can move them to the appropriate SANJUAN folder
-to use them from within SANJUAN. e.g:
-> mkdir SANJUAN/mapping_indexes/hg38/
-> mv MY_STAR_INDICES/Human_hg38/* SANJUAN/mapping_indexes/hg38/
-
-
+the corresponding UCSC database (chr prefix convention).
 You can view the list of all available genomes and genome 
 versions from UCSC here:
 ftp://hgdownload.cse.ucsc.edu/goldenPath/
+
+Go into the folder bigZips and download the compressed fasta file.
+
+For example,
+ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
+
+Alternatively, you can use ENSEMBL (no chr prefix convention).
 You can find links to all available ENSEMBL genomes FASTA
 files for the current release here:
 http://www.ensembl.org/info/data/ftp/index.html
 For previous ENSEMBL releases see:
 ftp://ftp.ensembl.org/pub/
 
+Download the genome sequences into any folder you want
+and un-comress the file if necessary.
 
-5. MAKE CHROMOSOME IDS MATCHING
+Create a dictory which will contain the index inside the
+SANJUAN installation inside folder mapping_indexes
+
+mkdir /path/to/SANJUAN/mapping_indexes/GENOMEID
+
+Finally, build the STAR genome index (STAR v>2.4.x required)
+using the following command.
+
+> STAR --runThreadN 10 --runMode genomeGenerate --genomeDir /path/to/SANJUAN/mapping_indexes/GENOMEID --genomeFastaFiles <YOUR_DOWNLOADED_FASTA_FILE> --sjdbGTFfile /path/to/SANJUAN/db/gtfs/GENOMEID.gtf --sjdbOverhang 124 
+
+Where the number specified for --sjdbOverhang is optimally
+the length of your most commonly used reads minus 1 or the
+more generic value 100 (see also STAR manual for details).
+
+You can delete of keep the FASTA file with genomic sequences
+and the STAR temporary files.
+
+Run the following command to see if the added genome is
+available for mapping as well.
+> sanjuan -g
+
+IMPORTANT: the IDs of the reference chromosomes must
+be the same as those used in the GTF file (steps
+2. OBTAIN A TRANSCRIPTOME DESCRIPTION (GTF FILE)
+and 3. BUILD SANJUAN ANNOTATION FILES). For more details
+and hints, read section MAKE CHROMOSOME IDS MATCHING.
+Please note as well that the annotation data which
+comes with SANJUAN uses the "chr" prefix. Hence, we
+recommend to download the reference sequences from the
+UCSC resources.
+
+IMPORTANT: the specified genomeDir has to be inside the
+mapping_indexes directory of SANJUAN and its name has to match
+the GENOMEID used in previous steps.
+
+If you have already built a STAR genome indexe for the genome
+to be added to SANJUAN, you might create symbolic links inside 
+the directory
+/path/to/SANJUAN/mapping_indexes/GENOMEID 
+pointing to the alreadx existing index files.
+
+
+6. MAKE CHROMOSOME IDS MATCHING
 ===============================
-Chromosome IDs in the GTF file and genome 
-sequence files have to match. If you install the
-mapping indexes for your species as well, you will
-have to obtain the genome sequences of this species.
-In this case, you need to make sure that the chromosome
-ids in both, the GTF file and the FASTA files(s) 
-match. 
+If you install the mapping indexe for a new genome as well, 
+you will have to obtain the genome sequences of this species.
+In this case, you need to make sure that the chromosome ids
+in both, the GTF file and the FASTA files(s) match. 
+
 ENSEMBL is using a naming convention that omits 
 the "chr" prefix from chromosome ids, i.e., 1 versus chr1.
 GENCODE and UCSC are using the prefix "chr", 
@@ -185,23 +192,24 @@ annotation come from different resources where the
 chromosome ids differ by using / or not using the "chr"
 prefix, it is recommended to add the "chr" prefix where
 it is missing. This is, in most cases, easier as removing
-this prefix where it is too much.
+this prefix.
 
 For adding the "chr" prefix to a GTF file, run:
 
 > sed 's/^\([^#]\)/chr\1/' <FILE_NAME>.gtf > <FILE_NAME>.chr.added.gtf 
 For example:
-sed 's/^\([^#]\)/chr\1/' Homo_sapiens.GRCh38.84.chr.gtf > Homo_sapiens.GRCh38.84.chr.added.gtf 
+sed 's/^\([^#]\)/chr\1/' hg19.gtf > hg19.added.gtf 
 
 For adding the "chr" prefix to FASTA sequences,
 you might do the following.
-1. in the folder where you have your FASTA sequences, 
+1. in the folder where you have your FASTA file,
 create a new file, put the following line into it, 
 save it under the name addchr.pl
 
 open($fh,$ARGV[0]);while(<$fh>){if(substr($_,0,1) eq ">"){print ">chr".substr($_,1);next;}print "$_";}
 
-2. in this folder when you want to change all files with ending *.fa, run
+2. when you want to add the chr-prefix to all sequence ids in
+all files with ending *.fa in this folder, run
 for file in ./*.fa; do
 perl addchr.pl $file > tmp_file.fa
 mv tmp_file.fa $file

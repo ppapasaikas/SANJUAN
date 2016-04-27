@@ -39,7 +39,7 @@ sub print_help{
 	print "\n";
 	print "Call with arguments (<standard value already set>):\n";
 	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -a <AGATCGGAAGAGC> -b <M> -c <HC> -i -s -lsr -t -db <db sub-directory of SANJUAN directory>\n\n";	#CinS 
-	print "\t-g:     genome / species; to see installed genomes/species run sanjuan -g (standard value hg19)\n";
+	print "\t-g:     genome (ID); to see installed genomes/species run sanjuan -g (standard value hg19)\n";
 	print "\t-g1:    short name for group 1\n";
 	print "\t-f1:    input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
 	print "\t\t if -b is M: pairs of FASTQ/FASTQ.GZ files describing paired-end RNAseq data,\n";
@@ -111,7 +111,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "";
 	print $fh "";
 	print $fh "#######################  General parameters  #######################";
-	print $fh "GENOME=hg19		### Specifies organism: run sanjuan -g to see species available in this installation";
+	print $fh "GENOME=hg19		### ID of genome; run sanjuan -g to see genomes available in this installation";
 	print $fh "OUTDIR=			### Directory for Output, if not given, the current working directory is used as output directory";
 	print $fh "COND1=CNT		### Label for Condition 1 (eg 'CNT' or 'WT')";
 	print $fh "COND2=KD			### Label for Condition 2 (eg 'KD' or 'OvEx')";
@@ -234,7 +234,7 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 		}}
 	}
 
-	print "\n   available species: ";
+	print "\n   available genomes: ";
 	my $str="\n   ID          FOR MAPPING     FOR SPLICING ANALYSIS\n";
 	my $str2=$str;
 	foreach my $sc (sort {lc $a cmp lc $b} keys %all_scs) {

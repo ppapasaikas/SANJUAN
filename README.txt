@@ -7,7 +7,7 @@ version 1.0 beta
 1. SHORT INTRODUCTION
 2. DEPENDENCIES
 3. INSTALLATION
-4. ADDING GENOMES / SPECIES
+4. ADDING GENOMES
 5. ADDING MAPPING INDEXES
 6. RUNNING SANJUAN
 7. OUTPUT OF SANJUAN
@@ -21,39 +21,44 @@ SANJUAN determines differential inclusion levels of
 alternative splicing events between two conditions,
 e.g., knock down versus wild type.
 
-It is not designed to determine inclusion levels of 
+SANJUAN is not designed to determine inclusion levels of 
 alternative splicing events under only one condition.
 
 SANJUAN relies mostly on the RNAseq data to de-novo detect
 splicing junctions and alternative splicing events and
-only minimally on available annotation data of transcript structure
-for refining results.
-SANJUAN comes with the capability of adding custom new 
-genomes / species by the user with a few easy steps.
-In addition, the following genomes / species are precompiled
-and ready-to-use:
-1. human      (hg19)
-2. human      (hg38)
-3. mouse      (mm10)
-4. fly        (dm6)
-5. zebrafish  (danRer10)
-6. worm       (ce11)
-7. arabidopsis (ath10)
+only minimally on available annotation data of transcript
+structure for refining results.
 
-As input SANJUAN takes either
-1. RNAseq data: FASTQ files from paired or single end experiments
-(raw, gzipped -.gz- or bzipped -.bz2-), or directly
-2. mapped reads (BAM files)
+SANJUAN comes with the capability of making available 
+new genomes for splicing analysis to your
+local SANJUAN installation with a few easy steps. 
 
-For adapter removal, trimming and mapping,
-SANJUAN relies on the STAR aligner software.
-The user might decide to perform these pre-processing
-steps and mapping, independently, and to apply
-SANJUAN on the resulting BAM files, skipping the build-in
-pre-processing and mapping functionality of SANJUAN.
+The following genomes are precompiled and ready-to-use.
+1.  hg19       (human)
+2.  hg38       (human)
+3.  mm10       (mouse)
+4.  dm6        (fly)
+5.  danRer10   (zebrafish)
+6.  ce11       (worm)
+7.  ath10      (arabidopsis)
 
-SANJUAN is designed to run on "Linux" like platforms
-(including OSX).
+SANJUAN takes as input either
+1. RNAseq data 
+- from paired- or single-end experiments
+- raw FASTQ, gzipped -.gz- or bzipped -.bz2-
+or directly
+2. mapped reads 
+- when the use wants to do pre-processing of 
+  RNAseq data and mapping by himself
+- BAM files
+
+When you supply RNASeq read data, SANJUAN relies
+on the STAR aligner using it for adapter removal, 
+read trimming and mapping.
+
+SANJUAN is designed to run on Linux-like platforms
+including Mac OS.
+
 SANJUAN is currently a beta version. You use it
 on your own risk.
 
@@ -61,21 +66,20 @@ on your own risk.
 2. DEPENDENCIES
 ===============
 SANJUAN is a Perl pipeline and was tested under
-Perl v5.10.1 and v5.18.2. It relies on the
+Perl v5.10.1 and v5.18.2. It depends on the
 following programs:
 
 1. samtools v.>=1.1
 2. bedtools v.>=2.25
-3. awk                    (+)
-4. command line tool sort (+)
-5. STAR aligner v.>=2.4.0   (*)
+3. awk                     (+)
+4. command line tool sort  (+)
+5. STAR aligner v.>=2.4.0  (*)
 
-(+): These programs / tools are normally already
-installed on "Linux" like platforms.
+(+): These programs are normally already
+installed on Linux-like platforms.
 (*): These programs need only be installed if you
 intend to use the pre-processing and mapping
 functionality of SANJUAN.
-
 
 
 3. INSTALLATION
@@ -102,15 +106,15 @@ the following sub-directories:
          Statistics) which are used internally by SANJUAN.
 4. db: contains annotation data used 
          internally by SANJUAN.
-5. mapping_indexes: There, STAR indexes
-         compiled by the user, are stored.
-         These indexes and files are used only by the
-         pre-processing and mapping routine of SANJUAN. 
+5. mapping_indexes: contains STAR indexes compiled by 
+         the user. They are used only by the pre-processing
+         and mapping routine of SANJUAN. Can be left empty
+         if you don't use this functionality of SANJUAN.
 
-IMPORTANT: contents of the db folder is necessary for the
-splicing analysis. Adding genomes / species will populate
-this folder with data. See section ADDING GENOMES / SPECIES
-for installation details.
+IMPORTANT: contents of the db folder is necessary for
+the  splicing analysis. Adding genomes will populate
+this folder with data. See section ADDING GENOMES for
+installation details.
 
 IMPORTANT: contents of the indexes folder are used by
 the pre-processing routines of SANJUAN (essentially mapping).
@@ -118,64 +122,77 @@ If the user wants to use the pre-processing routine of SANJUAN,
 the user needs to create the necessary indexes. See section 
 ADDING MAPPING INDEXES for details. These indexes are unnecessary 
 if you want to do splicing analysis only. Because these indexes
-take much space and are unnecessary for the splicing analysis,
-they are not part of SANJUAN.
+are bulky and unnecessary for the splicing analysis, they are 
+not part of SANJUAN.
 
 If necessary make the file sanjuan.pl in the bin directory 
 executable with
 
-> chmod 770 sanjuan.pl
+> chmod 755 sanjuan.pl
 
 Now you can run sanjuan through its full
 path
 
 > /full/path/to/SANJUAN/bin/sanjuan.pl
 
-You might define a link to sanjuan.pl in any of
+We recommend you to define a link to sanjuan.pl in any of
 your PATH directories to allow easier execution.
 
-> ln -s /full/path/to/SANJUAN/bin/sanjuan.pl /one/of/my/directories/inPATH/sanjuan
+> ln -s /full/path/to/SANJUAN/bin/sanjuan.pl /one/PATH/directory/sanjuan
 
-Having set this link, you might call SANJUAN simply by
+Having set this link, you can call SANJUAN simply by
 
 > sanjuan
 
-4. ADDING GENOMES / SPECIES
+To run the splicing analysis, you have to add genomes.
+For details see section ADDING GENOMES.
+
+
+4. ADDING GENOMES
 ===========================
 Before running splicing analysis, the user needs to
-add annotation data for genomes / species.
-We offer these data ready-to-use for the species:
-1. human      (hg19)
-2. human      (hg38)
-3. mouse      (mm10)
-4. fly        (dm6)
-5. zebrafish  (danRer10)
-6. worm       (ce11)
-7. arabidopsis thaliana (ath10)
+add annotation data for genomes.
+We offer these data ready-to-use for the following genomes:
+1.  hg19       (human)
+2.  hg38       (human)
+3.  mm10       (mouse)
+4.  dm6        (fly)
+5.  danRer10   (zebrafish)
+6.  ce11       (worm)
+7.  ath10      (arabidopsis)
+
 To see an overview of all available annotation files 
 of splicing events, go to:
 https://s3.amazonaws.com/PAN/SANJUAN/aws_S3_index.html
 
-To install them, go through the following steps.
-1. go to the main SANJUAN installation folder with
-name SANJUAN
-2. download the annotation data 
-e.g:
+Installation steps:
+1. Go to the main SANJUAN installation folder with
+name SANJUAN.
+2. Download the annotation data for genomes you are
+interested in
 > wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
-3. uncompress
-> tar -xvzf SANJUAN_db.tar.gz
-4. delete or keep the file SANJUAN_db.tar.gz 
-5. run SANJUAN with option -g to see available species and
-corresponding short names
-
-The links for the annotation data of all avaialable genomes:
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg38.tar.gz
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_mm10.tar.gz
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_dm6.tar.gz
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_danRer10.tar.gz
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ce11.tar.gz
-https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ath10.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg38.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_mm10.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_danRer10.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ce11.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_dm6.tar.gz
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ath10.tar.gz
+3. uncompress all downloaded files
+> ls SANJUAN_db_*.tar.gz | xargs -i tar xfzv {}
+4. Delete or keep the downloaded archives.
+5. Run SANJUAN with option -g to see available genomes and
+corresponding short names. When you have decided to download
+all annotation data, the output should look like
+> sanjuan -g
+   available genomes: 
+   ID          FOR MAPPING     FOR SPLICING ANALYSIS
+   ath10                no                       yes
+   ce11                 no                       yes
+   danRer10             no                       yes
+   dm6                  no                       yes
+   hg19                 no                       yes
+   hg38                 no                       yes
+   mm10                 no                       yes
 
 If you want to add more genomes, SANJUAN offers convenient
 Perl scripts helping you. Please find more details in file
@@ -186,24 +203,20 @@ ADDING_MORE_GENOMES.txt .
 =========================
 We provide more details on the installation
 of mapping indexes as part of the manual
-for adding / installing new genomes / species.
-Please find details in ADDING_MORE_GENOMES.txt .
+for adding new genomes to SANJUAN. Details
+are given in the file ADDING_MORE_GENOMES.txt.
 
 
 6. RUNNING SANJUAN
 ==================
-
-IMPORTANT: running without access to CRG cluster 
-resources SANJUAN was developed at the CRG, Barcelona, 
-and initially tailored for using local cluster resources
+IMPORTANT: SANJUAN was developed at the CRG, Barcelona,
+and initially tailored to using local cluster resources
 at the CRG, i.e., sending automatically jobs to the 
-CRG cluster. For use without access to the cluster 
-resources of the CRG, SANJUAN needs to be run with
-the option -noqsub to prevent that SANJUAN sends 
-automatically jobs to the CRG cluster. Nevertheless,
+CRG cluster. For use without access to the CRG cluster, 
+SANJUAN needs to be run with the option -noqsub to prevent
+that SANJUAN sends jobs to the CRG cluster. Nevertheless,
 it is possible to run SANJUAN with option -noqsub 
 as a single job on any cluster you have access to.
-
 
 Once SANJUAN is installed, the user might call
 
@@ -211,10 +224,9 @@ Once SANJUAN is installed, the user might call
 
 to obtain a help message with further explanations.
 
-Definition of parameters: 
-SANJUAN can be run in two different ways:
-1. by passing arguments on the command line, or 
-2. by a text file containing parameter definitions
+The parameters of SANJUAN can be specified by
+1. arguments of the SANJUAN command line call
+2. a text file containing parameter definitions
 
 Both ways of defining parameters are almost identical
 with one important exception regarding the way of
@@ -225,7 +237,7 @@ line call, they have to be specified with full path
 and be given in a predefined order. The file names
 do not have to follow any specific naming convention.
 
-If input files are given through the SANJUAN parameters
+If input files are given through the SANJUAN parameter
 file, they are not specified individually but given
 by a link to a directory which contains all input 
 files. These files are then assigned to the two 
@@ -238,13 +250,11 @@ and the  two different ways to bypass parameters to
 SANJUAN, are given within the help message of SANJUAN.
 
 
-IMPORTANT: when doing pre-processing and mapping by yourself
+IMPORTANT: when doing pre-processing and mapping by yourself,
+please note the following important points,
+
 1. the XS attribute field in BAM files is necessary
-Skipping SANJUAN's pre-processing and mapping routine, the
-user can do adapter removal, trimming and mapping of paired 
-RNAseq reads by himself. The user would then apply the 
-splicing analysis of SANJUAN to her BAM files. The splicin 
-analysis of SANJUAN relies amongst other things on the 
+as SANJUAN relies amongst other things on the 
 XS attribute field for junction reads in the BAM files. 
 When using the STAR aligner the XS attribute for (canonical)
 junction reads can be generated for all types of libraries
@@ -273,7 +283,7 @@ Confidence levels:
 5.  NC (no confidence)
 
 When running SANJUAN, you may select on of these 
-confidence levels. These confidence levels translate
+confidence levels. These confidence levels imply
 into the following constraints on splicing junctions.
 
                                        VHC       HC       MC       LC
@@ -286,7 +296,7 @@ min. fold change of N_reads XXX       0.15      0.1      0.05   0.005
 max p value of Hypergeometric test: 0.0001    0.001      0.01     0.3
 XXX                                      1        1         1       1
 
-The confidence level NC impies no constraints at all.
+The confidence level NC implies no constraints at all.
 
 Depending on the user's choice of the confidence level,
 differentially spliced junctions are reported in file
@@ -358,9 +368,6 @@ where the first file contains information for differential
 splicing junctions according to the user's choice of
 confidence level. The other two files always get created
 for confidence levels LC and NC.
-
-The pre-processing routine produces a TOPHAT
-and a TRIM folder for each group / condition.
 
 
 8. LICENSE
