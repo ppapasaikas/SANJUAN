@@ -1,6 +1,6 @@
-Last update of this file: April 11th, 2016
+Last update of this file: April 20th, 2016
 
-We are currently re-working SANJAUN to make
+We are currently re-working SANJUAN to make
 integration of new genomes possible.
 A first complete version of SANJUAN shall be available
 within a few days.
@@ -48,15 +48,16 @@ and ready-to-use:
 7. arabidopsis (ath10)
 
 As input SANJUAN takes either
-1. RNAseq data (FASTQ, FASTQGZ files, only paired-end), or directly
+1. RNAseq data: FASTQ files from paired or single end experiments
+(raw, gzipped -.gz- or bzipped -.bz2-), or directly
 2. mapped reads (BAM files)
 
 For adapter removal, trimming and mapping,
-SANJUAN relies on Cutadapt, Trim-Galore and Tophat2.
-The user might decide to do these pre-processing
-steps and mapping with other programs by herself
-and apply SANJUAN on the resulting BAM files,
-skipping the build-in pre-processing and mapping of SANJUAN.
+SANJUAN relies on the STAR aligner software.
+The user might decide to perform these pre-processing
+steps and mapping, independently, and to apply
+SANJUAN on the resulting BAM files, skipping the build-in
+pre-processing and mapping functionality of SANJUAN.
 
 SANJUAN is designed to run on "Linux" like platforms
 (including OSX).
@@ -68,22 +69,19 @@ on your own risk.
 ===============
 SANJUAN is a Perl pipeline and was tested under
 Perl v5.10.1 and v5.18.2. It relies on the
-following programs.
+following programs:
 
-1. samtools
-2. bedtools
-3. overlapSelect
-7. awk                    (+)
-8. command line tool sort (+)
-4. trim_galore            (*)
-5. cutadapt               (*)
-6. tophat2 (& botwie2)    (*)
+1. samtools v.>=1.1
+2. bedtools v.>=2.25
+3. awk                    (+)
+4. command line tool sort (+)
+5. STAR aligner v.>=2.4.0   (*)
 
 (+): These programs / tools are normally already
 installed on "Linux" like platforms.
-(*): These marked prorgams need to be installed only
-if you will use the pre-processing (adapter removal, 
-trimming) and mapping routine of SANJUAN.
+(*): These programs need only be installed if you
+intend to use the pre-processing and mapping
+functionality of SANJUAN.
 
 
 
@@ -111,7 +109,7 @@ the following sub-directories:
          Statistics) which are used internally by SANJUAN.
 4. db: contains annotation data used 
          internally by SANJUAN.
-5. mapping_indexes: There, bowtie2 and tophat2 indexes
+5. mapping_indexes: There, STAR indexes
          compiled by the user, are stored.
          These indexes and files are used only by the
          pre-processing and mapping routine of SANJUAN. 
@@ -160,33 +158,31 @@ We offer these data ready-to-use for the species:
 4. fly        (dm6)
 5. zebrafish  (danRer10)
 6. worm       (ce11)
+7. arabidopsis thaliana (ath10)
+To see an overview of all available annotation files 
+of splicing events, go to:
+https://s3.amazonaws.com/PAN/SANJUAN/aws_S3_index.html
 
 To install them, go through the following steps.
 1. go to the main SANJUAN installation folder with
 name SANJUAN
-2. download annotation data by
-> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db.tar.gz
+2. download the annotation data 
+e.g:
+> wget https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
 3. uncompress
 > tar -xvzf SANJUAN_db.tar.gz
 4. delete or keep the file SANJUAN_db.tar.gz 
 5. run SANJUAN with option -g to see available species and
 corresponding short names
 
-If you prefer to obtain annotation data only for some species
-but not all, we provide individual files for download. The
-installation procedure is the same as for the complete bundle 
-of splicing annotations.
-
+The links for the annotation data of all avaialable genomes:
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg19.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_hg38.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_mm10.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_dm6.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_danRer10.tar.gz
 https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ce11.tar.gz
-
-To see an overview over all available annotation files 
-of splicing events, go to:
-https://s3.amazonaws.com/PAN/SANJUAN/aws_S3_index.html
+https://s3.amazonaws.com/PAN/SANJUAN/SANJUAN_db_ath10.tar.gz
 
 If you want to add more genomes, SANJUAN offers convenient
 Perl scripts helping you. Please find more details in file
@@ -223,15 +219,15 @@ Once SANJUAN is installed, the user might call
 to obtain a help message with further explanations.
 
 Definition of parameters: 
-SANJUAN allows the following two ways.
-1. by arguments of the command line call
+SANJUAN can be run in two different ways:
+1. by passing arguments on the command line, or 
 2. by a text file containing parameter definitions
 
 Both ways of defining parameters are almost identical
 with one important exception regarding the way of
-defining the input files.
+defining the input files
 
-If input files are given as arguments to the comman 
+If input files are given as arguments to the command
 line call, they have to be specified with full path 
 and be given in a predefined order. The file names
 do not have to follow any specific naming convention.
@@ -257,15 +253,16 @@ RNAseq reads by himself. The user would then apply the
 splicing analysis of SANJUAN to her BAM files. The splicin 
 analysis of SANJUAN relies amongst other things on the 
 XS attribute field for junction reads in the BAM files. 
-This attribute field is present by default when mapping 
-with Tophat2. When using the STAR aligner the XS attribute 
-for (canonical) junction reads can be generated for all 
-types of libraries by setting the "--outSAMstrandField" 
-switch to "intronMotif". The STAR aligner manual gives
-more details.
+When using the STAR aligner the XS attribute for (canonical)
+junction reads can be generated for all types of libraries
+by setting the "--outSAMstrandField" switch to "intronMotif".
+The STAR aligner manual gives more details:
 https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+This attribute field is present by default when mapping 
+with Tophat2. 
 
-2. The genome ids must have the prefix "chr".
+2. The genome ids must have the prefix "chr" (though we are 
+working to change this).
 
 
 7. OUTPUT OF SANJUAN

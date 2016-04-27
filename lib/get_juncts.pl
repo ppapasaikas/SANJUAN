@@ -1,18 +1,20 @@
 $SuppThreshold=3;	#Minimum Total Number of Junction Reads  
 $FractThreshold=0.6;	#Minimum Fraction of Replicates with Junction
-$SAMFILE=$ARGV[0];
-$low_seq_req=$ARGV[1]; # Y or N
-$fn_out=$ARGV[2];
+#$SAMFILE=$ARGV[0];
+$low_seq_req=$ARGV[0]; # Y or N
+$fn_out=$ARGV[1];
 
 open (OUT,">".$fn_out) || die $!;
 
-open (IN, "$SAMFILE") ||die;	#Open Merged Junctions File
+##open (IN, "$SAMFILE") ||die;	#Open Merged Junctions File, deprecated now directly from piped samtools view output
 
-while (<IN>){
+while (<STDIN>){
 $line=$_;
 @mat=split /\t/,$line;
 
-next unless length($mat[2])<6;	#Remove junctions coming from non-canonical chromosomes. 03-2015
+
+#next unless length($mat[2])<8;	#Remove junctions coming from non-canonical chromosomes. 03-2015
+next if ( (length($mat[2])>7 && $mat[2]=~/chr/) ||  (length($mat[2])>4 && $mat[2]!~/chr/) );
 
 next unless $mat[5]=~/^[\dMN]+$/;
 
@@ -56,7 +58,7 @@ print OUT "$INF[0]\t$INF[1]\t$INF[2]\t$id\t$count{$id}\t$INF[3]\n";#$fcount{$id}
 }
 
 
-close(IN);
+#close(IN);
 close(OUT);
 
 # wait 5 min so that output on cluster is written completely for sure 
