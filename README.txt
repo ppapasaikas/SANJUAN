@@ -1,10 +1,3 @@
-Last update of this file: April 20th, 2016
-
-We are currently re-working SANJUAN to make
-integration of new genomes possible.
-A first complete version of SANJUAN shall be available
-within a few days.
-
 SANJUAN -- *S*plicing *AN*alysis & *JU*nction *AN*notation
 version 1.0 beta
 

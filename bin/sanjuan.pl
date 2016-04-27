@@ -163,6 +163,11 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	exit 0;
 }
 
+if(@ARGV==1 && ( $ARGV[0] eq "version" || $ARGV[0] eq "-version" || $ARGV[0] eq "--version") ){
+	print "\nSANJUAN $version\n\n";
+	exit 0;
+}
+
 # check if species is available for splicing analysis
 sub is_available_for_splicing{
 	my $species=$_[0];
