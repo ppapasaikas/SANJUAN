@@ -39,9 +39,10 @@ sub print_help{
 	print "\n";
 	print "Call with arguments (<standard value already set>):\n";
 	print "sanjuan -g <hg> -g1 <grp1> -f1 -g2 <grp2> -f2 -o <.> -a <AGATCGGAAGAGC> -b <M> -c <HC> -i -s -lsr -t -db <db sub-directory of SANJUAN directory>\n\n";	#CinS 
-	print "\t-g:     genome (ID); to see installed genomes/species run sanjuan -g (standard value hg19)\n";
+	print "\t-g:     genome (ID); To see installed genomes run sanjuan -g.\n";
+	print "\t-b:     M -> start with mapping, S -> start with splicing analysis SKIPPING mapping\n";	#CinS
 	print "\t-g1:    short name for group 1\n";
-	print "\t-f1:    input files for group 1; Depending on value of argument -b, -f1 defines different input files.\n";
+	print "\t-f1:    input files for group 1; Depending on value of argument -b, -f1 defines different types of input files.\n";
 	print "\t\t if -b is M: pairs of FASTQ/FASTQ.GZ files describing paired-end RNAseq data,\n";
 	print "\t\t\t comma separated list without white spaces following this order (file names don't matter): run1_read1.fastq,run1_read2.fastq,run2_read1.fastq,run2_read2.fastq,..\n";
 	print "\t\t if -b set to S: exactly one BAM file containing all mapped reads for group 1\n";	#CinS
@@ -60,7 +61,7 @@ sub print_help{
 	print "\t-tpm:    If given it activates the Basic twopassMode STAR mapping option. More sensitive novel junction discovery at the cost of speed.\n"; #NinS
 	#NRS print "\t-d:     average inner mate distance of paired-end reads (needed only for pre-processing; if omitted, will be set to 85).\n";
 	#NRS print "\t-d_dev: std. dev. of average inner mate distance of paired-end reads (needed only for pre-processing; if omitted will be set to 25).\n";
-	print "\t-b:     M -> start with mapping, S -> start with splicing analysis SKIPPING mapping\n";	#CinS 
+	 
 	print "\t-c:     threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
 	print "\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
 	print "\t-i:     If -i is given, high sensitivity intron retention analysis (IRM mode) will be done.\n";

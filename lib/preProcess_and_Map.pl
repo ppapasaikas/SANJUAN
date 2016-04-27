@@ -137,9 +137,9 @@ for my $cf (0..$#READC){
 	#$fq2=$READ2[$cf];
 	$fq=($library_type=~/2/)? "$READ1[$cf] $READ2[$cf]" : $READS[$cf];
 	
-	if ($fq=~/\.gz$/){	#command for reading fastq files
+	if ($fq=~/\.gz$/i){	#command for reading fastq files
 	$readCommand="--readFilesCommand zcat";
-	} elsif ($fq=~/\.bz2$/){
+	} elsif ($fq=~/\.bz2$/i){
 	$readCommand="--readFilesCommand bzip2 -c";	
 	}	
 
