@@ -10,5 +10,5 @@ close(OUT);
 sleep 60;
 chmod 0755, $ARGV[1];
 
-# wait 10 min so that output on cluster is written completely for sure 
+# wait 1 min so that output on cluster is written completely for sure 
 sleep 60;
