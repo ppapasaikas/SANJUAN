@@ -50,6 +50,7 @@ sub print_help{
 	print "\t\t\t if -b set to S: exactly one BAM file containing all mapped reads for group 1\n";	#CinS
 	print "\t-g2    like argument -g1 but for group 2\n";
 	print "\t-f2    like argument -f1 but for group 2\n";
+	print "\t-d     directoy of input data; If specified, files given via -f1 / -f2 are taken from this directory.\n";
 	print "\t-o     output directory; If omitted current working directory is taken.\n";
 	print "\t-p     encoding of base qualities in FASTQ files; values: phred33 (ASCII+33), phred64 (ASCII+64); Can be omitted if -b S.\n";
 	print "\t\t\t For details have a look at section Encoding of Wikipedia article on FASTQ https://en.wikipedia.org/wiki/Fastq\n";	
@@ -74,7 +75,7 @@ sub print_help{
 	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
-	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
+	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s\n\n";
 	print "Contact:\n";
 	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
 	print "Andre Gohr: andre.gohr\@crg.eu (Functionality Extensions and Support)\n\n";
@@ -270,7 +271,7 @@ my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to 
 # special arguments from parameter file
 #  if $map_no_trim=Y -> Go to mapping directly (i.e map using untrimmed fastq files)
 #
-my $rawinput_dir="";# input_dir contains all input fastq files 
+my $rawinput_dir=".";# input_dir contains all input fastq files 
 # this SANJUAN run should not use qsub but run locally
 my $run_without_qsub=0;
 my $N_processes=1;
@@ -294,6 +295,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-f2"){@g2_files=split(",",$ARGV[($i++)+1]);}
 		if($ARGV[$i] eq "-o"){$output_dir=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-b"){$start_with=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-d"){$rawinput_dir=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-lsr"){$low_seq_req="Y";}
 		if($ARGV[$i] eq "-t"){$test_run=1;}
 		if($ARGV[$i] eq "-db"){$sanjuan_genomic_data_dir=$ARGV[($i++)+1];}
@@ -365,6 +367,12 @@ $output_dir=~ s/\/$//;
 
 if(@g1_files>0){
 	unless($start_with eq "M" || $start_with eq "S" ){$tmp_str="Parameter -b not defined. Should be set to M or S to start with mapping, or directly with splicing analysis\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;} #CinS
+	# add data input dir if necessary
+	unless($rawinput_dir eq "."){
+		for(my $i=0;$i<@g1_files;$i++){$g1_files[$i]=$rawinput_dir."/".$g1_files[$i];}
+		for(my $i=0;$i<@g2_files;$i++){$g2_files[$i]=$rawinput_dir."/".$g2_files[$i];}
+	}
+	
 	if($start_with eq "S"){
 		my $check=0;
 		my $tmp_msg="";
