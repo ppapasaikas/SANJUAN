@@ -1,6 +1,11 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+
+print "\nCall of sub routine:\n";
+print "preProcess_and_Map.pl ".join(" ",@ARGV)."\n";
+
+
 my $Lqueue="long-sl65";		#Long queue
 my $Squeue="short-sl65";	#Short queue
 #Specify base directory for Output:
@@ -54,8 +59,6 @@ my @READC=(); #NinS is set to either @READ1 or @READS depending on library type
 my @COND=();
 my $group="";
 #NRS my $last_was_read2_file=1;
-my @g1_files=();
-my @g2_files=();
 my @skipping_ok=();
 
 
@@ -74,41 +77,54 @@ for(my $i=11; $i<@ARGV; $i++){
 		next;
 	}
 
-	if($library_type=~/2/ && $ARGV[$i]=~/1\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){	#CinS
-		push(@READ1,$ARGV[$i]);
-		#NRS $last_was_read2_file=0;
-		if($group==1){push(@g1_files,$ARGV[$i]);push(@COND,$cond1_name)};
-		if($group==2){push(@g2_files,$ARGV[$i]);push(@COND,$cond2_name)};
-		next;
-	}
-
-	if($library_type=~/2/ && $ARGV[$i]=~/2\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){	#CinS
-		push(@READ2,$ARGV[$i]);
-		#NRS $last_was_read2_file=1;
-		if($group==1){push(@g1_files,$ARGV[$i])};
-		if($group==2){push(@g2_files,$ARGV[$i])};
-		next;
-	}
-	#NinS: pass single end sequencing files:
-	if($library_type=~/1/ && $ARGV[$i]=~/\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){		#CinS
+#	if($library_type=~/2/ && $ARGV[$i]=~/1\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){	#CinS
+#		push(@READ1,$ARGV[$i]);
+#		#NRS $last_was_read2_file=0;
+#		if($group==1){push(@g1_files,$ARGV[$i]);push(@COND,$cond1_name)};
+#		if($group==2){push(@g2_files,$ARGV[$i]);push(@COND,$cond2_name)};
+#		next;
+#	}
+#
+#	if($library_type=~/2/ && $ARGV[$i]=~/2\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){	#CinS
+#		push(@READ2,$ARGV[$i]);
+#		#NRS $last_was_read2_file=1;
+#		if($group==1){push(@g1_files,$ARGV[$i])};
+#		if($group==2){push(@g2_files,$ARGV[$i])};
+#		next;
+#	}
+#	#NinS: pass single end sequencing files:
+#	if($library_type=~/1/ && $ARGV[$i]=~/\.(fq$|fastq$|fq\.gz$|fastq\.gz$|fq\.bz2$|fastq\.bz2$)/i){		#CinS
+#		push(@READS,$ARGV[$i]);
+#		if($group==1){push(@g1_files,$ARGV[$i]);push(@COND,$cond1_name)};
+#		if($group==2){push(@g2_files,$ARGV[$i]);push(@COND,$cond2_name)};
+#		next;
+#	}
+	
+	if($library_type=~/2/){      # paired-end reads -> this and the next file comprise a pair of files for read1 and read2 of the same RNAseq data set
+			                     # (This is assured by the naming convention of the files when they are given through a parameter file
+		  					 	 # and by the fact that all files get sorted. If files are given by command line argument, they have to
+			 					 # fulfill this ordering by convention. Important: files given by command line arguments are not subject to any
+			 					 # naming convention such as a pair of files need to have the same name and must differ only in R1 and R2.
+			 					 # That is why we should not use this naming convention here to detect which files comprise a pair. Here we
+			 					 # need to rely on the ordering of files such that pairs of files directly follow each other.
+		push(@READ1,$ARGV[$i]);push(@READ2,$ARGV[$i+1]);
+		if($group==1){push(@COND,$cond1_name);}
+		if($group==2){push(@COND,$cond2_name);}
+		$i++;  # -> to jump to first file of next pair (file i+1 belongs still belongs to current pair of files)
+	}else{ # single-end reads
 		push(@READS,$ARGV[$i]);
-		if($group==1){push(@g1_files,$ARGV[$i]);push(@COND,$cond1_name)};
-		if($group==2){push(@g2_files,$ARGV[$i]);push(@COND,$cond2_name)};
-		next;
+		if($group==1){push(@COND,$cond1_name);}
+		if($group==2){push(@COND,$cond2_name);}		
 	}
 }
 
 @READC=($library_type=~/2/)? @READ1 : @READS;
 
 
-
 for(my $i=0; $i<@READC; $skipping_ok[$i++]=1){}
 my %skipping_ok;
 $skipping_ok{$cond1_name}=1;
 $skipping_ok{$cond2_name}=1;
-
-print "\nCall of sub routine:\n";
-print "preProcess_and_Map.pl $basedir $genome $adapter_seq $library_type $tpm $test_run $run_without_qsub $sanjuan_dir $STAR_index $N_processes -g1 $cond1_name ".join(",",@g1_files)." -g2 $cond2_name ".join(",",@g2_files)."\n";
 
 
 ########################################	M A P P I N G		##########################################
@@ -121,18 +137,18 @@ my %bam_files=();
 my %bam_files_count=();
 my $readCommand="";
 #my ($fq1,$fq2,$top_out);
-my ($fq, $star_out);
 my $trimCommand=($adapter_seq=~/\w+/)? "--clip3pAdapterSeq $adapter_seq" : "";
 
 $,="\t";
 
-
 my $outQSconversionAdd=0; # phred33
 if($phred_code eq "phred64"){$outQSconversionAdd=-31;}
 
+my ($c1,$c2,$group_counter,$cond,$jname,$star_out,$fq)=(0,0,"","","","","");
+
 for my $cf (0..$#READC){
-	my $cond=$COND[$cf];
-	my $jname="MAP_" . $cond ."_$cf";
+	$cond=$COND[$cf];
+	$jname="MAP_" . $cond ."_$cf";
 	#$fq1=$READ1[$cf];
 	#$fq2=$READ2[$cf];
 	$fq=($library_type=~/2/)? "$READ1[$cf] $READ2[$cf]" : $READS[$cf];
@@ -143,7 +159,8 @@ for my $cf (0..$#READC){
 	$readCommand="--readFilesCommand bzip2 -c";	
 	}	
 
-	my $star_out=$basedir . '/MAPPING/' . $cond . "_" . "$cf" . "_";
+	if($cond eq $cond1_name){$c1++;$group_counter=$c1;}else{$c2++;;$group_counter=$c2;}
+	$star_out=$basedir . '/MAPPING/' . $cond . "_" . "$group_counter" . "_";
 	my $bampath=$star_out . "Aligned.sortedByCoord.out.bam";
 	unless($bam_files{$cond}){$bam_files{$cond}=$bampath;
 	} else {$bam_files{$cond}.=" $bampath";}
