@@ -56,13 +56,9 @@ sub print_help{
 	print "\t-l     RNAseq library type; values: 1S (single-end, stranded), 1U (single-end, unstranded), 2U (paired-end, unstranded), 2S (paired-end, stranded)\n";
    	print "\t\t\t Paired-end reads are expected in be given in two FASTQ files.\n"; #CinS  
    	print "\t\t\t Can be omitted if -b S.\n";
-	#NRS print "\t\t For details have a look at section on library type of TopHat online manual https://ccb.jhu.edu/software/tophat/manual.shtml.\n";
 	print "\t-a     RNAseq adapter sequence; CRG standard is AGATCGGAAGAGC. Can be omitted if -b S.\n"; 
 	print "\t\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz\n";
 	print "\t-tpm   If given it activates the Basic twopassMode STAR mapping option. More sensitive novel junction discovery at the cost of speed.\n"; #NinS
-	#NRS print "\t-d:     average inner mate distance of paired-end reads (needed only for pre-processing; if omitted, will be set to 85).\n";
-	#NRS print "\t-d_dev: std. dev. of average inner mate distance of paired-end reads (needed only for pre-processing; if omitted will be set to 25).\n";
-	 
 	print "\t-c     threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
 	print "\t\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
 	print "\t-i     High sensitivity intron retention analysis (IRM mode) will be done.\n";
@@ -76,7 +72,6 @@ sub print_help{
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
 	print "\tSTANDARD VALUES ALREADY SET:\n";
 	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC\n";
-	
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -c HC -i -s\n\n";
@@ -91,7 +86,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -g hg19 -g1 grp1 -f1 <file1,file2,..> -g2 grp2 -f2 <file1,file2,..> -p phred33 -l 2U -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -t\n\n";
+	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub\n\n";
 	exit 0;
 }
 
