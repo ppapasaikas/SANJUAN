@@ -461,7 +461,7 @@ my $STAR_index=$abs_path."/mapping_indexes/$genome/"; #NiS
 
 if($start_with ne "S"){
 	# user wants to do mapping and splicing analysis
-	if(!is_available_for_mapping($genome,$abs_path)){die "Mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
+	if(!is_available_for_mapping($genome,$abs_path)){die "Mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\nRun sanjuan -g to see installed genomes,\nand see README on GitHub.com webpage of SANJUAN on how to install further genomes\n";}
 }else{
 	# user wants to do splicing analysis only
 	if(!is_available_for_splicing($genome,$abs_path)){die "Splicing analysis for species / genome $genome is not possible\nas this species / genome is not installed for splicing analysis.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
