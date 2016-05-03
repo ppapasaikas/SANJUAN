@@ -31,6 +31,7 @@ print "\nBuilding transcript bed file...\n";
 open (IN, $ARGV[0]) ||die;
 	while (<IN>){
 	$line=$_;
+	if(substr($line,0,1) eq "#"){next;}
 	chomp $line;
 	@mat=split /\t/,$line;
 	next unless $mat[2]=~/exon/i;
@@ -76,6 +77,7 @@ $trID2gID=();
 open (IN, $ARGV[0]) ||die;
 while (<IN>){
 $line=$_;
+if(substr($line,0,1) eq "#"){next;}
 chomp $line;
 @mat=split /\t/,$line;
 $GeneName="";
