@@ -71,9 +71,12 @@ and hints, read section MAKE CHROMOSOME IDS MATCHING.
 =================================
 Go into the bin folder of the SANJUAN 
 installation and run
-> perl build_annotations_from_gtf.pl ../db/gtfs/GENOMEID.gtf GENOMEID
+> perl build_annotations_from_gtf.pl ../db/gtfs/GENOMEID.gtf GENOMEID /full/path/to/SANJUAN
 For example,
-> perl build_annotations_from_gtf.pl ../db/gtfs/hg38.gtf hg38
+> perl build_annotations_from_gtf.pl ../db/gtfs/hg38.gtf hg38 /software/SANJUAN
+
+where /software/SANJUAN contains the sub-folders
+bin, lib, perllib, db, mapping_indexes.
 
 If successful, this script populates the folder 
 -> db/SANJUAN_annotation_files with
