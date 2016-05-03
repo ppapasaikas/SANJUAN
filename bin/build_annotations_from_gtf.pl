@@ -11,15 +11,21 @@ unless ($pwd=~/SANJUAN\/bin.*$/){
 	}
 
 
-if ($#ARGV<1) {
-	die "\n\n!!Missing arguments!!. Usage:
-	perl perl build_annotations_from_gtf.pl transcriptome_gtf prefix\n
-	e.g: 
-	perl perl build_annotations_from_gtf.pl Homo_sapiens.GRCh38.84.chr.corrrected.gtf hg38\n\n\n"; 
-	}
-$OUTBED="../db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcripts.bed";
-$OUTT2J="../db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcript_Junctions.txt";
-$OUTT2I="../db/SANJUAN_annotation_files/" . $ARGV[1] . "_TxID2Name.txt";
+if (@ARGV<3 || $ARGV[0]=~ /help/) {
+	print "Creates SANJUAN annotation files for new genomes\n";
+	print "perl build_annotations_from_gtf.pl transcriptome_gtf prefix sanjuan_dir\n";
+	print "transcriptome_gtf      : GTF files with gene annotation of genome to be added\n";
+	print "prefix                 : short name of new genome; This name is used as ID to select this genome when you run SANJUAN later\n";
+	print "sanjuan_dir            : full path to the installation directory of SANJUAN; This directory should have as sub-directory: bin, db, lib, perllib, mapping_indexes\n";
+	exit 0; 
+}
+
+my $sanjuan_dir=$ARGV[2];
+unless(-d "$ARGV[2]/db"){die "Cannot find sub-directory db in specified SANJUAN directory $sanjuan_dir\n";}
+
+$OUTBED="$sanjuan_dir/db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcripts.bed";
+$OUTT2J="$sanjuan_dir/db/SANJUAN_annotation_files/" . $ARGV[1] . "_Transcript_Junctions.txt";
+$OUTT2I="$sanjuan_dir/db/SANJUAN_annotation_files/" . $ARGV[1] . "_TxID2Name.txt";
 open (OUTBED, ">$OUTBED") || die;
 open (OUTT2J, ">$OUTT2J") || die;
 open (OUTT2I, ">$OUTT2I") || die;
@@ -106,8 +112,8 @@ print "\nDone\n";
 
 #######Retrieving genome file from UCSC
 print "\nRetrieving genome file (chromosome sizes) from UCSC...\n";
-$OUTGENOME="../db/genomes/" . $ARGV[1] . ".genome";
-print `../lib/fetchChromSizes $ARGV[1]  > $OUTGENOME`;
+$OUTGENOME="$sanjuan_dir/db/genomes/" . $ARGV[1] . ".genome";
+print `$sanjuan_dir/lib/fetchChromSizes $ARGV[1]  > $OUTGENOME`;
 
 
 
