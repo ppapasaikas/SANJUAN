@@ -5,12 +5,6 @@ use Cwd;
 ####### Usage: perl build_annotations_from_gtf.pl transcriptome_gtf prefix
 ### e.g: perl build_annotations_from_gtf.pl hg38.gtf hg38 
 
-my $pwd=cwd();
-unless ($pwd=~/SANJUAN\/bin.*$/){
-	die "\nPlease run this script from within the SANJUAN/bin directory";
-	}
-
-
 if (@ARGV<3 || $ARGV[0]=~ /help/) {
 	print "Creates SANJUAN annotation files for new genomes\n";
 	print "perl build_annotations_from_gtf.pl transcriptome_gtf prefix sanjuan_dir\n";
