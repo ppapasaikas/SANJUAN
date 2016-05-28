@@ -264,8 +264,12 @@ https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 This attribute field is present by default when mapping 
 with Tophat2. 
 
-2. The genome ids must have the prefix "chr" (though we are 
-working to change this).
+2. The chromosome ids might have the prefix "chr" or not.
+In your BAM files you need to have this prefix if the genome 
+annotations used to install the genome in SANJUAN use
+this prefix. Call sanjuan -g to see if installed genome 
+annotations for mapping and splicing analysis use this
+"chr" prefix or not.
 
 
 7. OUTPUT OF SANJUAN
