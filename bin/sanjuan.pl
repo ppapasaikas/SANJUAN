@@ -220,7 +220,7 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 				open(my $fh_tmp,"$abs_path/db/genomes/${species}.genome") or die $!;
 				$chr_pref_ase{$species}="   ";
 				while(<$fh_tmp>){
-					if($1 =~ /^chr/){$chr_pref_ase{$species}="chr";last;}
+					if($_ =~ /^chr/){$chr_pref_ase{$species}="chr";last;}
 				}
 				close($fh_tmp);
 			}
@@ -235,7 +235,7 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 				open(my $fh_tmp,"$abs_path/mapping_indexes/$species/chrName.txt") or die $!;
 				$chr_pref_mapping{$species}="";
 				while(<$fh_tmp>){
-					if($1 =~ /^chr/){$chr_pref_mapping{$species}="chr";last;}
+					if($_ =~ /^chr/){$chr_pref_mapping{$species}="chr";last;}
 				}
 				close($fh_tmp);
 			}
