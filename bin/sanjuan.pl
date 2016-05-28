@@ -209,32 +209,48 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 	my %splicing_ok=();
 	my $species;
 	my %mapping_ok=();
+	my %chr_pref_mapping=();
+	my %chr_pref_ase=();
 
 	# available species for splicing analysis 
 	foreach my $file (<$abs_path/db/genomes/*.*>){
 		if( $file =~ /$abs_path\/db\/genomes\/(.+)\.genome/ ){
 			$species=$1;
-			if(is_available_for_splicing($species,$abs_path)){$splicing_ok{$species}=1;$all_scs{$species}=1;}
+			if(is_available_for_splicing($species,$abs_path)){$splicing_ok{$species}=1;$all_scs{$species}=1;
+				open(my $fh_tmp,"$abs_path/db/genomes/${species}.genome") or die $!;
+				$chr_pref_ase{$species}="   ";
+				while(<$fh_tmp>){
+					if($1 =~ /^chr/){$chr_pref_ase{$species}="chr";last;}
+				}
+				close($fh_tmp);
+			}
 		}
 	}
-	
+
 	# available species for mapping
 	foreach my $dir (<$abs_path/mapping_indexes/*>){
 		if( $dir =~ /$abs_path\/mapping_indexes\/(.+)/ ){if(-d "$abs_path/mapping_indexes/$1"){
 			$species=$1;
-			if(is_available_for_mapping($species,$abs_path)){$mapping_ok{$species}=1;$all_scs{$species}=1;}
+			if(is_available_for_mapping($species,$abs_path)){$mapping_ok{$species}=1;$all_scs{$species}=1;
+				open(my $fh_tmp,"$abs_path/mapping_indexes/$species/chrName.txt") or die $!;
+				$chr_pref_mapping{$species}="";
+				while(<$fh_tmp>){
+					if($1 =~ /^chr/){$chr_pref_mapping{$species}="chr";last;}
+				}
+				close($fh_tmp);
+			}
 		}}
 	}
 
 	print "\n   available genomes: ";
-	my $str="\n   ID          FOR MAPPING     FOR SPLICING ANALYSIS\n";
+	my $str="\n   ID          FOR MAPPING   CHR_ID PREFIX     FOR SPLICING ANALYSIS   CHR_ID PREFIX\n";
 	my $str2=$str;
 	foreach my $sc (sort {lc $a cmp lc $b} keys %all_scs) {
 		$str.= "   $sc";
 		for(my $i=3+length($sc);$i<23;$i++){$str.=" ";}
-		if(defined($mapping_ok{$sc})){$str.="yes";}else{$str.=" no";}
+		if(defined($mapping_ok{$sc})){$str.="yes             $chr_pref_mapping{$sc}";}else{$str.=" no                ";}
 		for(my $i=0;$i<23;$i++){$str.=" ";}
-		if(defined($splicing_ok{$sc})){$str.="yes\n";}else{$str.=" no\n";}
+		if(defined($splicing_ok{$sc})){$str.="yes             $chr_pref_ase{$sc}\n";}else{$str.=" no\n";}
 	}
 
 	if($str eq $str2){print "   none\n";}else{print $str;}
