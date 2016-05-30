@@ -258,7 +258,7 @@ unless ($skip{5}){
 	print "\n\n\nSorting intronic segments file\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
 	#print `sort -k1,1 -k2,2n $OUT_INTR_SEGM > $OUT_INTR_SEGM_SORTED`;
-	run_cmd("qsub -N $prefix -hold_jid $job_ids -V -cwd -o $output_dir/log_files/16_out_sortIntronSegments.txt -e $output_dir/log_files/16_err_sortIntronSegments.txt -l virtual_free=5G","$sanjuan_dir/sort_wrapper.sh $OUT_INTR_SEGM $OUT_INTR_SEGM_SORTED",\@all_job_ids,$OUT_INTR_SEGM_SORTED,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N $prefix -hold_jid $job_ids -V -cwd -o $output_dir/log_files/16_out_sortIntronSegments.txt -e $output_dir/log_files/16_err_sortIntronSegments.txt -l virtual_free=5G","$sanjuan_dir/sort_wrapper.sh $OUT_INTR_SEGM $bam1 $OUT_INTR_SEGM_SORTED",\@all_job_ids,$OUT_INTR_SEGM_SORTED,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 }
 
 
