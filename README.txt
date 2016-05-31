@@ -313,38 +313,6 @@ Annotated_Diff_Introns.txt.
 Columns of Annotated_Diff_Junctions.txt are as follows.
 Here, we assume that the label for the first group is
 "cntr" and for the second group "ko".
-INCL_COORDs XXX
-Gene_Name(s)
-High_Confidence_Junction
-Competing_Junction
-minJDist
-COMPET_TYPE
-HCJ_5'ss
-HCJ_3'ss
-HCJ_Junc
-CompJ_5'ss
-CompJ_3'ss
-CompJ_Junc
-HCJ_LR(cntr/ko)
-CompJ_LogRatio(cntr/ko)
-HCJ_Delta(cntr-ko)
-CompJ_Delta(cntr-ko)
-HCJ_Pval
-CompJ_Pval
-HCJ_Eff_ko
-HCJ_Eff_cntr
-HCJ_N_ko
-HCJ_N_cntr
-HCJ_PSI_ko
-HCJ_PSI_cntr
-CompJ_Eff_ko
-CompJ_Eff_cntr
-CompJ_N_ko
-CompJ_N_cntr
-CompJ_PSI_ko
-CompJ_PSI_cntr
-
-Columns in Annotated_Diff_Introns.txt are as follows.
 1.  INCL_COORDs : Genomic coordinates delimiting the inclusive interval of the Alternative Splicing Event.
 2.  Gene_Name(s) : Official gene symbol or gene ID if gene symbol is not available
 3.  High_Confidence_Junction: ID of Differentially used junction. Junction ID is of the form chrName_starCoord_endCoord_strand 
@@ -354,14 +322,44 @@ Columns in Annotated_Diff_Introns.txt are as follows.
 7.  HCJ_5'ss
 8.  HCJ_3'ss
 9.  HCJ_Junc
-10.  IRLR
-11.  PvalIR
-12. HCJ_Delta
-13. HCJ_Pval
-14. HCJ_N_ko
-15. HCJ_N_cntr
-16. HCJ_PSI_ko
-17. HCJ_PSI_cntr
+10. CompJ_5'ss
+11.CompJ_3'ss
+12. CompJ_Junc
+13. HCJ_LR(cntr/ko)
+14. CompJ_LogRatio(cntr/ko)
+15. HCJ_Delta(cntr-ko)
+16. CompJ_Delta(cntr-ko)
+17. HCJ_Pval
+18. CompJ_Pval
+19. HCJ_Eff_ko
+20. HCJ_Eff_cntr
+21. HCJ_N_ko
+22. HCJ_N_cntr
+23. HCJ_PSI_ko
+24. HCJ_PSI_cntr
+25. CompJ_Eff_ko
+26. CompJ_Eff_cntr
+27. CompJ_N_ko
+28. CompJ_N_cntr
+29. CompJ_PSI_ko
+30. CompJ_PSI_cntr
+
+Columns in Annotated_Diff_Introns.txt are as follows.
+1.  INCL_COORDs : Genomic coordinates delimiting the inclusive interval of the Alternative Splicing Event.
+2.  Gene_Name(s) : Official gene symbol or gene ID if gene symbol is not available
+3.  High_Confidence_Junction: ID of Differentially used junction. Junction ID is of the form chrName_starCoord_endCoord_strand 
+4.  COMPET_TYPE: Type of competition between the two junctions. See section Competition Type below for details.
+5.  HCJ_5'ss
+6.  HCJ_3'ss
+7.  HCJ_Junc
+8.  IRLR
+9.  PvalIR
+10. HCJ_Delta
+11. HCJ_Pval
+12. HCJ_N_ko
+13. HCJ_N_cntr
+14. HCJ_PSI_ko
+15. HCJ_PSI_cntr
 
 IMPORTANT: XXX
 SANJUAN reports fold changes for retained introns.
