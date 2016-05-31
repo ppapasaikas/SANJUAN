@@ -345,21 +345,23 @@ CompJ_PSI_ko
 CompJ_PSI_cntr
 
 Columns in Annotated_Diff_Introns.txt are as follows.
-INCL_COORDs
-Gene_Name(s)
-High_Confidence_Junction
-COMPET_TYPE
-HCJ_5'ss
-HCJ_3'ss
-HCJ_Junc
-IRLR
-PvalIR
-HCJ_Delta
-HCJ_Pval
-HCJ_N_ko
-HCJ_N_cntr
-HCJ_PSI_ko
-HCJ_PSI_cntr
+1.  INCL_COORDs : Genomic coordinates delimiting the inclusive interval of the Alternative Splicing Event.
+2.  Gene_Name(s) : Official gene symbol or gene ID if gene symbol is not available
+3.  High_Confidence_Junction: ID of Differentially used junction. Junction ID is of the form chrName_starCoord_endCoord_strand 
+4.  Competing_Junction: ID of identified Competing Junction.  
+5.  minJDist: Minimum distance between the boundaries of the competing junctions. For alt5'/3'ss or Cassette Exons this is 0.
+6.  COMPET_TYPE: Type of competition between the two junctions. See section Competition Type below for details.
+7.  HCJ_5'ss
+8.  HCJ_3'ss
+9.  HCJ_Junc
+10.  IRLR
+11.  PvalIR
+12. HCJ_Delta
+13. HCJ_Pval
+14. HCJ_N_ko
+15. HCJ_N_cntr
+16. HCJ_PSI_ko
+17. HCJ_PSI_cntr
 
 IMPORTANT: XXX
 SANJUAN reports fold changes for retained introns.
