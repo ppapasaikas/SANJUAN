@@ -376,6 +376,8 @@ unless($low_seq_req =~ /Y|N/){$tmp_str="Parameter LOWSEQRQMNTS/-r not or wrongly
 
 
 if($output_dir eq "" || $output_dir eq "."){$output_dir=cwd();}
+$output_dir=abs_path($output_dir);
+
 # remove trailing / if exists
 $rawinput_dir=~ s/\/$//;
 $output_dir=~ s/\/$//;
