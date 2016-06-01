@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sleep 300
+sleep 60
 ln -s "$@"
