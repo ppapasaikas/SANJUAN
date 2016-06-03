@@ -57,7 +57,7 @@ sub print_help{
 	print "\t-l     RNAseq library type; values: 1S (single-end, stranded), 1U (single-end, unstranded), 2U (paired-end, unstranded), 2S (paired-end, stranded)\n";
    	print "\t\t\t Paired-end reads are expected in be given in two FASTQ files.\n"; #CinS  
    	print "\t\t\t Can be omitted if -b S.\n";
-	print "\t-a     RNAseq adapter sequence; CRG standard is AGATCGGAAGAGC. Can be omitted if -b S.\n"; 
+	print "\t-a     RNAseq adapter sequence; CRG standard is AGATCGGAAGAGC. If you define none, then no adapter trimming will be done. Can be omitted if -b S.\n"; 
 	print "\t\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz\n";
 	print "\t-tpm   If given it activates the Basic twopassMode STAR mapping option. More sensitive novel junction discovery at the cost of speed.\n"; #NinS
 	print "\t-c     threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
@@ -322,7 +322,6 @@ if(@ARGV>1){
 		#NRS if($ARGV[$i] eq "-d_dev"){$inner_mate_dist_std_dev=$ARGV[($i++)+1];}
 	}
 }
-
 # parameters through parameter file
 else{	
 	# Read and parse parameter file:
@@ -356,6 +355,8 @@ else{
 }
 
 
+print "adapter |$adapter|\n";
+
 ## parameter checks
 my ($OK_params_preprocess,$OK_params_main)=(1,1);
 my ($warnings_preprocess,$warnings_main,$tmp_str)=("","",);
@@ -366,7 +367,7 @@ unless($SuppJun =~ /Y|N/){$tmp_str="Parameter SUPPJUN/-s not or wrongly defined.
 unless($phred_code =~ /phred33|phred64/){$tmp_str="Parameter PHRED/-p not or wrongly defined. Should take values phred33 or phred64.\n";$OK_params_preprocess=0;$warnings_preprocess.=$tmp_str;}
 unless($library_type =~ /1S|1U|2S|2U/)  {$tmp_str="Parameter LIBTYPE/-l not defined. Should take values 1S,1U, 2S or 2U\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($tpm =~ /Basic|None/)  {$tmp_str="Parameter TPM/-tpm not defined. Should take values Basic or None\n"; $OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
-if($adapter ne ""){ unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined. Should be a sequence composed of any letter of ACGTNUacgtnu.\n";$OK_params_preprocess=0;$warnings_preprocess.=$tmp_str;} }
+if($adapter ne "none"){ unless($adapter =~ /[ACGTNUacgtnu]+/){$tmp_str="Parameter ADAPTER/-a not defined. Should be a sequence composed of any letter of ACGTNUacgtnu.\n";$OK_params_preprocess=0;$warnings_preprocess.=$tmp_str;} }
 unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 if($g1_shortname eq $g2_shortname){$tmp_str="Parameter COND1/-g1 and COND2/-g2 are identical but must be different.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
@@ -495,7 +496,6 @@ my $suffix="";
 if($test_run){$suffix.="-t ";}
 if($run_without_qsub){$suffix.="-nqsub ";}
 
-if($adapter eq ""){$adapter="none";}
 print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
