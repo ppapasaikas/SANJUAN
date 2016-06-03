@@ -136,8 +136,9 @@ print "\n\n\nMapping\n#####################\n\n";
 my %bam_files=();
 my %bam_files_count=();
 my $readCommand="";
-#my ($fq1,$fq2,$top_out);
-my $trimCommand=($adapter_seq=~/\w+/)? "--clip3pAdapterSeq $adapter_seq" : "";
+
+my $trimCommand=""; 
+unless($adapter_seq eq "none"){$trimCommand="--clip3pAdapterSeq $adapter_seq";}
 
 $,="\t";
 
