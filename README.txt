@@ -356,7 +356,7 @@ Columns in Annotated_Diff_Introns.txt are as follows.
 7.  HCJ_Junc: Annotation status of the HC Junction. Either known or novel.
 8.  IRLR: Intron retention (natural) log ratio.
 9.  PvalIR: p-value for differential intron retention.
-10. HCJ_Delta: Differential Intron Retention.
+10. HCJ_Delta: Differential Intron Retention. In testing status, NOT recommended for general use.
 11. HCJ_Pval. p-value for differential intron retention.
 12. HCJ_N_ko: Number of reads supporing the junction in condition 1 (e.g ko)
 13. HCJ_N_cntr: Number of reads supporting the junction in condition 2 (e.g cntr)
