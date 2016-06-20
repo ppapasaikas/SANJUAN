@@ -78,7 +78,7 @@ sub print_help{
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s\n\n";
 	print "Contact:\n";
 	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
-	print "Andre Gohr: andre.gohr\@crg.eu (Functionality Extensions and Support)\n\n";
+	print "Andre Gohr: andre.gohr\@crg.eu\n\n";
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
