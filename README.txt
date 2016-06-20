@@ -319,30 +319,32 @@ Here, we assume that the label for the first group is
 4.  Competing_Junction: ID of identified Competing Junction.  
 5.  minJDist: Minimum distance between the boundaries of the competing junctions. For alt5'/3'ss or Cassette Exons this is 0.
 6.  COMPET_TYPE: Type of competition between the two junctions. See section Competition Type below for details.
-7.  HCJ_5'ss
-8.  HCJ_3'ss
-9.  HCJ_Junc
-10. CompJ_5'ss
-11.CompJ_3'ss
-12. CompJ_Junc
-13. HCJ_LR(cntr/ko)
-14. CompJ_LogRatio(cntr/ko)
-15. HCJ_Delta(cntr-ko)
-16. CompJ_Delta(cntr-ko)
-17. HCJ_Pval
-18. CompJ_Pval
-19. HCJ_Eff_ko
-20. HCJ_Eff_cntr
-21. HCJ_N_ko
-22. HCJ_N_cntr
-23. HCJ_PSI_ko
-24. HCJ_PSI_cntr
-25. CompJ_Eff_ko
-26. CompJ_Eff_cntr
-27. CompJ_N_ko
-28. CompJ_N_cntr
-29. CompJ_PSI_ko
-30. CompJ_PSI_cntr
+7.  HCJ_5'ss: Annotation status of the HC Junction 5'ss. Either known or novel.
+8.  HCJ_3'ss: Annotation status of the HC Junction 3'ss. Either known or novel.
+9.  HCJ_Junc: Annotation status of the HC Junction. Either known or novel.
+10. CompJ_5'ss: Annotation status of the Competin Junction 3'ss. Either known or novel.
+11.CompJ_3'ss: Annotation status of the Competing Junction 5'ss. Either known or novel.
+12. CompJ_Junc: Annotation status of the Competing Junction. Either known or novel.
+13. HCJ_LR(cntr/ko): Log (natural) ratio of HC Junction usage (e.g ratio in cntr/ko).
+14. CompJ_LogRatio(cntr/ko): Log (natural) ratio of Comp Junction usage (e.g ratio in cntr/ko).
+15. HCJ_Delta(cntr-ko): Delta PSI of HC Junction.
+16. CompJ_Delta(cntr-ko): Delta PSI of Comp Junction.
+17. HCJ_Pval: p-value for differential usage of the HC Junction.
+18. CompJ_Pval: p-value for differential usage of the Comp. Junction.
+19. HCJ_Eff_ko: HC Junction Efficiency* in condition 1 (e.g ko). 
+20. HCJ_Eff_cntr: HC Junction Efficiency* in condition 2 (e.g cntr). 
+21. HCJ_N_ko: Number of reads supporting HC Junction in condition 1 (e.g ko). 
+22. HCJ_N_cntr: Number of reads supporting HC Junction in condition 2 (e.g cntr). 
+23. HCJ_PSI_ko: HC Junction PSI in condition 1 (e.g ko). 
+24. HCJ_PSI_cntr: HC Junction PSI in condition 2 (e.g cntr). 
+25. CompJ_Eff_ko: Comp Junction Efficiency* in condition 1 (e.g ko). 
+26. CompJ_Eff_cntr: Comp Junction Efficiency* in condition 2 (e.g cntr). 
+27. CompJ_N_ko: Number of reads supporting Comp Junction in condition 1 (e.g ko). 
+28. CompJ_N_cntr: Number of reads supporting Comp Junction in condition 2 (e.g cntr). 
+29. CompJ_PSI_ko: Comp Junction PSI in condition 1 (e.g ko). 
+30. CompJ_PSI_cntr: Comp Junction PSI in condition 2 (e.g cntr). 
+
+*Efficiency quantifies relative junction usage in a "locus" by taking into account neighboring junctions. It is a less intuitive, yet more robust measure, of junction usage.
 
 Columns in Annotated_Diff_Introns.txt are as follows.
 1.  INCL_COORDs : Genomic coordinates delimiting the inclusive interval of the Alternative Splicing Event.
