@@ -351,22 +351,21 @@ Columns in Annotated_Diff_Introns.txt are as follows.
 2.  Gene_Name(s) : Official gene symbol or gene ID if gene symbol is not available
 3.  High_Confidence_Junction: ID of Differentially used junction. Junction ID is of the form chrName_starCoord_endCoord_strand 
 4.  COMPET_TYPE: Type of competition between the two junctions. See section Competition Type below for details.
-5.  HCJ_5'ss
-6.  HCJ_3'ss
-7.  HCJ_Junc
-8.  IRLR
-9.  PvalIR
-10. HCJ_Delta
-11. HCJ_Pval
-12. HCJ_N_ko
-13. HCJ_N_cntr
-14. HCJ_PSI_ko
-15. HCJ_PSI_cntr
+5.  HCJ_5'ss: Annotation status of the HC Junction 5'ss. Either known or novel.
+6.  HCJ_3'ss: Annotation status of the HC Junction 3'ss. Either known or novel.
+7.  HCJ_Junc: Annotation status of the HC Junction. Either known or novel.
+8.  IRLR: Intron retention (natural) log ratio.
+9.  PvalIR: p-value for differential intron retention.
+10. HCJ_Delta: Differential Intron Retention.
+11. HCJ_Pval. p-value for differential intron retetion.
+12. HCJ_N_ko: Number of reads supporing the junction in condition 1 (e.g ko)
+13. HCJ_N_cntr: Number of reads supporting the junction in condition 2 (e.g cntr)
+14. HCJ_PSI_ko: A PSI-like index for intron retention in condition 1. In testing status, NOT recommended for general use.
+15. HCJ_PSI_cntr: A PSI-like index for intron retention in condition 2. In testing status, NOT recommended for general use.
 
 IMPORTANT: XXX
-SANJUAN reports fold changes for retained introns.
-We plan to switch to PSI values for retained introns
-in the future.
+Currently SANJUAN mainly relies on fold changes for calling differentially retained introns.
+A more accurate calculation of intron retention PSI values is being implemented and will be available in near-future versions.
 
 In addition, raw information are written into files
 1. Diff_Junctions_<VHC,HC,MC,LC,NC>.txt
