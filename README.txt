@@ -357,13 +357,13 @@ Columns in Annotated_Diff_Introns.txt are as follows.
 8.  IRLR: Intron retention (natural) log ratio.
 9.  PvalIR: p-value for differential intron retention.
 10. HCJ_Delta: Differential Intron Retention.
-11. HCJ_Pval. p-value for differential intron retetion.
+11. HCJ_Pval. p-value for differential intron retention.
 12. HCJ_N_ko: Number of reads supporing the junction in condition 1 (e.g ko)
 13. HCJ_N_cntr: Number of reads supporting the junction in condition 2 (e.g cntr)
 14. HCJ_PSI_ko: A PSI-like index for intron retention in condition 1. In testing status, NOT recommended for general use.
 15. HCJ_PSI_cntr: A PSI-like index for intron retention in condition 2. In testing status, NOT recommended for general use.
 
-IMPORTANT: XXX
+IMPORTANT:
 Currently SANJUAN mainly relies on fold changes for calling differentially retained introns.
 A more accurate calculation of intron retention PSI values is being implemented and will be available in near-future versions.
 
