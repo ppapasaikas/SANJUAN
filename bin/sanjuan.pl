@@ -355,8 +355,6 @@ else{
 }
 
 
-print "adapter |$adapter|\n";
-
 ## parameter checks
 my ($OK_params_preprocess,$OK_params_main)=(1,1);
 my ($warnings_preprocess,$warnings_main,$tmp_str)=("","",);
