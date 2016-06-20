@@ -71,6 +71,7 @@ sub print_help{
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
+	print "\t-ram   max RAM (in GB) granted to STAR mapper. If not specified, STAR is run with its standard RAM limits.\ņ";
 	print "\tSTANDARD VALUES ALREADY SET:\n";
 	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -d . -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
@@ -117,7 +118,8 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "TESTRUN=N        ### values Y, N; if Y, qsub statements are printed but not sent to cluster";
 	print $fh "DBLOCATION=      ### the location of the sub-directory db containing predefined exon-exon junctions. Needs to be specified only if db sun-directory is not in main SANJUAN directory.";
 	print $fh "NOQSUB=N         ### run SANJUAN without sending jobs to CRG cluster";
-	print $fh "NPROCS=1         ### run SANJUAN with this maximal number of parallel processes (only applies to mapping)";	
+	print $fh "NPROCS=1         ### run SANJUAN with this maximal number of parallel processes (only applies to mapping)";
+	print $fh "RAM=64           ### Max RAM (in GB) granted to STAR mapper. If not specified, STAR is run with its standard RAM limits.";	
 	print $fh "";
 	print $fh "#######################  Data  #######################";
 	print $fh "### To specify parameters, un-comment them.";
@@ -284,6 +286,9 @@ my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to 
 #NRS my $inner_mate_dist=85;
 #NRS my $inner_mate_dist_std_dev=25;
 
+my $ram="none"; # RAM limits of STAR; if none, STAR is run with its standard RAM limits
+
+
 # special arguments from parameter file
 #  if $map_no_trim=Y -> Go to mapping directly (i.e map using untrimmed fastq files)
 #
@@ -317,6 +322,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-db"){$sanjuan_genomic_data_dir=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-noqsub"){$run_without_qsub=1;}
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
+		if($ARGV[$i] eq "-ram"){$ram=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
 		#NRS if($ARGV[$i] eq "-d"){$inner_mate_dist=$ARGV[($i++)+1];}
 		#NRS if($ARGV[$i] eq "-d_dev"){$inner_mate_dist_std_dev=$ARGV[($i++)+1];}
@@ -347,6 +353,7 @@ else{
 		$sanjuan_genomic_data_dir=$1 if $_=~/^\s*DBLOCATION\s*=\s*([\w\/\.\_\-]+)/;
 		$run_without_qsub=1  if $_=~/^\s*NOQSUB\s*=\s*Y/;
 		$N_processes=$1      if $_=~/^\s*NPROCS\s*=\s*(\d+)/;
+		$ram=$1              if $_=~/^\s*RAM\s*=\s*(\d+)/;
 		$rmdup=1	     if $_=~/^\s*RMDUP\s*=\s*Y/;
 		#NRS $inner_mate_dist=$1  if $_=~/^\s*INNER_MATE_DIST\s*=(\d+)/;
 		#NRS $inner_mate_dist_std_dev=$1  if $_=~/^\s*DIST_STD_DEV\s*=(\d+)/;
@@ -494,7 +501,7 @@ my $suffix="";
 if($test_run){$suffix.="-t ";}
 if($run_without_qsub){$suffix.="-nqsub ";}
 
-print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
+print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -ram $ram -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
@@ -503,7 +510,7 @@ my $ret="Job ids:";
 if($start_with eq "M"){
 	# mapping
 	print "\n\n*************\nMapping\n*************\n\n";
-	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $test_run $run_without_qsub $sanjuan_dir $STAR_index $N_processes $phred_code -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
+	$call="perl $sanjuan_dir/preProcess_and_Map.pl $output_dir $genome $adapter $library_type $tpm $test_run $run_without_qsub $sanjuan_dir $STAR_index $N_processes $phred_code $ram -g1 $g1_shortname @g1_files -g2 $g2_shortname @g2_files"; #CinS
 	$ret=`$call`;
 	print $ret."\n";
 }else{
