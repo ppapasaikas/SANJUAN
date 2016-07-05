@@ -71,8 +71,8 @@ sub print_help{
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
-	print "\t-ram   max RAM (in GB) granted to STAR mapper. If not specified, STAR is run with its standard RAM limits.\ņ";
-	print "\tSTANDARD VALUES ALREADY SET:\n";
+	print "\t-ram   max RAM (in GB) granted to STAR mapper. If not specified, STAR is run with its standard RAM limits.\n";
+	print "\n\tSTANDARD VALUES ALREADY SET:\n";
 	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -d . -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
