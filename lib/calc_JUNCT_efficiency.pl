@@ -1,6 +1,6 @@
 use lib $ARGV[6] || "/usr/lib/perl5";
 use Text::NSP::Measures::2D::Fisher::twotailed;
-use Statistics::Descriptive
+use Statistics::Descriptive;
 
 
 $Proc_Junctions1=$ARGV[0];
