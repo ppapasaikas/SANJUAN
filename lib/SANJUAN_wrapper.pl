@@ -285,6 +285,9 @@ unless ($skip{7}){
 
 #Annotate Differential Junctions
 @par=($OUT_calc_HC_JEFF,$OUT_calc_LC_JEFF,$olapSel_Junc2Tx,$OUT_INTR_RET,$ENSid2Name,$ENS_Tx_Junc);
+# $OUT_calc_HC_JEFF and $OUT_calc_LC_JEFF are tables with columns like
+# JUNCTION	JEfficiency_cond1	JEfficiency_cond2	NReads_cond1	NReads_cond2	PSI_cond1	PSI_cond2	p-value (Fisher test)
+# chr13_56632186_56632858_+	0.4	0.2383900929	23	76	1	0.5959752322	0.0158705724
 my $OUT_ANNOT=$output_dir."/Annotated_Diff_Junctions.txt";
 unless ($skip{8}){
 	print "\n\n\nAnnotation of differential junctions\n#####################\n\n";
