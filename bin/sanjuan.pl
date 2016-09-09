@@ -41,7 +41,7 @@ sub print_help{
 	print "\tsanjuan ... ARGUMENTS ...\n\n";	#CinS
 	print "\tARGUMENTS:\n";
 	print "\t-nprocs number of parallel processes\n"; 
-	print "\t-g     genome (ID); To see installed genomes run sanjuan -g.\n";
+	print "\t-g     genome (ID); To see installed genomes run sanjuan -showg which can be used with -db option.\n";
 	print "\t-b     M -> start with mapping, S -> start with splicing analysis SKIPPING mapping\n";	#CinS
 	print "\t-g1    short name for group 1\n";
 	print "\t-f1    input files for group 1; Depending on value of argument -b, -f1 defines different types of input files.\n";
@@ -111,7 +111,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "# 6. If you are not sure if intermediate results have been computed correctly / completely, please delete the corresponding output file in order to force SANJUAN re-computing these results and all later (down-stream) results.";
 	print $fh "";
 	print $fh "#######################  General parameters  #######################";
-	print $fh "GENOME=hg19      ### ID of genome; run sanjuan -g to see genomes available in this installation";
+	print $fh "GENOME=hg19      ### ID of genome; run sanjuan -showg to see genomes available in this installation";
 	print $fh "OUTDIR=          ### Directory for Output, if not given, the current working directory is used as output directory";
 	print $fh "COND1=CNTR       ### Label for Condition 1 (eg 'CNT' or 'WT')";
 	print $fh "COND2=COND       ### Label for Condition 2 (eg 'KD' or 'OvEx')";
@@ -205,7 +205,7 @@ return($ret);
 }
 
 
-if($ARGV[0] eq "-g"){
+if($ARGV[0] eq "-showg"){
 	# genome / species shortcuts
 	my %all_scs=();
 	my %splicing_ok=();
