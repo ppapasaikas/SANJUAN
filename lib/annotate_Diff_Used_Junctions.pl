@@ -13,6 +13,7 @@ open(OUT,">".$fn_out) || die $!;
 ($minDPSI,$minPvRET,$minLFC)=(0.15,0.05,0.4) if $conf eq 'HC';
 ($minDPSI,$minPvRET,$minLFC)=(0.20,0.01,0.2) if $conf eq 'VHC';
 ($minDPSI,$minPvRET,$minLFC)=(0.10,0.10,0.1) if $conf eq 'MC';
+($minDPSI,$minPvRET,$minLFC)=(0,2,0) if $conf eq 'NC'; ## added Andre Sep 8, 2016 for getting all exons / introns
 
 
 open (IN, $ENSid2Name)||die "\n$ENSid2Name\n$!\n";
@@ -61,7 +62,7 @@ next if $line=~/^>/;
 chomp $line;
 @mat=split /\t/,$line;
 @mm=split /\_/,$mat[0];
-next unless abs($mat[6]-$mat[5])>$minDPSI;	
+next unless abs($mat[6]-$mat[5])>=$minDPSI; ## changed from > to >= Andre Sep 8 for getting all exons / introns	
 @{$ATTRIBS{$mat[0]}}=@mat;
 $DELTA{$mat[0]}=$mat[6]-$mat[5];
 $LR{$mat[0]}=log(($mat[2]/$mat[1]));
@@ -201,7 +202,9 @@ $loc5=$CHR{$hcj} . '+' . $seg2;
 $loc6=$CHR{$hcj} . '+' . $seg3;
 	foreach $lcj (@{$LOCJ{$loc1}},@{$LOCJ{$loc2}},@{$LOCJ{$loc3}},@{$LOCJ{$loc4}},@{$LOCJ{$loc5}},@{$LOCJ{$loc6}}){
 	next unless $L_ATTRIBS{$lcj};	
-	next if $LR{$hcj}*$L_LR{$lcj}>0;	#Require Opposite Efficiency
+	if($conf ne "NC"){   ### added Andre Sep 8th in order to get all exons
+		next if $LR{$hcj}*$L_LR{$lcj}>0;	#Require Opposite Efficiency
+	}
 	next if $hcj eq $lcj;
 	#next unless $STRAND{$hcj} eq $EL_STRAND{$lcj};
 	$minDist=min(abs($START{$hcj}-$EL_END{$lcj}),abs($END{$hcj}-$EL_START{$lcj}),abs($START{$hcj}-$EL_START{$lcj}),abs($END{$hcj}-$EL_END{$lcj}) );	

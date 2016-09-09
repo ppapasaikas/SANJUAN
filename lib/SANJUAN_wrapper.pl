@@ -285,11 +285,21 @@ unless ($skip{7}){
 
 #Annotate Differential Junctions
 @par=($OUT_calc_HC_JEFF,$OUT_calc_LC_JEFF,$olapSel_Junc2Tx,$OUT_INTR_RET,$ENSid2Name,$ENS_Tx_Junc);
+# $OUT_calc_HC_JEFF and $OUT_calc_LC_JEFF are tables with columns like
+# JUNCTION	JEfficiency_cond1	JEfficiency_cond2	NReads_cond1	NReads_cond2	PSI_cond1	PSI_cond2	p-value (Fisher test)
+# chr13_56632186_56632858_+	0.4	0.2383900929	23	76	1	0.5959752322	0.0158705724
 my $OUT_ANNOT=$output_dir."/Annotated_Diff_Junctions.txt";
 unless ($skip{8}){
 	print "\n\n\nAnnotation of differential junctions\n#####################\n\n";
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $par[0] $par[1] $par[2] $par[3] $par[4] $par[5] $conf $COND1 $COND2 $OUT_ANNOT",\@all_job_ids,$OUT_ANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	
+	# and all junctions
+	my $OUT_ANNOT_NC=$output_dir."/Annotated_Diff_Junctions_NC.txt";
+	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_2_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_2_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $OUT_calc_NC_JEFF $OUT_calc_NC_JEFF $par[2] $par[3] $par[4] $par[5] NC $COND1 $COND2 $OUT_ANNOT_NC",\@all_job_ids,$OUT_ANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	
+	$job_ids=join(",",@all_job_ids);
+	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_3_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_3_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/create_exon_tables.pl $output_dir $sanjuan_dir",\@all_job_ids,$OUT_ANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 }
 
 if ($IRM eq 'Y'){
