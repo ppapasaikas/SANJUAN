@@ -19,14 +19,14 @@ my $sanjuan_genomic_data_dir=$abs_path."/db";	# should contain folders genomes a
 
 # Are all important parts of SANJUAN in place?
 # check if all sanjuan files can be accessed
-my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions.pl","BAM2JUNCTjob.pl","bedtools_intersect_NJ.sh","bedtools_intersect_ST.sh","bedtools_intersect.sh","bedtools_slop.sh","calc_INTRON_retention.pl","calc_JUNCT_efficiency.pl","fetchChromSizes","get_juncts.pl","ln_s_wrapper.sh","Mapped_junctions2IntronSegments.pl","merge_junctions.pl","preProcess_and_Map.pl","SANJUAN_wrapper.pl","sort_wrapper.sh");
-foreach (@SANJUAN_files){unless(-r $sanjuan_dir."/".$_){die "Cannot open file $_ which is essential for SANJUAN. You might go through the installation process again to solve this problem.\n";}}
+#my @SANJUAN_files=("annotate_Diff_Used_Introns.pl","annotate_Diff_Used_Junctions.pl","BAM2JUNCTjob.pl","bedtools_intersect_NJ.sh","bedtools_intersect_ST.sh","bedtools_intersect.sh","bedtools_slop.sh","calc_INTRON_retention.pl","calc_JUNCT_efficiency.pl","fetchChromSizes","get_juncts.pl","ln_s_wrapper.sh","Mapped_junctions2IntronSegments.pl","merge_junctions.pl","preProcess_and_Map.pl","SANJUAN_wrapper.pl","sort_wrapper.sh");
+#foreach (@SANJUAN_files){unless(-r $sanjuan_dir."/".$_){die "Cannot open file $_ which is essential for SANJUAN. You might go through the installation process again to solve this problem.\n";}}
 
 # check if sub-directories genomes and annotation_files exist in db sub-directory
-if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/SANJUAN_annotation_files"){die "Sub-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
+#if(!-d $sanjuan_genomic_data_dir."/genomes" || !-d $sanjuan_genomic_data_dir."/SANJUAN_annotation_files"){die "Sub-directories genomes and/or annotation_files cannot be found in $sanjuan_genomic_data_dir. Try to specify parameter DBLOCATION / -db to specify their location\n";}
 
 # check if sub-directories perllib is in place
-if(!-d $sanjuan_perllib."/Text" || !-d $sanjuan_perllib."/Statistics"){die "Sud-directories / perl modules Text and/or Statistics cannot be found in $sanjuan_perllib. You might go through the installation process again to solve this problem.\n";}
+#if(!-d $sanjuan_perllib."/Text" || !-d $sanjuan_perllib."/Statistics"){die "Sud-directories / perl modules Text and/or Statistics cannot be found in $sanjuan_perllib. You might go through the installation process again to solve this problem.\n";}
 #############################################################
 #############################################################
 
@@ -165,13 +165,13 @@ if(@ARGV==1 && ( $ARGV[0] eq "version" || $ARGV[0] eq "-version" || $ARGV[0] eq 
 # check if species is available for splicing analysis
 sub is_available_for_splicing{
 	my $species=$_[0];
-	my $abs_path=$_[1];
+	my $abs_db_path=$_[1];
 	my $check=0;
 	# check if we have the genome file
-	if(-e "$abs_path/db/genomes/${species}.genome"){$check++;}
+	if(-e "$abs_db_path/genomes/${species}.genome"){$check++;}
 	
 	# SANJUAN_annotation_files
-	if(-e "$abs_path/db/SANJUAN_annotation_files/${species}_Transcript_Junctions.txt" && -e "$abs_path/db/SANJUAN_annotation_files/${species}_Transcripts.bed" && -e "$abs_path/db/SANJUAN_annotation_files/${species}_TxID2Name.txt" ){$check++;}
+	if(-e "$abs_db_path/SANJUAN_annotation_files/${species}_Transcript_Junctions.txt" && -e "$abs_db_path/SANJUAN_annotation_files/${species}_Transcripts.bed" && -e "$abs_db_path/SANJUAN_annotation_files/${species}_TxID2Name.txt" ){$check++;}
 		
 	# gft files are not necessary for splicing analysis
 	#if(-e "$abs_path/db/gtfs/${species}.gtf"){$check++;}
@@ -205,7 +205,7 @@ return($ret);
 }
 
 
-if(@ARGV==1 && $ARGV[0] eq "-g"){
+if($ARGV[0] eq "-g"){
 	# genome / species shortcuts
 	my %all_scs=();
 	my %splicing_ok=();
@@ -214,12 +214,15 @@ if(@ARGV==1 && $ARGV[0] eq "-g"){
 	my %chr_pref_mapping=();
 	my %chr_pref_ase=();
 
+	my $db_dir="$abs_path/db";
+	if(@ARGV==3 && $ARGV[1] eq "-db"){$db_dir=$ARGV[2];}
+
 	# available species for splicing analysis 
-	foreach my $file (<$abs_path/db/genomes/*.*>){
-		if( $file =~ /$abs_path\/db\/genomes\/(.+)\.genome/ ){
+	foreach my $file (<$db_dir/genomes/*.*>){
+		if( $file =~ /$db_dir\/genomes\/(.+)\.genome/ ){
 			$species=$1;
-			if(is_available_for_splicing($species,$abs_path)){$splicing_ok{$species}=1;$all_scs{$species}=1;
-				open(my $fh_tmp,"$abs_path/db/genomes/${species}.genome") or die $!;
+			if(is_available_for_splicing($species,"$db_dir")){$splicing_ok{$species}=1;$all_scs{$species}=1;
+				open(my $fh_tmp,"$db_dir/genomes/${species}.genome") or die $!;
 				$chr_pref_ase{$species}="   ";
 				while(<$fh_tmp>){
 					if($_ =~ /^chr/){$chr_pref_ase{$species}="chr";last;}
@@ -488,7 +491,7 @@ if($start_with ne "S"){
 	if(!is_available_for_mapping($genome,$abs_path)){die "Mapping for species / genome $genome is not possible\nas this species / genome is not installed for mapping.\nRun sanjuan -g to see installed genomes,\nand see README on GitHub.com webpage of SANJUAN on how to install further genomes\n";}
 }else{
 	# user wants to do splicing analysis only
-	if(!is_available_for_splicing($genome,$abs_path)){die "Splicing analysis for species / genome $genome is not possible\nas this species / genome is not installed for splicing analysis.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
+	if(!is_available_for_splicing($genome,$sanjuan_genomic_data_dir)){die "Splicing analysis for species / genome $genome is not possible\nas this species / genome is not installed for splicing analysis.\n Run sanjuan -g to see installed species / genomes, \nsee README on GitHub.com webpage of SANJUAN on how to install further species / genomes\n";}
 }
 
 
