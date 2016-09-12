@@ -24,22 +24,18 @@ close($out);
 
 # replace all entries in CEs_NC_clean.txt with entries in (more strict) CEs_clean.txt
 %ids=();
-open($fh,"$dir_out/CEs_clean.txt");
+open($fh,"$dir_out/CEs_NC_clean.txt") or die;
 $header=<$fh>;
 while(<$fh>){@fs=split("\t");$ids{join("_",@fs[1..4])}=$_;}
-
-open($fh,"$dir_out/CEs_NC_clean.txt");
-$header=<$fh>;
-while(<$fh>){
-	@fs=split("\t");
-	$key=join("_",@fs[1..4]);
-	if(!defined($ids{$key})){  # only add entries which not yet have been in CEs_clean.txt
-		$ids{$key}=$_;
-	}
-}
 close($fh);
 
+open($fh,"$dir_out/CEs_clean.txt") or die;
+$header=<$fh>;
+while(<$fh>){@fs=split("\t");$ids{join("_",@fs[1..4])}=$_;}  # add or overwrite if already existent 
+close($fh);
+
+
 # rewrite file
-open($fh,"$dir_out/CEs_NC_clean.txt");
+open($fh,">$dir_out/CEs_NC_clean.txt") or die;
 foreach $key (keys %ids){print $fh $ids{$key};}
 close($fh);
