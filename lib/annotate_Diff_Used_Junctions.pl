@@ -181,7 +181,14 @@ $L_LR{"NA"}="NA";
 $L_ATTRIBS{"NA"}="NA";
 
 
-foreach $hcj (keys %ATTRIBS){
+# We search for pairs of competing junctions 
+# - efficiency of one goes up and efficiency of the other down to a very similar degree
+# - both junctions are close (each junction is a pair if start-,end-coordinate, (minimal) distance 
+#   between 2 junctions is the smallest distance between each combination of their start/end coordinates
+# - we start with all high confidence junctions and search for a competing junction among all low confidence junctions
+# For each identified pair of junction and its competing junction we determine the type of alternative splicing event 
+
+foreach $hcj (keys %ATTRIBS){   # go over all high conf. junctions
 $Dist{$hcj}=7.0;
 $TYPE{$hcj}="UNIDNT_COMP";
 $PROXIMAL{$hcj}="NA";
@@ -200,17 +207,17 @@ $loc3=$CHR{$hcj} . '-' . $seg3;
 $loc4=$CHR{$hcj} . '+' . $seg1;
 $loc5=$CHR{$hcj} . '+' . $seg2;
 $loc6=$CHR{$hcj} . '+' . $seg3;
-	foreach $lcj (@{$LOCJ{$loc1}},@{$LOCJ{$loc2}},@{$LOCJ{$loc3}},@{$LOCJ{$loc4}},@{$LOCJ{$loc5}},@{$LOCJ{$loc6}}){
+	foreach $lcj (@{$LOCJ{$loc1}},@{$LOCJ{$loc2}},@{$LOCJ{$loc3}},@{$LOCJ{$loc4}},@{$LOCJ{$loc5}},@{$LOCJ{$loc6}}){   # go over all low conf. junctions
 	next unless $L_ATTRIBS{$lcj};	
-	if($conf ne "NC"){   ### added Andre Sep 8th in order to get all exons
-		next if $LR{$hcj}*$L_LR{$lcj}>0;	#Require Opposite Efficiency
+	if($conf ne "NC"){                          ### added Andre Sep 8th in order to get all exons
+		next if $LR{$hcj}*$L_LR{$lcj}>0;    # - require opposite efficiency
 	}
 	next if $hcj eq $lcj;
 	#next unless $STRAND{$hcj} eq $EL_STRAND{$lcj};
 	$minDist=min(abs($START{$hcj}-$EL_END{$lcj}),abs($END{$hcj}-$EL_START{$lcj}),abs($START{$hcj}-$EL_START{$lcj}),abs($END{$hcj}-$EL_END{$lcj}) );	
-	next unless $minDist<100000;
+	next unless $minDist<100000;                        # junctions must be closer then 100000 nts
 	$lc_jlength=abs($EL_START{$lcj}-$EL_END{$lcj});
-	next if $lc_jlength>100000;
+	next if $lc_jlength>100000;                         # low conf. junctions must not span more then 100000 nts
 	$scale1=($ATTRIBS{$hcj}[1]+$ATTRIBS{$hcj}[2])/2;
 	$scale2=($L_ATTRIBS{$lcj}[1]+$L_ATTRIBS{$lcj}[2])/2;
 	$LRdist=abs(($ATTRIBS{$hcj}[1]-$ATTRIBS{$hcj}[2])/$scale1+($L_ATTRIBS{$lcj}[1]-$L_ATTRIBS{$lcj}[2])/$scale2 );
@@ -219,6 +226,10 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 	$DSdist=4.5*log($minDist/250+1)/log(100);
 	$STRANDdist=6 *  ($STRAND{$hcj} ne $EL_STRAND{$lcj});
 	$intsct=intersect( ($START{$hcj},$END{$hcj},$EL_START{$lcj},$EL_END{$lcj}) );
+	# goal: from all close enough low confidence jucntions, create a ranking and select the top-one as competing
+	# ranking will be done wrt. $Dist (the lower the better)
+	# $Dist is a heuristic score which combines several aspects of pairs of junctions, like their minimal distance, are they on the
+	# same strand, are bot diff. splice between conditions etc. 
 	$Dist=$LRdist+$PVdist+$RCdist+$DSdist+$STRANDdist+ (6*(1-$intsct)*($STRAND{$hcj} eq $EL_STRAND{$lcj}));
 	next unless $Dist<$Dist{$hcj};
 	$Dist{$hcj}=$Dist;
@@ -230,7 +241,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 	$PROX_ABS_DIS{$hcj}=$minDist;
 		if ( $minDist==abs($START{$hcj}-$EL_END{$lcj}) ){			
 		$PROX_DIS{$hcj}=-$START{$hcj}+$EL_END{$lcj};
-		$TYPE{$hcj}="nonME_COMP";		
+		$TYPE{$hcj}="nonME_COMP";		# non-mutual exclusive complex
 		}
 		if ($minDist==abs($END{$hcj}-$EL_START{$lcj}) ){
 		$PROX_DIS{$hcj}=-$END{$hcj}+$EL_START{$lcj};
@@ -248,7 +259,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 		}
 		
 		$CE="no";	#Moved this out of the loop 05-10-14
-		if ($END{$hcj}==$EL_END{$lcj} || $START{$hcj}==$EL_START{$lcj}){
+		if ($END{$hcj}==$EL_END{$lcj} || $START{$hcj}==$EL_START{$lcj}){  # the two junctions have identical start or identical end
 		($longj,$shortj)=($hcj,$lcj);
 		($longj,$shortj)=($lcj,$hcj) if (abs($END{$hcj}-$START{$hcj})) < (abs($EL_END{$lcj}-$EL_START{$lcj}));
 			foreach $ssj (@{$Same_Start{$longj}}) {
@@ -256,7 +267,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 			next if abs($EL_END{$ssj}-$EL_END{$longj})<2;
 			next if ($EL_START{$ssj} eq $EL_END{$shortj}) || ($EL_END{$ssj} eq $EL_START{$shortj});
 			next if $ssj eq $shortj || $ssj eq $longj;
-			$CE="yes" if ($EL_END{$ssj} < $EL_START{$shortj}-2 && $L_LR{$ssj} && $L_LR{$ssj}*$L_LR{$shortj}>0);
+			$CE="yes" if ($EL_END{$ssj} < $EL_START{$shortj}-2 && $L_LR{$ssj} && $L_LR{$ssj}*$L_LR{$shortj}>0);   # both junctions indicate a SE event
 			#print OUT "LOOK1: $hcj\t$lcj\t$longj\t$shortj\t$ssj\t$CE\n";# if $CE eq "yes";
 			}
 			foreach $sej (@{$Same_End{$longj}}) {
@@ -269,6 +280,10 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 			}
 		}
 
+		# we consider for each high-confidence jucntion several possible competing junctions
+		# one pairing might indicate a SE event
+		# another one a 3SS or 5SS 
+		# we add here all these indications into one competing type
 		if ($END{$hcj}==$EL_END{$lcj} ){
 		$TYPE{$hcj}="COMP_3'SS_" . ($START{$hcj}-$EL_START{$lcj}) if $STRAND{$hcj} eq "-";
 		$TYPE{$hcj}="COMP_5'SS_" . ($START{$hcj}-$EL_START{$lcj}) if $STRAND{$hcj} eq "+";
