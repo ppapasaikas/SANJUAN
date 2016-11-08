@@ -11,6 +11,8 @@ $conf=$ARGV[4];
 $ENS_Tx_Junc=$ARGV[5];
 
 $fn_out=$ARGV[7];
+
+$min1read_filter=$ARGV[8];		#Added Claudia 28-10-16
 open(OUT,">".$fn_out) || die $!;
 
 open (IN,$Proc_Junctions1)||die;
@@ -208,7 +210,12 @@ $statR = Statistics::Descriptive::Full->new();
 foreach $JID (keys %Tcount){
 next unless $Tcount{$JID}>$TH[0];			#Sufficient Junction Reads
 next unless $NEIGH_T{$JID}>$TH[1] * $Tcount{$JID};	#Sufficient Neighbor Reads
-next if ($Ccount{$JID}<$TH[7] || $Rcount{$JID}<$TH[7]);	#Do not consider spurious junctions. 
+
+if ($min1read_filter eq 'Y') {		#Added Claudia 28-10-16
+	next if ($Ccount{$JID}<$TH[7] || $Rcount{$JID}<$TH[7]);	#Do not consider spurious junctions (minimum 1 junction read in BOTH conditions). 
+} elsif ($min1read_filter eq 'N') {
+	next if ($Ccount{$JID}<$TH[7] && $Rcount{$JID}<$TH[7]);	# Minimum 1 junction read in AT LEAST ONE conditions (more spurious junctions!!). 
+}
 next unless ($SubJunc{$JID});				#Do not consider spurious junctions
 next unless $Tcount{$JID}>$TH[2] * $NEIGH_T{$JID}; 	#Sufficient Junction/Neighbor Reads (> 0.5%/0.4%/0.1%)
 next if $JLENG{$JID}>$TH[3];				#Remove too Long Junctions
@@ -250,7 +257,7 @@ $PSI_C=0.5*($PSI_S_C + $PSI_E_C );
 $PSI_R=0.5*($PSI_S_R + $PSI_E_R );
 
 
-if (($PSI_C-$PSI_R)*($JE_control-$JE_transgn)<0 ){
+if (($PSI_C-$PSI_R)*($JE_control-$JE_transgn)<0 && ($JE_control-$JE_transgn)>0.2){      #Modified Claudia 05-11-16: in case of discordance btw PSIs and JEFFs, consider JEFF only if ∆JEFF is > 0.2
 $PSI_C=$Ccount/$NEIGH_TC;
 $PSI_R=$Rcount/$NEIGH_TR;
 	if(  ($PSI_C==$PSI_R && $PSI_C==1)|| max($PSI_C,$PSI_R)>1 || ($PSI_C-$PSI_R)*($JE_control-$JE_transgn)<0  ) {

@@ -267,7 +267,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 			next if abs($EL_END{$ssj}-$EL_END{$longj})<2;
 			next if ($EL_START{$ssj} eq $EL_END{$shortj}) || ($EL_END{$ssj} eq $EL_START{$shortj});
 			next if $ssj eq $shortj || $ssj eq $longj;
-			$CE="yes" if ($EL_END{$ssj} < $EL_START{$shortj}-2 && $L_LR{$ssj} && $L_LR{$ssj}*$L_LR{$shortj}>0);   # both junctions indicate a SE event
+			$CE="yes" if ($EL_END{$ssj} < $EL_START{$shortj}-2); 	##  && $L_LR{$ssj} && $L_LR{$ssj}*$L_LR{$shortj}>0);   # both junctions indicate a SE event    # Modified Claudia 05-11-16 to improve annotation
 			#print OUT "LOOK1: $hcj\t$lcj\t$longj\t$shortj\t$ssj\t$CE\n";# if $CE eq "yes";
 			}
 			foreach $sej (@{$Same_End{$longj}}) {
@@ -275,7 +275,7 @@ $loc6=$CHR{$hcj} . '+' . $seg3;
 			next if abs($EL_START{$sej}-$EL_START{$longj})<2;
 			next if ($EL_START{$sej} eq $EL_END{$shortj}) || ($EL_END{$sej} eq $EL_START{$shortj});
 			next if $sej eq $shortj || $sej eq $longj;
-			$CE="yes" if ($EL_START{$sej} > $EL_END{$shortj}+2 && $L_LR{$sej}  && $L_LR{$sej}*$L_LR{$shortj}>0)
+			$CE="yes" if ($EL_START{$sej} > $EL_END{$shortj}+2); 	##  && $L_LR{$sej}  && $L_LR{$sej}*$L_LR{$shortj}>0)	# Modified Claudia 05-11-16 to improve annotation
 			#print OUT "LOOK2: $hcj\t$lcj\t$longj\t$shortj\t$sej\t$CE\n"  if $CE eq "yes";
 			}
 		}

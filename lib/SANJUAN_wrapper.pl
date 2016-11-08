@@ -113,6 +113,8 @@ my $sanjuan_dir=$ARGV[16];
 my $sanjuan_perllib=$ARGV[17]; 
 my $sanjuan_genomic_data_dir=$ARGV[18];
 
+my $min1read_filter=$ARGV[19];   #Added Claudia 28-10-16
+
 my $prefix="SANJUAN";
 
 print "Call of sub routine:\n";
@@ -241,9 +243,9 @@ unless ($skip{4}){
 	
 	$job_ids=join(",",@all_job_ids);
 	# XXX should this file be ommit because now we have the output for all junctions with parameter NC?				
-	run_cmd("qsub -N ${prefix}_LCDJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/14_out_calcJUNCTeff_LC.txt -e $output_dir/log_files/14_err_calcJUNCTeff_LC.txt -b y","perl $sanjuan_dir/calc_JUNCT_efficiency.pl $par[0] $par[1] $par[2] $par[3] LC $par[4] $sanjuan_perllib $OUT_calc_LC_JEFF",\@all_job_ids,$OUT_calc_LC_JEFF,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_HCDJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/14_out_calcJUNCTeff_HC.txt -e $output_dir/log_files/14_err_calcJUNCTeff_HC.txt -b y","perl $sanjuan_dir/calc_JUNCT_efficiency.pl $par[0] $par[1] $par[2] $par[3] $conf $par[4] $sanjuan_perllib $OUT_calc_HC_JEFF",\@all_job_ids,$OUT_calc_HC_JEFF,\@ENFORCE_RUN,$test_run,$run_without_qsub);
-	run_cmd("qsub -N ${prefix}_NCDJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/14_out_calcJUNCTeff_NC.txt -e $output_dir/log_files/14_err_calcJUNCTeff_NC.txt -b y","perl $sanjuan_dir/calc_JUNCT_efficiency.pl $par[0] $par[1] $par[2] $par[3] NC $par[4] $sanjuan_perllib $OUT_calc_NC_JEFF",\@all_job_ids,$OUT_calc_NC_JEFF,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	run_cmd("qsub -N ${prefix}_LCDJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/14_out_calcJUNCTeff_LC.txt -e $output_dir/log_files/14_err_calcJUNCTeff_LC.txt -b y","perl $sanjuan_dir/calc_JUNCT_efficiency.pl $par[0] $par[1] $par[2] $par[3] LC $par[4] $sanjuan_perllib $OUT_calc_LC_JEFF $min1read_filter",\@all_job_ids,$OUT_calc_LC_JEFF,\@ENFORCE_RUN,$test_run,$run_without_qsub);     #Added min1read Claudia 28-10-16
+	run_cmd("qsub -N ${prefix}_HCDJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/14_out_calcJUNCTeff_HC.txt -e $output_dir/log_files/14_err_calcJUNCTeff_HC.txt -b y","perl $sanjuan_dir/calc_JUNCT_efficiency.pl $par[0] $par[1] $par[2] $par[3] $conf $par[4] $sanjuan_perllib $OUT_calc_HC_JEFF $min1read_filter",\@all_job_ids,$OUT_calc_HC_JEFF,\@ENFORCE_RUN,$test_run,$run_without_qsub);     #Added min1read Claudia 28-10-16
+	run_cmd("qsub -N ${prefix}_NCDJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/14_out_calcJUNCTeff_NC.txt -e $output_dir/log_files/14_err_calcJUNCTeff_NC.txt -b y","perl $sanjuan_dir/calc_JUNCT_efficiency.pl $par[0] $par[1] $par[2] $par[3] NC $par[4] $sanjuan_perllib $OUT_calc_NC_JEFF $min1read_filter",\@all_job_ids,$OUT_calc_NC_JEFF,\@ENFORCE_RUN,$test_run,$run_without_qsub);     #Added min1read Claudia 28-10-16
 }
 
 
