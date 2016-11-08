@@ -82,7 +82,6 @@ sub print_help{
 	print "Contact:\n";
 	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
 	print "Andre Gohr: andre.gohr\@crg.eu\n";
-	print "______\n\n";
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
