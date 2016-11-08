@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Cwd qw(abs_path cwd);
 
-### Verion
+### Version
 my $version="1.0 beta";
 
 #### main paths parameters
@@ -68,6 +68,8 @@ sub print_help{
 	print "\t\t\t If result files are empty, a reason could be too strong filtering. Then try to use -lsr.\n";
 	print "\t-rmdup remove PCR duplicates\n";
 	print "\t-t     program calls will be printed but not excecuted (test run).\n";
+	print "\t-min1read  apply filter for minimum 1 read/junction in BOTH conditions ";  #Added Claudia 28-10-16
+	print "\t-t     if not applied, minimum 1 read/junction in AT LEAST ONE condition will be applied.\n";  #Added Claudia 28-10-16
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
@@ -79,7 +81,8 @@ sub print_help{
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s\n\n";
 	print "Contact:\n";
 	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
-	print "Andre Gohr: andre.gohr\@crg.eu\n\n";
+	print "Andre Gohr: andre.gohr\@crg.eu\n";
+	print "______\n\n";
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
@@ -88,7 +91,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub\n\n";
+	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub -min1read\n\n";     #Added Claudia min1read 28-10-16
 	exit 0;
 }
 
@@ -151,7 +154,11 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "IRM=Y            ### IRM mode: Perform  High Sensitivity Intron Retention Analysis? 'Y'->YES  'N'->NO ";
 	print $fh "SUPPJUN=Y        ### Require Supporting Junction Evidence for IntrRet. identification (IRM mode). 'Y'->YES  'N'->NO";
 	print $fh "LOWSEQRQMNTS=N   ### Low sequence requirements: set to Y is you are working with RNASeq data not coming from CRG. If set to Y, some stringent tests on RNASeq will be omitted leading to more usable reads.";
-	print $fh "RMDUP=N          ### If set to Y: PCR duplicates will be removed\n";
+	print $fh "RMDUP=N          ### If set to Y: PCR duplicates will be removed";
+	print $fh "MIN1READ=Y       ### If set to Y: Apply filter for minimum 1 read/junction in BOTH conditions.";   #Added Claudia 28-10-16
+	print $fh "                 ### If set to N: minimum 1 read/junction in AT LEAST ONE condition.";   #Added Claudia 28-10-16
+	print $fh "                 ### Default set to Y. * Setting this filter to N has the potential to increase the number of identified novel junctions, but at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n";     #Added Claudia 28-10-16
+	print $fh "                 ### A good practice when setting this filter to N is to analyse separately biological independently and discard junctions that are detected in only one of the comparisons. \n";     #Added Claudia 28-10-16
 	$\="";
 	close($fh);
 	exit 0;
@@ -288,6 +295,7 @@ my $low_seq_req="N";
 my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to cluster
 #NRS my $inner_mate_dist=85;
 #NRS my $inner_mate_dist_std_dev=25;
+my $min1read_filter="Y"; # if set to 1, filter applied #Added Claudia 28-10-16
 
 my $ram="none"; # RAM limits of STAR; if none, STAR is run with its standard RAM limits
 
@@ -327,6 +335,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-ram"){$ram=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
+		if($ARGV[$i] eq "-min1read"){$min1read_filter="Y";}    #Added Claudia 28-10-16
 		#NRS if($ARGV[$i] eq "-d"){$inner_mate_dist=$ARGV[($i++)+1];}
 		#NRS if($ARGV[$i] eq "-d_dev"){$inner_mate_dist_std_dev=$ARGV[($i++)+1];}
 	}
@@ -358,6 +367,7 @@ else{
 		$N_processes=$1      if $_=~/^\s*NPROCS\s*=\s*(\d+)/;
 		$ram=$1              if $_=~/^\s*RAM\s*=\s*(\d+)/;
 		$rmdup=1	     if $_=~/^\s*RMDUP\s*=\s*Y/;
+		$min1read_filter=$1	     if $_=~/^\s*MIN1READ\s*=\s*(Y|N)/;   #Added Claudia 28-10-16
 		#NRS $inner_mate_dist=$1  if $_=~/^\s*INNER_MATE_DIST\s*=(\d+)/;
 		#NRS $inner_mate_dist_std_dev=$1  if $_=~/^\s*DIST_STD_DEV\s*=(\d+)/;
 	}
@@ -380,6 +390,7 @@ unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 if($g1_shortname eq $g2_shortname){$tmp_str="Parameter COND1/-g1 and COND2/-g2 are identical but must be different.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($low_seq_req =~ /Y|N/){$tmp_str="Parameter LOWSEQRQMNTS/-r not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
+unless($min1read_filter =~ /Y|N/){$tmp_str="Parameter MIN1READ/-r not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}  #Added Claudia 28-10-16
 #NRS unless($inner_mate_dist =~ /(\d+)/){$tmp_str="Parameter INNER_MATE_DIST/-d not or wrongly defined. Should take one integer value.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 #NRS unless($inner_mate_dist_std_dev =~ /(\d+)/){$tmp_str="Parameter DIST_STD_DEV/-d_dev not or wrongly defined. Should take one integer value.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 
@@ -504,12 +515,13 @@ my $suffix="";
 if($test_run){$suffix.="-t ";}
 if($run_without_qsub){$suffix.="-nqsub ";}
 
-print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -ram $ram -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $suffix\n\n\n";
+print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -ram $ram -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $min1read_filter $suffix\n\n\n";     #Added min1read Claudia 28-10-16
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
 unless (-d "$output_dir/log_files"){print `mkdir -p $output_dir/log_files`;}
 my $ret="Job ids:";
+
 if($start_with eq "M"){
 	# mapping
 	print "\n\n*************\nMapping\n*************\n\n";
@@ -538,7 +550,7 @@ print "merged_bam_file_1=$merged_bam_file_1\nmerged_bam_file_2=$merged_bam_file_
 
 
 print "\n\n*************\nSplicing Analysis\n*************\n\n";
-$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $library_type $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $rmdup $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir";
+$call="perl $sanjuan_dir/SANJUAN_wrapper.pl $genome $library_type $conf $IRM $SuppJun $g1_shortname $g2_shortname $merged_bam_file_1 $merged_bam_file_2 $output_dir $job_ids $low_seq_req $test_run $run_without_qsub $N_processes $rmdup $sanjuan_dir $sanjuan_perllib $sanjuan_genomic_data_dir $min1read_filter";      #Added min1read Claudia 28-10-16
 system($call);
 
 exit(0);
