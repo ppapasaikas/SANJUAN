@@ -257,7 +257,7 @@ $PSI_C=0.5*($PSI_S_C + $PSI_E_C );
 $PSI_R=0.5*($PSI_S_R + $PSI_E_R );
 
 
-if (($PSI_C-$PSI_R)*($JE_control-$JE_transgn)<0 && ($JE_control-$JE_transgn)>0.2){      #Modified Claudia 05-11-16: in case of discordance btw PSIs and JEFFs, consider JEFF only if ∆JEFF is > 0.2
+if (($PSI_C-$PSI_R)*($JE_control-$JE_transgn)<0){   ## Original
 $PSI_C=$Ccount/$NEIGH_TC;
 $PSI_R=$Rcount/$NEIGH_TR;
 	if(  ($PSI_C==$PSI_R && $PSI_C==1)|| max($PSI_C,$PSI_R)>1 || ($PSI_C-$PSI_R)*($JE_control-$JE_transgn)<0  ) {
