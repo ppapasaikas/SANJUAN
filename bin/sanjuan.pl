@@ -68,8 +68,8 @@ sub print_help{
 	print "\t\t\t If result files are empty, a reason could be too strong filtering. Then try to use -lsr.\n";
 	print "\t-rmdup remove PCR duplicates\n";
 	print "\t-t     program calls will be printed but not excecuted (test run).\n";
-	print "\t-min1read  apply filter for minimum 1 read/junction in BOTH conditions ";  #Added Claudia 28-10-16
-	print "\t-t     if not applied, minimum 1 read/junction in AT LEAST ONE condition will be applied.\n";  #Added Claudia 28-10-16
+	print "\t-yes0reads  DON'T apply filter for minimum 1 read/junction in BOTH conditions. Default set to Y. * Setting this filter to N has the potential to increase the number of identified novel junctions, but at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n";     #Updated Claudia 16-11-16
+	print "\t-t		A good practice when setting this filter to N is to analyse separately biological independently and discard junctions that are detected in only one of the comparisons. \n ";   #Updated Claudia 16-11-16
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
@@ -90,7 +90,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub -min1read\n\n";     #Added Claudia min1read 28-10-16
+	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub\n\n";     #Added Claudia min1read 28-10-16  #Removed Claudia 16-11-16
 	exit 0;
 }
 
