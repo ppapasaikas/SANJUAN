@@ -69,7 +69,7 @@ sub print_help{
 	print "\t-rmdup remove PCR duplicates\n";
 	print "\t-t     program calls will be printed but not excecuted (test run).\n";
 	print "\t-yes0reads  DON'T apply filter for minimum 1 read/junction in BOTH conditions. Default set to Y. * Setting this filter to N has the potential to increase the number of identified novel junctions, but at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n";     #Updated Claudia 16-11-16
-	print "\t-t		A good practice when setting this filter to N is to analyse separately biological independently and discard junctions that are detected in only one of the comparisons. \n ";   #Updated Claudia 16-11-16
+	print "\t 		A good practice when setting this filter to N is to analyse separately biological independently and discard junctions that are detected in only one of the comparisons. \n ";   #Updated Claudia 16-11-16
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
