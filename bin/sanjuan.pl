@@ -68,8 +68,10 @@ sub print_help{
 	print "\t\t\t If result files are empty, a reason could be too strong filtering. Then try to use -lsr.\n";
 	print "\t-rmdup remove PCR duplicates\n";
 	print "\t-t     program calls will be printed but not excecuted (test run).\n";
-	print "\t-yes0reads  DON'T apply filter for minimum 1 read/junction in BOTH conditions. Default set to Y. * Setting this filter to N has the potential to increase the number of identified novel junctions, but at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n";     #Updated Claudia 16-11-16
-	print "\t 		A good practice when setting this filter to N is to analyse separately biological independently and discard junctions that are detected in only one of the comparisons. \n ";   #Updated Claudia 16-11-16
+	print "\t-min1read\tY -> apply filter for minimum 1 read/junction in BOTH conditions, N -> minimum 1 read/junction in AT LEAST ONE condition. \n"; 	#Updated Claudia 07-12-16
+   	print "\t\t\tDefault set to Y.\t* Setting this filter to N has the potential to increase the number of identified novel junctions,\n"; 	#Updated Claudia 07-12-16
+	print "\t\t\tBut at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n"; 	#Updated Claudia 07-12-16
+   	print "\t\t\tA good practice when setting this filter to N is to analyse separately biological replicates and discard junctions detected in only one comparison. \n ";   #Updated Claudia 07-12-16
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
@@ -78,7 +80,7 @@ sub print_help{
 	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -d . -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
-	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s\n\n";
+	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s -min1read Y\n\n";   #Updated Claudia 07-12-16
 	print "Contact:\n";
 	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
 	print "Andre Gohr: andre.gohr\@crg.eu\n\n";
@@ -90,7 +92,7 @@ if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help"
 }
 
 if(@ARGV==1 && $ARGV[0] eq "-exampleC"){
-	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub\n\n";     #Added Claudia min1read 28-10-16  #Removed Claudia 16-11-16
+	print "\nsanjuan -o . -g hg19 -g1 COND -f1 <f1_read1,f1_read2,f2_read1,f2_read2..> -g2 CNTR -f2 <f1_read1,f1_read2,..> -p phred33 -l 2S -a AGATCGGAAGAGC -b M -c HC -i -s -lsr -noqsub -min1read Y\n\n";     #Added Claudia min1read 28-10-16  #Updated Claudia 07-12-16
 	exit 0;
 }
 
@@ -157,7 +159,7 @@ if(@ARGV==1 && $ARGV[0] eq "-exampleF"){
 	print $fh "MIN1READ=Y       ### If set to Y: Apply filter for minimum 1 read/junction in BOTH conditions.";   #Added Claudia 28-10-16
 	print $fh "                 ### If set to N: minimum 1 read/junction in AT LEAST ONE condition.";   #Added Claudia 28-10-16
 	print $fh "                 ### Default set to Y. * Setting this filter to N has the potential to increase the number of identified novel junctions, but at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n";     #Added Claudia 28-10-16
-	print $fh "                 ### A good practice when setting this filter to N is to analyse separately biological independently and discard junctions that are detected in only one of the comparisons. \n";     #Added Claudia 28-10-16
+	print $fh "                 ### A good practice when setting this filter to N is to analyse separately biological replicates and discard junctions that are detected in only one of the comparisons. \n";     #Added Claudia 28-10-16
 	$\="";
 	close($fh);
 	exit 0;
@@ -294,7 +296,7 @@ my $low_seq_req="N";
 my $test_run=0;  # if set to 1, qsub statements will be printed but not sent to cluster
 #NRS my $inner_mate_dist=85;
 #NRS my $inner_mate_dist_std_dev=25;
-my $min1read_filter="Y"; # if set to 1, filter applied #Added Claudia 28-10-16
+my $min1read_filter="Y"; # if set to Y, filter applied #Added Claudia 28-10-16  #Updated Claudia 07-12-16
 
 my $ram="none"; # RAM limits of STAR; if none, STAR is run with its standard RAM limits
 
@@ -334,7 +336,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-ram"){$ram=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
-		if($ARGV[$i] eq "-yes0reads"){$min1read_filter="N";}    #Updated Claudia 16-11-16
+		if($ARGV[$i] eq "-min1read"){$min1read_filter=$ARGV[($i++)+1];}    #Updated Claudia 16-11-16
 		#NRS if($ARGV[$i] eq "-d"){$inner_mate_dist=$ARGV[($i++)+1];}
 		#NRS if($ARGV[$i] eq "-d_dev"){$inner_mate_dist_std_dev=$ARGV[($i++)+1];}
 	}
@@ -374,7 +376,7 @@ else{
 }
 
 
-## parameter checks
+## parameter checks and error messages
 my ($OK_params_preprocess,$OK_params_main)=(1,1);
 my ($warnings_preprocess,$warnings_main,$tmp_str)=("","",);
 unless($genome){$tmp_str="Parameter GENOME/-g not defined.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
@@ -389,7 +391,7 @@ unless($g1_shortname =~ /\w+/){$tmp_str="Parameter COND1/-g1 not defined. Should
 unless($g2_shortname =~ /\w+/){$tmp_str="Parameter COND2/-g2 not defined. Should be a short word composed of a-z, A-Z, 0-9 and \_.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 if($g1_shortname eq $g2_shortname){$tmp_str="Parameter COND1/-g1 and COND2/-g2 are identical but must be different.\n";$OK_params_preprocess=0;$OK_params_main=0;$warnings_preprocess.=$tmp_str;$warnings_main.=$tmp_str;}
 unless($low_seq_req =~ /Y|N/){$tmp_str="Parameter LOWSEQRQMNTS/-r not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
-unless($min1read_filter =~ /Y|N/){$tmp_str="Parameter MIN1READ/-min1read not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}  #Added Claudia 28-10-16
+unless($min1read_filter =~ /Y|N/){$tmp_str="Parameter MIN1READ/-min1read not or wrongly defined. Should take values Y or N.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}  #Added Claudia 28-10-16  #Updated Claudia 07-12-16
 #NRS unless($inner_mate_dist =~ /(\d+)/){$tmp_str="Parameter INNER_MATE_DIST/-d not or wrongly defined. Should take one integer value.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 #NRS unless($inner_mate_dist_std_dev =~ /(\d+)/){$tmp_str="Parameter DIST_STD_DEV/-d_dev not or wrongly defined. Should take one integer value.\n";$OK_params_main=0;$warnings_main.=$tmp_str;}
 
@@ -514,7 +516,7 @@ my $suffix="";
 if($test_run){$suffix.="-t ";}
 if($run_without_qsub){$suffix.="-nqsub ";}
 
-print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -ram $ram -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req $min1read_filter $suffix\n\n\n";     #Added min1read Claudia 28-10-16
+print "Call:\nsanjuan -g $genome -c $conf -nproc $N_processes -i $IRM -s $SuppJun -l $library_type -a $adapter -tpm $tpm -ram $ram -g1 $g1_shortname -f1 ".join(",",@g1_files)." -g2 $g2_shortname -f2 ".join(",",@g2_files)." -o $output_dir -b $start_with -r $low_seq_req -min1read $min1read_filter $suffix\n\n\n";     #Added min1read Claudia 28-10-16   #Updated Claudia 07-12-16
 
 unless (-d $output_dir){print `mkdir -p $output_dir`;}
 # here go all output and error messages
