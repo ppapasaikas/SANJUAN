@@ -325,7 +325,13 @@ if ($IRM eq 'Y'){
 	}
 }
 
-print "\n\n\n******************\nDone: ";
+print "\n\n\n******************\nDone: \n";
+if($min1read_filter eq "Y"){										     #Added Claudia 07-12-16
+		print "Min1read filter applied. Minimum 1 read/junction in BOTH conditions required.\n\n";     #Added Claudia 07-12-16
+	} elsif($min1read_filter eq "N"){									     #Added Claudia 07-12-16
+		print "Min1read filter NOT applied. Minimum 1 read/junction in AT LEAST ONE condition required.\n\n";     #Added Claudia 07-12-16
+	}
+
 if($test_run){
 	if($run_without_qsub==0){
 		print "did not send jobs to cluster because this was a test run\n\n";
