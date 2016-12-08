@@ -77,7 +77,7 @@ sub print_help{
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
 	print "\t-ram   max RAM (in GB) granted to STAR mapper. If not specified, STAR is run with its standard RAM limits.\n";
 	print "\n\tSTANDARD VALUES ALREADY SET:\n";
-	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -d . -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC\n";
+	print "\t-nprocs 1 -g hg19 -g1 COND -g2 CNTR -d . -b M -o . -p phred33 -l 2S -a AGATCGGAAGAGC -c HC -min1read Y\n";
 	print "\nFor printing a full example SANJUAN call: sanjuan -exampleC\n\n";
 	print "Example call for human RNAseq data from CRG:\n";
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s -min1read Y\n\n";   #Updated Claudia 07-12-16
