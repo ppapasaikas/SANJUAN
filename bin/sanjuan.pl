@@ -336,7 +336,7 @@ if(@ARGV>1){
 		if($ARGV[$i] eq "-nprocs"){$N_processes=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-ram"){$ram=$ARGV[($i++)+1];}
 		if($ARGV[$i] eq "-rmdup"){$rmdup=1;}
-		if($ARGV[$i] eq "-min1read"){$min1read_filter=$ARGV[($i++)+1];}    #Updated Claudia 16-11-16
+		if($ARGV[$i] eq "-min1read"){$min1read_filter=$ARGV[($i++)+1];}    #Updated Claudia 07-12-16
 		#NRS if($ARGV[$i] eq "-d"){$inner_mate_dist=$ARGV[($i++)+1];}
 		#NRS if($ARGV[$i] eq "-d_dev"){$inner_mate_dist_std_dev=$ARGV[($i++)+1];}
 	}
