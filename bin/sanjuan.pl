@@ -68,10 +68,12 @@ sub print_help{
 	print "\t\t\t If result files are empty, a reason could be too strong filtering. Then try to use -lsr.\n";
 	print "\t-rmdup remove PCR duplicates\n";
 	print "\t-t     program calls will be printed but not excecuted (test run).\n";
-	print "\t-min1read\tY -> apply filter for minimum 1 read/junction in BOTH conditions, N -> minimum 1 read/junction in AT LEAST ONE condition. \n"; 	#Updated Claudia 07-12-16
-   	print "\t\t\tDefault set to Y.\t* Setting this filter to N has the potential to increase the number of identified novel junctions,\n"; 	#Updated Claudia 07-12-16
-	print "\t\t\tBut at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n"; 	#Updated Claudia 07-12-16
-   	print "\t\t\tA good practice when setting this filter to N is to analyse separately biological replicates and discard junctions detected in only one comparison. \n ";   #Updated Claudia 07-12-16
+	print "\t-min1read\n";
+	print "\t       Y: (default) apply filter for minimum 1 read/junction in BOTH conditions.\n";
+	print "\t       N: minimum 1 read/junction in AT LEAST ONE condition.\n"; 	#Updated Claudia 07-12-16
+   	print "\t       Setting this filter to N has the potential to increase the number of identified novel junctions,\n"; 	#Updated Claudia 07-12-16
+	print "\t       But at the same time it will probably result in the identification of numerous spurious junctions (e.g. sequencing artifacts). \n"; 	#Updated Claudia 07-12-16
+   	print "\t       A good practice when setting this filter to N is to analyse separately biological replicates and discard junctions detected in only one comparison. \n ";   #Updated Claudia 07-12-16
 	print "\t-db    Full path to the directory db where SANJUAN will find pre-defined exon-exon junctions, genomes, and annotations.\n";
 	print "\t\t\t Has to be set only if this directory is not under the SANJUAN installation directory.\n";
 	print "\t-noqsub stand-alone run without sending jobs to CRG cluster\n\n";
@@ -83,7 +85,7 @@ sub print_help{
 	print "\tsanjuan -g1 ko -g2 cntr -f1 run1_1.fastq,run1_2.fastq -f2 run2_1.fastq,run2_2.fastq -d . -c HC -i -s -min1read Y\n\n";   #Updated Claudia 07-12-16
 	print "Contact:\n";
 	print "Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas\@crg.eu\n";
-	print "Andre Gohr: andre.gohr\@crg.eu\n\n";
+	print "\n";
 }
 
 if(@ARGV==0 || $ARGV[0] eq "--help" || $ARGV[0] eq "-help" || $ARGV[0] eq "help" || $ARGV[0] eq "?"){
