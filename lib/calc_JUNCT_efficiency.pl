@@ -34,6 +34,7 @@ $MeanJuncDepth=int(0.5 * ($Tot_Jreads_C+$Tot_Jreads_R));
 $NormalRatio1=$MeanJuncDepth/$Tot_Jreads_C;
 $NormalRatio2=$MeanJuncDepth/$Tot_Jreads_R;
 
+my %Ccount_unnormalized;
 
 open (IN,$Proc_Junctions1)||die;
 while (<IN>){
@@ -41,10 +42,12 @@ $line=$_;
 @mat=split /\t/,$line;
 $JID=$mat[3];
 $Ccount{$JID}=int($mat[4]*$NormalRatio1+0.5);	#Normalize Reads to Average Junction Depth
+$Ccount_unnormalized{$JID}=$mat[4];
 }
 close IN;
 
 
+my %Rcount_unnormalized;
 
 open (IN,$Proc_Junctions2)||die;
 while (<IN>){
@@ -52,6 +55,7 @@ $line=$_;
 @mat=split /\t/,$line;
 $JID=$mat[3];
 $Rcount{$JID}=int($mat[4]*$NormalRatio2+0.5);	#Normalize Reads to Average Junction Depth
+$Rcount_unnormalized{$JID}=$mat[4];
 }
 close IN;
 
@@ -282,7 +286,7 @@ $pval=calculateStatistic(n11=>$Ccount, n1p=>$Ccount+$Rcount, np1=>$NEIGH_C+$Ccou
 #print OUT "$JID\t$Ccount{$JID}\t$Rcount{$JID}\t$NEIGH_C{$JID}\t$NEIGH_R{$JID}\tTMC: $tmC\tTMR: $tmR\t$pval\t$JLENG{$JID}\t$TH[6]\n"; 
 
 #print OUT "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$NEIGH_C{$JID}\t$NEIGH_R{$JID}\t$pval\n" if $pval<$TH[6];
-print OUT "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$PSI_C\t$PSI_R\t$pval\n" if $pval<$TH[6];
+print OUT "$JID\t$JE_control\t$JE_transgn\t$Ccount{$JID}\t$Rcount{$JID}\t$PSI_C\t$PSI_R\t$pval\t$Ccount_unnormalized{$JID}\t$Rcount_unnormalized{$JID}\n" if $pval<$TH[6];
 }
 print OUT ">$cj\n";
 
