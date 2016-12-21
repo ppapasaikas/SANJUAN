@@ -135,7 +135,7 @@ close IN;
 
 
 print OUT "INCL_COORDs\tGene_Name(s)\tHigh_Confidence_Junction\tCOMPET_TYPE\tHCJ_5'ss\tHCJ_3'ss\tHCJ_Junc\t";
-print OUT "IRLR\tPvalIR\tHCJ_Delta\tHCJ_Pval\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\n";
+print OUT "IRLR\tPvalIR\tHCJ_Delta\tHCJ_Pval\tHCJ_N_$COND1\tHCJ_N_$COND2\tHCJ_PSI_$COND1\tHCJ_PSI_$COND2\tHCJ_Creads_$COND1\tHCJ_Creads_$COND2\n";
 
 
 $,="\t";
@@ -174,7 +174,7 @@ print OUT @{$Gnames{$hcj}};
 $,="\t";
 print OUT "\t$hcj\t$TYPE{$hcj}\t$NOVD\t$NOVA\t$NOVJ";
 print OUT "\t${$RI{$hcj}}[6]\t${$RI{$hcj}}[7]\t$DELTA{$hcj}\t$ATTRIBS{$hcj}[7]\t";
-print OUT @{$ATTRIBS{$hcj}}[3..6];
+print OUT @{$ATTRIBS{$hcj}}[(3..6,8..9)];
 print OUT "\n";
 
 
