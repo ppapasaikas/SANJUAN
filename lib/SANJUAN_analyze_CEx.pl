@@ -26,8 +26,8 @@ $hcj=$m[2];
 $compj=$m[3];
 $psi1=$m[22];
 $psi2=$m[23];
-$cpsi1=$m[28];
-$cpsi2=$m[29];
+$cpsi1=$m[28+2];
+$cpsi2=$m[29+2];
 
 if ($l=~/^INCL/){
 $title=$l;
