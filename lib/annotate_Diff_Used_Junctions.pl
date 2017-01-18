@@ -317,7 +317,7 @@ $lcj=$PROXIMAL{$hcj};
 $hcj_gene="";
 ($NOVD,$NOVA,$NOVJ)=("known","known","known");
 ($NOVD1,$NOVA1,$NOVJ1)=("NA","NA","NA");
-@L_VALS=('NA','NA','NA','NA','NA','NA','NA','NA','NA','NA');
+@L_VALS=('NA','NA','NA','NA','NA','NA','NA','NA','NA','NA','NA');
 
 @mm=split /\_/,$hcj;
 
