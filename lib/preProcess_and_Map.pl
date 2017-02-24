@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-
+# add a new parameter for STAR
 print "\nCall of sub routine:\n";
 print "preProcess_and_Map.pl ".join(" ",@ARGV)."\n";
 
