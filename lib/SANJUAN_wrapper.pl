@@ -321,7 +321,7 @@ if ($IRM eq 'Y'){
 	unless ($skip{11}){
 		print "\n\n\nAnnotation of differential introns\n#####################\n\n";
 		$job_ids=join(",",@all_job_ids);
-		run_cmd("qsub -N ${prefix}_ADI -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/21_out_annotateDiffIntrons_IRM.txt -e $output_dir/log_files/21_err_annotateDiffIntrons_IRM.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Introns.pl $par[0] $par[1] $par[2] $par[3] $par[4] $par[5] $par[6] VHC $COND1 $COND2 $OUT_IANNOT",\@all_job_ids,$OUT_IANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+		run_cmd("qsub -N ${prefix}_ADI -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/21_out_annotateDiffIntrons_IRM.txt -e $output_dir/log_files/21_err_annotateDiffIntrons_IRM.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Introns.pl $par[0] $par[1] $par[2] $par[3] $par[4] $par[5] $par[6] $conf $COND1 $COND2 $OUT_IANNOT",\@all_job_ids,$OUT_IANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	}
 }
 
