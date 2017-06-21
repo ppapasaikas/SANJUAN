@@ -54,6 +54,7 @@ close($fh);
 
 # rewrite file
 open($fh,">$dir_out/CEs_NC_clean.txt") or die;
+print $fh $header;
 foreach $key (keys %ids){print $fh $ids{$key};}
 close($fh);
 
@@ -73,5 +74,6 @@ close($fh);
 
 # rewrite file
 open($fh,">$dir_out/CEs_LC_clean.txt") or die;
+print $fh $header;
 foreach $key (keys %ids){print $fh $ids{$key};}
 close($fh);
