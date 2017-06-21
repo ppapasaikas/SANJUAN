@@ -296,10 +296,14 @@ unless ($skip{8}){
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $par[0] $par[1] $par[2] $par[3] $par[4] $par[5] $conf $COND1 $COND2 $OUT_ANNOT",\@all_job_ids,$OUT_ANNOT,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
-	# and all junctions
-	my $OUT_ANNOT_NC=$output_dir."/Annotated_Diff_Junctions_NC.txt";
-	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_2_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_2_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $OUT_calc_NC_JEFF $OUT_calc_NC_JEFF $par[2] $par[3] $par[4] $par[5] NC $COND1 $COND2 $OUT_ANNOT_NC",\@all_job_ids,$OUT_ANNOT_NC,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+	# and for LC
+	my $OUT_ANNOT_NC=$output_dir."/Annotated_Diff_Junctions_LC.txt";
+	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_2_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_2_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $OUT_calc_LC_JEFF $OUT_calc_LC_JEFF $par[2] $par[3] $par[4] $par[5] LC $COND1 $COND2 $OUT_ANNOT_NC",\@all_job_ids,$OUT_ANNOT_NC,\@ENFORCE_RUN,$test_run,$run_without_qsub);
 	
+	# and all junctions
+	$OUT_ANNOT_NC=$output_dir."/Annotated_Diff_Junctions_NC.txt";
+	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_2_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_2_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/annotate_Diff_Used_Junctions.pl $OUT_calc_NC_JEFF $OUT_calc_NC_JEFF $par[2] $par[3] $par[4] $par[5] NC $COND1 $COND2 $OUT_ANNOT_NC",\@all_job_ids,$OUT_ANNOT_NC,\@ENFORCE_RUN,$test_run,$run_without_qsub);
+
 	$job_ids=join(",",@all_job_ids);
 	run_cmd("qsub -N ${prefix}_ADJ -hold_jid $job_ids -V -cwd -l virtual_free=32G -o $output_dir/log_files/19_3_out_annotateDiffJuncts.txt -e $output_dir/log_files/19_3_err_annotateDiffJuncts.txt -b y","perl $sanjuan_dir/create_exon_tables.pl $output_dir $sanjuan_dir",\@all_job_ids,"$output_dir/CEs_NC_clean.txt",\@ENFORCE_RUN,$test_run,$run_without_qsub);
 }

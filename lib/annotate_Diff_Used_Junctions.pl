@@ -13,6 +13,7 @@ open(OUT,">".$fn_out) || die $!;
 ($minDPSI,$minPvRET,$minLFC)=(0.15,0.05,0.4) if $conf eq 'HC';
 ($minDPSI,$minPvRET,$minLFC)=(0.20,0.01,0.2) if $conf eq 'VHC';
 ($minDPSI,$minPvRET,$minLFC)=(0.10,0.10,0.1) if $conf eq 'MC';
+($minDPSI,$minPvRET,$minLFC)=(0,0.3,0.005) if $conf eq 'LC';  ## added Andre Jun 21, 2017 for getting LC junctions and later for getting LC CEs
 ($minDPSI,$minPvRET,$minLFC)=(0,2,0) if $conf eq 'NC'; ## added Andre Sep 8, 2016 for getting all exons / introns
 
 
