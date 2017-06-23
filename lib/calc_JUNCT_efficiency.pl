@@ -193,10 +193,10 @@ foreach $JID (keys %NEIGH){
 }
 
 
-##### Thresholds: minJNreads, minNGHreads, minJN/NGHreads, maxJNlen, minJNlen, minLFC, Pval)
-@VHC= (9,0.100,0.005,100000,50,0.150,0.0001,1);		#Very High Confidence Thresholds
-@HC = (7,0.050,0.004,100000,50,0.100,0.0010,1);		#High Confidence Thresholds	(Default)
-@MC = (5,0.010,0.002,100000,50,0.050,0.0100,1);		#Medium Confidence Thresholds
+##### Thresholds: minJNreads, minNGHreads, minJN/NGHreads, maxJNlen, minJNlen, minLFC, Pval, minJNreads per condition)
+@VHC= (9,0.100,0.005,100000,50,0.400,0.0001,1);		#Very High Confidence Thresholds
+@HC = (7,0.050,0.004,100000,50,0.200,0.0010,1);		#High Confidence Thresholds	(Default)
+@MC = (5,0.010,0.002,100000,50,0.100,0.0100,1);		#Medium Confidence Thresholds
 @LC = (3,0.001,0.001,200000,50,0.005,0.3000,1);		#Low Confidence Thresholds
 @NC = (0,-1e-100,-1e-100,1e100,2,-1e-100,2,0);		#NO Thresholds
 
