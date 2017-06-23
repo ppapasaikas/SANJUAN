@@ -252,12 +252,13 @@ foreach $JID (keys %NEIGH){
 
 
 
+##### Thresholds: minJNreads, minNGHreads, minJN/NGHreads, maxJNlen, minJNlen, minLFC, Pval)
+#@VHC=(9,0.200,0.005,100000,50,0.180,0.000001);		#Very High Confidence Thresholds
+#@HC =(7,0.050,0.004,100000,50,0.100,0.001000);		#High Confidence Thresholds
+#@MC =(3,0.001,0.001,200000,50,0.005,0.300000);		#Low Confidence Thresholds
+#@TH=@HC;
 
-@VHC=(9,0.200,0.005,100000,50,0.180,0.000001);		#Very High Confidence Thresholds
-@HC =(7,0.050,0.004,100000,50,0.100,0.001000);		#High Confidence Thresholds
-@LC =(3,0.001,0.001,200000,50,0.005,0.300000);		#Low Confidence Thresholds
-@TH=@HC;
-$pvalTH=0.01;
+#$pvalTH=0.01;
 
 foreach $SID (keys %S_Tcount){
 $IID=$1 if $SID=~/(.+[\-\+])/;
