@@ -10,7 +10,9 @@ $COND2=$ARGV[8];
 $fn_out=$ARGV[9];
 open(OUT,">".$fn_out) || die $!;
 
-($minDPSI,$minPvRET,$minLFC)=(0.20,0.01,0.4) if $conf eq 'VHC'; #Pan: Setting thresholds to strictest of the two previous sets. Fixing inverted values between VHC/HC for log fold change
+
+
+($minDPSI,$minPvRET,$minLFC)=(0.20,0.01,0.4) if $conf eq 'VHC'; #Pan: !!Note!! Only the minDPSI is relevant for junctions. minPvRET and minLFC are only applied to intron retention (Non-IRM mode)
 ($minDPSI,$minPvRET,$minLFC)=(0.15,0.05,0.2) if $conf eq 'HC';
 ($minDPSI,$minPvRET,$minLFC)=(0.10,0.10,0.1) if $conf eq 'MC';
 ($minDPSI,$minPvRET,$minLFC)=(0,0.3,0.005) if $conf eq 'LC';  ## added Andre Jun 21, 2017 for getting LC junctions and later for getting LC CEs
