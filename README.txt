@@ -292,15 +292,15 @@ When running SANJUAN, you may select on of these
 confidence levels. These confidence levels imply
 into the following constraints on splicing junctions.
 
-                                       VHC       HC       MC       LC
-min. number of junction reads:           9        7        5        3
-min. number of neighbor reads:         0.1     0.05     0.01    0.001
-XXX                                  0.005    0.004    0.002    0.001
-max. length of junction:            100000   100000   100000   200000
-min length of junction:                 50       50       50       50
-min. fold change of N_reads XXX       0.15      0.1      0.05   0.005
-max p value of Hypergeometric test: 0.0001    0.001      0.01     0.3
-XXX                                      1        1         1       1
+                                          VHC       HC       MC       LC
+min. DeltaPSI among conditions:           0.2     0.15      0.1        0              
+min. ln.fold change among conditions:    0.15      0.1     0.05    0.005
+min. number of junction reads:              9        7        5        3
+min. Neighb.Junction/Junction reads:      0.1     0.05     0.01    0.001
+min. Junction/Neighb.Junction reads:    0.005    0.004    0.002    0.001
+max. length of junction:               100000   100000   100000   200000
+min. length of junction:                   50       50       50       50
+max. p value of Hypergeometric test:   0.0001    0.001     0.01      0.3
 
 The confidence level NC implies no constraints at all.
 
