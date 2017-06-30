@@ -283,7 +283,7 @@ The constraints are grouped according to different
 levels of confidence on being differentially spliced.
 Confidence levels:
 1. VHC (very high confidence)
-2.  HC (high confidence)
+2.  HC (high confidence, default)
 3.  MC (medium confidence)
 4.  LC (low confidence)
 5.  NC (no confidence)
