@@ -60,7 +60,7 @@ SANJUAN is designed to run on Linux-like platforms
 including Mac OS.
 
 SANJUAN is currently a beta version. You use it
-on your own risk.
+at your own risk.
 
 
 2. DEPENDENCIES
