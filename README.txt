@@ -70,7 +70,7 @@ Perl v5.10.1 and v5.18.2. It depends on the
 following programs:
 
 1. samtools v.>=1.1
-2. bedtools v.>=2.25
+2. bedtools v.>=2.26
 3. awk                     (+)
 4. command line tool sort  (+)
 5. STAR aligner v.>=2.4.0  (*)
