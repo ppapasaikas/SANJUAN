@@ -390,5 +390,6 @@ Free Software Foundation.
 
 9. CONTACT / BUG REPORTS
 ========================
-Panagiotis Papasaikas started and developed SANJUAN: panagiotis.papasaikas@crg.eu
-Andre Gohr: andre.gohr@crg.eu (Support)
+Panagiotis Papasaikas developed SANJUAN: panagiotis.papasaikas@fmi.ch
+Andre Gohr extended and added functionality: andre.gohr@crg.eu (Support)
+Claudia Vivori (testing and support): claudia.vivori@crg.eu 
