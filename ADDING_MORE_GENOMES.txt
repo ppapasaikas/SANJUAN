@@ -28,7 +28,7 @@ all necessary files and you use this key when running SANJUAN
 to specify the genome.
 
 IMPORTANT: the short name should not yet be in use. Run SANJUAN
-with option -g to see already available genomes.
+with option -showg to see already available genomes.
 
 This short name should reflect the genome and its version
 which you want to install, e.g., hg19 or mm10.
