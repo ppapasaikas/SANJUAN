@@ -61,7 +61,7 @@ sub print_help{
 	print "\t\t\t To identify adapter you could try minion search-adapter -i FASTQFILE.gz\n";
 	print "\t-tpm   If given it activates the Basic twopassMode STAR mapping option. More sensitive novel junction discovery at the cost of speed.\n"; #NinS
 	print "\t-c     threshold on reported differentially spliced junctions; values VHC -> very high confidence (DPSI>20%, p-val<0.0001),\n";
-	print "\t\t\t HC -> high confidence (DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
+	print "\t\t\t HC -> high confidence (default, DPSI>15%, p-val<0.001), MC -> medium confidence (DPSI>10%, p-val<0.01)\n";
 	print "\t-i     High sensitivity intron retention analysis (IRM mode) will be done.\n";
 	print "\t-s     Supporting junction evidence for IR identification (for IRM mode -i) will be required.\n";
 	print "\t-lsr   Reads will be filtered-out less strictly (low sequence requirements).\n";
